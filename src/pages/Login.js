@@ -1,0 +1,291 @@
+import React, { useState } from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { login } from "../api/auth";
+
+export default function Login() {
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [fieldErrors, setFieldErrors] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    const nextErrors = {
+      email: "",
+      password: "",
+    };
+
+    if (!form.email.trim()) {
+      nextErrors.email = "이메일을 입력해주세요.";
+    }
+
+    if (!form.password.trim()) {
+      nextErrors.password = "비밀번호를 입력해주세요.";
+    }
+
+    if (nextErrors.email || nextErrors.password) {
+      setFieldErrors(nextErrors);
+      return;
+    }
+
+    try {
+      const data = await login(form);
+      localStorage.setItem("accessToken", data.access_token);
+      localStorage.setItem("refreshToken", data.refresh_token);
+
+      // 추후 메인 페이지 연결 시 여기서 이동 처리
+      // navigate("/");
+    } catch (error) {
+      console.error(error);
+
+      const detail =
+        error?.response?.data?.detail || "이메일 또는 비밀번호를 확인해주세요.";
+      const lowerDetail = String(detail).toLowerCase();
+
+      if (lowerDetail.includes("email")) {
+        setFieldErrors({
+          email: String(detail),
+          password: "",
+        });
+        return;
+      }
+
+      if (lowerDetail.includes("password")) {
+        setFieldErrors({
+          email: "",
+          password: String(detail),
+        });
+        return;
+      }
+
+      setFieldErrors({
+        email: "이메일 또는 비밀번호를 확인해주세요.",
+        password: "이메일 또는 비밀번호를 확인해주세요.",
+      });
+    }
+  };
+
+  return (
+    <Page>
+      <Inner>
+        <FormSection>
+          <FormCard>
+            <CardHeader>
+              <LogoText>Welcome Back</LogoText>
+              <CardTitle>로그인</CardTitle>
+              <CardDesc>계정에 로그인하고 가격 비교를 시작하세요.</CardDesc>
+            </CardHeader>
+
+            <Form onSubmit={handleLogin}>
+              <InputGroup>
+                <Label>이메일</Label>
+                <Input
+                  $error={!!fieldErrors.email}
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="example@email.com"
+                />
+                {fieldErrors.email && (
+                  <ErrorText>{fieldErrors.email}</ErrorText>
+                )}
+              </InputGroup>
+
+              <InputGroup>
+                <Label>비밀번호</Label>
+                <Input
+                  $error={!!fieldErrors.password}
+                  type="password"
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="비밀번호 입력"
+                />
+                {fieldErrors.password && (
+                  <ErrorText>{fieldErrors.password}</ErrorText>
+                )}
+              </InputGroup>
+
+              <MainButton type="submit">로그인</MainButton>
+            </Form>
+
+            <SubActions>
+              <TextButton type="button">아이디 찾기</TextButton>
+              <Divider />
+              <TextButton type="button">비밀번호 찾기</TextButton>
+              <Divider />
+              <TextButton type="button" onClick={() => navigate("/signup")}>
+                회원가입
+              </TextButton>
+            </SubActions>
+
+            {/* 소셜 로그인 임시 비활성화
+            <SocialSection>
+              <SocialLabel>간편 로그인</SocialLabel>
+              <SocialRow>
+                <SocialLink href={getGoogleLoginUrl()}>G</SocialLink>
+                <SocialLink href={getKakaoLoginUrl()}>K</SocialLink>
+                <SocialLink href={getNaverLoginUrl()}>N</SocialLink>
+              </SocialRow>
+            </SocialSection>
+            */}
+          </FormCard>
+        </FormSection>
+      </Inner>
+    </Page>
+  );
+}
+
+const Page = styled.div`
+  min-height: 100vh;
+  background: #f4f1eb;
+  padding: 40px 24px;
+`;
+
+const Inner = styled.div`
+  max-width: 1280px;
+  min-height: calc(100vh - 80px);
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const FormSection = styled.div`
+  width: 600px;
+  display: flex;
+  justify-content: center;
+`;
+
+const FormCard = styled.div`
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: 32px;
+  padding: 40px 32px;
+  box-shadow: 0 18px 50px rgba(25, 25, 25, 0.08);
+  border: 1px solid #eee7dd;
+`;
+
+const CardHeader = styled.div`
+  margin-bottom: 28px;
+`;
+
+const LogoText = styled.div`
+  font-size: 14px;
+  font-weight: 700;
+  color: #8d8478;
+  margin-bottom: 8px;
+`;
+
+const CardTitle = styled.h2`
+  font-size: 32px;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 10px;
+`;
+
+const CardDesc = styled.p`
+  font-size: 15px;
+  line-height: 1.6;
+  color: #6f675d;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+`;
+
+const InputGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const Label = styled.label`
+  font-size: 14px;
+  font-weight: 700;
+  color: #222;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  height: 56px;
+  padding: 0 18px;
+  border-radius: 16px;
+  border: 1px solid ${({ $error }) => ($error ? "#e15b64" : "#e5ddd2")};
+  background: #fcfbf8;
+  font-size: 15px;
+  color: #111;
+
+  &::placeholder {
+    color: #a59a8d;
+  }
+
+  &:focus {
+    border-color: ${({ $error }) => ($error ? "#e15b64" : "#111")};
+    background: #fff;
+  }
+`;
+
+const ErrorText = styled.p`
+  margin-top: -2px;
+  padding-left: 4px;
+  font-size: 13px;
+  color: #e15b64;
+`;
+
+const MainButton = styled.button`
+  width: 100%;
+  height: 58px;
+  border-radius: 18px;
+  background: #111;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 6px;
+`;
+
+const SubActions = styled.div`
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+`;
+
+const TextButton = styled.button`
+  font-size: 13px;
+  color: #6d655b;
+`;
+
+const Divider = styled.span`
+  width: 1px;
+  height: 12px;
+  background: #d8d1c8;
+`;
