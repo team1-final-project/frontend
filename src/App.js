@@ -6,6 +6,7 @@ import theme from "./styles/Theme";
 import { AuthProvider } from "./context/AuthContext";
 import GoogleLoginCallbackPage from "./test/GoogleLoginCallbackPage";
 import KakaoLoginCallbackPage from "./test/KakaoLoginCallbackPage";
+import NaverLoginCallbackPage from "./test/NaverLoginCallbackPage";
 
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -25,6 +26,10 @@ function App() {
           <Route
             path="/auth/kakao/callback"
             element={<KakaoLoginCallbackPage />}
+          />
+          <Route
+            path="/auth/naver/callback"
+            element={<NaverLoginCallbackPage />}
           />
           <Route path="*" element={<Navigate to="/" replace />} />
 
