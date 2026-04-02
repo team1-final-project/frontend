@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { sendEmailCode, verifyEmailCode } from "../api/auth";
+import { sendEmailCode, verifyEmailCode, getGoogleLoginUrl } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 
 export default function SignupTestForm() {
@@ -76,22 +76,32 @@ export default function SignupTestForm() {
   };
 
   return (
-    <form onSubmit={handleSignup}>
-      <h2>회원가입 테스트</h2>
-      <input name="email" placeholder="이메일" value={form.email} onChange={handleChange} />
-      <button type="button" onClick={handleSendCode}>인증코드 발송</button>
+    <>
+      <form onSubmit={handleSignup}>
+        <h2>회원가입 테스트</h2>
+        <input name="email" placeholder="이메일" value={form.email} onChange={handleChange} />
+        <button type="button" onClick={handleSendCode}>인증코드 발송</button>
 
-      <input name="code" placeholder="인증코드" value={form.code} onChange={handleChange} />
-      <button type="button" onClick={handleVerifyCode}>이메일 인증 확인</button>
+        <input name="code" placeholder="인증코드" value={form.code} onChange={handleChange} />
+        <button type="button" onClick={handleVerifyCode}>이메일 인증 확인</button>
 
-      <input name="password" type="password" placeholder="비밀번호" value={form.password} onChange={handleChange} />
-      <input name="confirmPassword" type="password" placeholder="비밀번호 확인" value={form.confirmPassword} onChange={handleChange} />
-      <input name="name" placeholder="이름" value={form.name} onChange={handleChange} />
-      <input name="phone" placeholder="휴대폰 번호" value={form.phone} onChange={handleChange} />
+        <input name="password" type="password" placeholder="비밀번호" value={form.password} onChange={handleChange} />
+        <input name="confirmPassword" type="password" placeholder="비밀번호 확인" value={form.confirmPassword} onChange={handleChange} />
+        <input name="name" placeholder="이름" value={form.name} onChange={handleChange} />
+        <input name="phone" placeholder="휴대폰 번호" value={form.phone} onChange={handleChange} />
 
-      <button type="submit">회원가입</button>
+        <button type="submit">회원가입</button>
 
-      {message && <p>{message}</p>}
-    </form>
+        {message && <p>{message}</p>}
+      </form>
+      <button
+        type="button"
+        onClick={() => {
+          window.location.href = getGoogleLoginUrl();
+        }}
+      >
+        구글 로그인
+      </button>
+    </>
   );
 }

@@ -32,6 +32,8 @@ export const login = async ({ email, password }) => {
   return response.data;
 };
 
+export const getGoogleLoginUrl = () => "http://localhost:8000/api/v1/auth/google/login";
+
 export const getMe = async () => {
   const response = await api.get("/auth/me");
   return response.data;
