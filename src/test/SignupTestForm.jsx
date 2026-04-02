@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { sendEmailCode, verifyEmailCode, getGoogleLoginUrl } from "../api/auth";
+import { sendEmailCode, verifyEmailCode, getGoogleLoginUrl, getKakaoLoginUrl } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 
 export default function SignupTestForm() {
@@ -101,6 +101,14 @@ export default function SignupTestForm() {
         }}
       >
         구글 로그인
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          window.location.href = getKakaoLoginUrl();
+        }}
+      >
+        카카오 로그인
       </button>
     </>
   );
