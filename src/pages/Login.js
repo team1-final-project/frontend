@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { login } from "../api/auth";
+import logo from "../assets/stocker-logo.svg";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -56,7 +57,6 @@ export default function Login() {
       localStorage.setItem("accessToken", data.access_token);
       localStorage.setItem("refreshToken", data.refresh_token);
 
-      // 추후 메인 페이지 연결 시 여기서 이동 처리
       // navigate("/");
     } catch (error) {
       console.error(error);
@@ -93,11 +93,9 @@ export default function Login() {
       <Inner>
         <FormSection>
           <FormCard>
-            <CardHeader>
-              <LogoText>Welcome Back</LogoText>
-              <CardTitle>로그인</CardTitle>
-              <CardDesc>계정에 로그인하고 가격 비교를 시작하세요.</CardDesc>
-            </CardHeader>
+            <LogoArea>
+              <LogoImage src={logo} alt="Stock+er" />
+            </LogoArea>
 
             <Form onSubmit={handleLogin}>
               <InputGroup>
@@ -142,17 +140,6 @@ export default function Login() {
                 회원가입
               </TextButton>
             </SubActions>
-
-            {/* 소셜 로그인 임시 비활성화
-            <SocialSection>
-              <SocialLabel>간편 로그인</SocialLabel>
-              <SocialRow>
-                <SocialLink href={getGoogleLoginUrl()}>G</SocialLink>
-                <SocialLink href={getKakaoLoginUrl()}>K</SocialLink>
-                <SocialLink href={getNaverLoginUrl()}>N</SocialLink>
-              </SocialRow>
-            </SocialSection>
-            */}
           </FormCard>
         </FormSection>
       </Inner>
@@ -178,12 +165,29 @@ const Inner = styled.div`
 const FormSection = styled.div`
   width: 600px;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const LogoArea = styled.div`
+  width: 100%;
+  max-width: 560px;
+  display: flex;
   justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 45px;
+`;
+
+const LogoImage = styled.img`
+  display: block;
+  width: 60%;
+  max-width: 420px;
+  height: auto;
 `;
 
 const FormCard = styled.div`
   width: 100%;
-  max-width: 460px;
+  max-width: 560px;
   background: #ffffff;
   border-radius: 32px;
   padding: 40px 32px;
@@ -193,13 +197,6 @@ const FormCard = styled.div`
 
 const CardHeader = styled.div`
   margin-bottom: 28px;
-`;
-
-const LogoText = styled.div`
-  font-size: 14px;
-  font-weight: 700;
-  color: #8d8478;
-  margin-bottom: 8px;
 `;
 
 const CardTitle = styled.h2`

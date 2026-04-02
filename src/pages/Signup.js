@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { sendEmailCode, signup, verifyEmailCode } from "../api/auth";
+import logo from "../assets/stocker-logo.svg";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -238,10 +239,9 @@ export default function Signup() {
       <Inner>
         <FormSection>
           <FormCard>
-            <CardHeader>
-              <LogoText>Create Account</LogoText>
-              <CardTitle>회원가입</CardTitle>
-            </CardHeader>
+            <LogoArea>
+              <LogoImage src={logo} alt="Stock+er" />
+            </LogoArea>
 
             <Form onSubmit={handleSignup}>
               <InputGroup>
@@ -318,75 +318,31 @@ export default function Signup() {
                 )}
               </InputGroup>
 
-              <DoubleRow>
-                <InputGroup>
-                  <Label>이름</Label>
-                  <Input
-                    $error={!!fieldErrors.name}
-                    type="text"
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    placeholder="이름"
-                  />
-                  {fieldErrors.name && (
-                    <ErrorText>{fieldErrors.name}</ErrorText>
-                  )}
-                </InputGroup>
-
-                <InputGroup>
-                  <Label>연락처</Label>
-                  <Input
-                    $error={!!fieldErrors.phone}
-                    type="text"
-                    name="phone"
-                    value={form.phone}
-                    onChange={handleChange}
-                    placeholder="01012345678"
-                  />
-                  {fieldErrors.phone && (
-                    <ErrorText>{fieldErrors.phone}</ErrorText>
-                  )}
-                </InputGroup>
-              </DoubleRow>
+              <InputGroup>
+                <Label>이름</Label>
+                <Input
+                  $error={!!fieldErrors.name}
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="이름"
+                />
+                {fieldErrors.name && <ErrorText>{fieldErrors.name}</ErrorText>}
+              </InputGroup>
 
               <InputGroup>
-                <Label>주민등록번호</Label>
-                <ResidentRow>
-                  <ResidentHalf>
-                    <Input
-                      $error={!!fieldErrors.rrnFront}
-                      type="text"
-                      name="rrnFront"
-                      value={form.rrnFront}
-                      onChange={handleChange}
-                      placeholder="앞 6자리"
-                      maxLength={6}
-                    />
-                  </ResidentHalf>
-
-                  <Dash>-</Dash>
-
-                  <ResidentHalf>
-                    <BackPart>
-                      <BackDigitInput
-                        $error={!!fieldErrors.rrnBack}
-                        type="password"
-                        name="rrnBack"
-                        value={form.rrnBack}
-                        onChange={handleChange}
-                        maxLength={1}
-                      />
-                      <MaskedBox>●●●●●●</MaskedBox>
-                    </BackPart>
-                  </ResidentHalf>
-                </ResidentRow>
-
-                {fieldErrors.rrnFront && (
-                  <ErrorText>{fieldErrors.rrnFront}</ErrorText>
-                )}
-                {!fieldErrors.rrnFront && fieldErrors.rrnBack && (
-                  <ErrorText>{fieldErrors.rrnBack}</ErrorText>
+                <Label>연락처</Label>
+                <Input
+                  $error={!!fieldErrors.phone}
+                  type="text"
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  placeholder="01012345678"
+                />
+                {fieldErrors.phone && (
+                  <ErrorText>{fieldErrors.phone}</ErrorText>
                 )}
               </InputGroup>
 
@@ -422,6 +378,7 @@ const Inner = styled.div`
 `;
 
 const FormSection = styled.div`
+  width: 600px;
   display: flex;
   justify-content: center;
 `;
@@ -606,4 +563,20 @@ const BottomLink = styled.button`
   font-size: 14px;
   font-weight: 700;
   color: #111;
+`;
+
+const LogoArea = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 46px;
+`;
+
+const LogoImage = styled.img`
+  display: block;
+  width: 60%;
+  max-width: 420px;
+  height: auto;
 `;
