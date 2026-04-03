@@ -10,14 +10,18 @@ export default function Signup() {
   const { signup } = useAuth();
 
   const [form, setForm] = useState({
-    email: "",
-    code: "",
-    verificationToken: "",
-    password: "",
-    confirmPassword: "",
-    name: "",
-    phone: "",
+  email: "",
+  code: "",
+  verificationToken: "",
+  password: "",
+  confirmPassword: "",
+  name: "",
+  phone: "",
   });
+
+  const [isSendingCode, setIsSendingCode] = useState(false);
+
+  const isEmailVerified = !!form.verificationToken;
 
   const [fieldErrors, setFieldErrors] = useState({
     email: "",
@@ -30,7 +34,6 @@ export default function Signup() {
 
   const [fieldMessages, setFieldMessages] = useState({
     email: "",
-    code: "",
   });
 
   const handleChange = (e) => {
@@ -67,7 +70,7 @@ export default function Signup() {
     if (name === "email" || name === "code") {
       setFieldMessages((prev) => ({
         ...prev,
-        [name]: "",
+        email: "",
       }));
     }
   };
@@ -92,10 +95,18 @@ export default function Signup() {
     }
 
     try {
-      const data = await sendEmailCode(form.email.trim());
+      setIsSendingCode(true);
+
       setFieldMessages((prev) => ({
         ...prev,
-        email: data?.message || "인증코드를 발송했습니다.",
+        email: "인증코드 발송 중입니다...",
+      }));
+
+      const data = await sendEmailCode(form.email.trim());
+
+      setFieldMessages((prev) => ({
+        ...prev,
+        email: data?.message || "인증코드 발송을 요청했습니다.",
       }));
     } catch (error) {
       console.error(error);
@@ -103,6 +114,8 @@ export default function Signup() {
         ...prev,
         email: error?.response?.data?.detail || "인증코드 발송 실패",
       }));
+    } finally {
+      setIsSendingCode(false);
     }
   };
 
@@ -115,6 +128,7 @@ export default function Signup() {
     setFieldMessages((prev) => ({
       ...prev,
       code: "",
+      email: "",
     }));
 
     if (!form.email.trim()) {
@@ -146,7 +160,8 @@ export default function Signup() {
 
       setFieldMessages((prev) => ({
         ...prev,
-        code: data?.message || "이메일 인증이 완료되었습니다.",
+        email: "이메일 인증이 완료되었습니다.",
+        code: "",
       }));
     } catch (error) {
       console.error(error);
@@ -233,7 +248,8 @@ export default function Signup() {
             <Form onSubmit={handleSignup}>
               <InputGroup>
                 <Label>이메일</Label>
-                <InlineRow>
+
+                {isEmailVerified ? (
                   <Input
                     $error={!!fieldErrors.email}
                     type="email"
@@ -241,39 +257,53 @@ export default function Signup() {
                     value={form.email}
                     onChange={handleChange}
                     placeholder="example@email.com"
+                    disabled
                   />
-                  <SmallButton type="button" onClick={handleSendCode}>
-                    인증 발송
-                  </SmallButton>
-                </InlineRow>
-                {fieldErrors.email && (
-                  <ErrorText>{fieldErrors.email}</ErrorText>
+                ) : (
+                  <InlineRow>
+                    <Input
+                      $error={!!fieldErrors.email}
+                      type="email"
+                      name="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      placeholder="example@email.com"
+                    />
+                    <SmallButton
+                      type="button"
+                      onClick={handleSendCode}
+                      disabled={isSendingCode}
+                    >
+                      {isSendingCode ? "발송 중..." : "인증 발송"}
+                    </SmallButton>
+                  </InlineRow>
                 )}
+
+                {fieldErrors.email && <ErrorText>{fieldErrors.email}</ErrorText>}
                 {!fieldErrors.email && fieldMessages.email && (
                   <SuccessText>{fieldMessages.email}</SuccessText>
                 )}
               </InputGroup>
 
-              <InputGroup>
-                <Label>이메일 인증번호</Label>
-                <InlineRow>
-                  <Input
-                    $error={!!fieldErrors.code}
-                    type="text"
-                    name="code"
-                    value={form.code}
-                    onChange={handleChange}
-                    placeholder="인증번호 입력"
-                  />
-                  <SmallButton type="button" onClick={handleVerifyCode}>
-                    인증 확인
-                  </SmallButton>
-                </InlineRow>
-                {fieldErrors.code && <ErrorText>{fieldErrors.code}</ErrorText>}
-                {!fieldErrors.code && fieldMessages.code && (
-                  <SuccessText>{fieldMessages.code}</SuccessText>
-                )}
-              </InputGroup>
+              {!isEmailVerified && (
+                <InputGroup>
+                  <Label>이메일 인증번호</Label>
+                  <InlineRow>
+                    <Input
+                      $error={!!fieldErrors.code}
+                      type="text"
+                      name="code"
+                      value={form.code}
+                      onChange={handleChange}
+                      placeholder="인증번호 입력"
+                    />
+                    <SmallButton type="button" onClick={handleVerifyCode}>
+                      인증 확인
+                    </SmallButton>
+                  </InlineRow>
+                  {fieldErrors.code && <ErrorText>{fieldErrors.code}</ErrorText>}
+                </InputGroup>
+              )}
 
               <InputGroup>
                 <Label>비밀번호</Label>
@@ -418,6 +448,12 @@ const Input = styled.input`
     border-color: ${({ $error }) => ($error ? "#e15b64" : "#111")};
     background: #fff;
   }
+
+  &:disabled {
+    background: #f1ede6;
+    color: #8f8477;
+    cursor: not-allowed;
+  }
 `;
 
 const InlineRow = styled.div`
@@ -447,6 +483,11 @@ const SmallButton = styled.button`
   color: #fff;
   font-size: 13px;
   font-weight: 700;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
 `;
 
 const MainButton = styled.button`
