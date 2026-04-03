@@ -80,15 +80,18 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const completeGoogleLogin = useCallback(async ({ accessToken, refreshToken }) => {
-    setTokens({
-      accessToken,
-      refreshToken,
-    });
+  const completeSocialLogin = useCallback(
+    async ({ accessToken, refreshToken }) => {
+      setTokens({
+        accessToken,
+        refreshToken,
+      });
 
-    const me = await loadMe();
-    return me;
-  }, [loadMe]);
+      const me = await loadMe();
+      return me;
+    },
+    [loadMe]
+  );
 
   useEffect(() => {
     initialize();
@@ -114,9 +117,18 @@ export function AuthProvider({ children }) {
       signup,
       logout,
       reloadMe: loadMe,
-      completeGoogleLogin,
+      completeSocialLogin,
     }),
-    [member, isAuthenticated, isInitializing, login, signup, logout, loadMe, completeGoogleLogin]
+    [
+      member,
+      isAuthenticated,
+      isInitializing,
+      login,
+      signup,
+      logout,
+      loadMe,
+      completeSocialLogin,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

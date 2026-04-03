@@ -1,24 +1,23 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { sendEmailCode, signup, verifyEmailCode } from "../api/auth";
+import { sendEmailCode, verifyEmailCode } from "../api/auth";
+import { useAuth } from "../context/AuthContext";
 import logo from "../assets/stocker-logo.svg";
 
 export default function Signup() {
   const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const [form, setForm] = useState({
     email: "",
     code: "",
+    verificationToken: "",
     password: "",
     confirmPassword: "",
     name: "",
-    rrnFront: "",
-    rrnBack: "",
     phone: "",
   });
-
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState({
     email: "",
@@ -27,8 +26,6 @@ export default function Signup() {
     confirmPassword: "",
     name: "",
     phone: "",
-    rrnFront: "",
-    rrnBack: "",
   });
 
   const [fieldMessages, setFieldMessages] = useState({
@@ -41,26 +38,26 @@ export default function Signup() {
 
     let nextValue = value;
 
-    if (name === "rrnFront") {
-      nextValue = value.replace(/\D/g, "").slice(0, 6);
-    }
-
-    if (name === "rrnBack") {
-      nextValue = value.replace(/\D/g, "").slice(0, 1);
-    }
-
     if (name === "phone") {
       nextValue = value.replace(/\D/g, "").slice(0, 11);
     }
 
     if (name === "code") {
-      nextValue = value.replace(/\D/g, "");
+      nextValue = value.replace(/\D/g, "").slice(0, 6);
     }
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: nextValue,
-    }));
+    setForm((prev) => {
+      const nextForm = {
+        ...prev,
+        [name]: nextValue,
+      };
+
+      if (name === "email" || name === "code") {
+        nextForm.verificationToken = "";
+      }
+
+      return nextForm;
+    });
 
     setFieldErrors((prev) => ({
       ...prev,
@@ -72,10 +69,6 @@ export default function Signup() {
         ...prev,
         [name]: "",
       }));
-    }
-
-    if (name === "email" || name === "code") {
-      setIsEmailVerified(false);
     }
   };
 
@@ -99,7 +92,7 @@ export default function Signup() {
     }
 
     try {
-      const data = await sendEmailCode(form.email);
+      const data = await sendEmailCode(form.email.trim());
       setFieldMessages((prev) => ({
         ...prev,
         email: data?.message || "인증코드를 발송했습니다.",
@@ -142,18 +135,25 @@ export default function Signup() {
 
     try {
       const data = await verifyEmailCode({
-        email: form.email,
-        code: form.code,
+        email: form.email.trim(),
+        code: form.code.trim(),
       });
 
-      setIsEmailVerified(true);
+      setForm((prev) => ({
+        ...prev,
+        verificationToken: data.verification_token,
+      }));
+
       setFieldMessages((prev) => ({
         ...prev,
         code: data?.message || "이메일 인증이 완료되었습니다.",
       }));
     } catch (error) {
       console.error(error);
-      setIsEmailVerified(false);
+      setForm((prev) => ({
+        ...prev,
+        verificationToken: "",
+      }));
       setFieldErrors((prev) => ({
         ...prev,
         code: error?.response?.data?.detail || "이메일 인증 실패",
@@ -171,17 +171,17 @@ export default function Signup() {
       confirmPassword: "",
       name: "",
       phone: "",
-      rrnFront: "",
-      rrnBack: "",
     };
 
     if (!form.email.trim()) nextErrors.email = "이메일을 입력해주세요.";
     if (!form.code.trim()) nextErrors.code = "인증번호를 입력해주세요.";
-    if (!isEmailVerified)
+    if (!form.verificationToken) {
       nextErrors.code = nextErrors.code || "이메일 인증을 완료해주세요.";
+    }
     if (!form.password.trim()) nextErrors.password = "비밀번호를 입력해주세요.";
-    if (!form.confirmPassword.trim())
+    if (!form.confirmPassword.trim()) {
       nextErrors.confirmPassword = "비밀번호 확인을 입력해주세요.";
+    }
     if (
       form.password &&
       form.confirmPassword &&
@@ -191,10 +191,6 @@ export default function Signup() {
     }
     if (!form.name.trim()) nextErrors.name = "이름을 입력해주세요.";
     if (!form.phone.trim()) nextErrors.phone = "연락처를 입력해주세요.";
-    if (form.rrnFront.length !== 6)
-      nextErrors.rrnFront = "앞 6자리를 입력해주세요.";
-    if (form.rrnBack.length !== 1)
-      nextErrors.rrnBack = "뒤 1자리를 입력해주세요.";
 
     const hasError = Object.values(nextErrors).some(Boolean);
 
@@ -204,28 +200,19 @@ export default function Signup() {
     }
 
     try {
-      const payload = {
-        email: form.email,
+      await signup({
+        email: form.email.trim(),
         password: form.password,
-        name: form.name,
-        phone: form.phone || null,
-        is_email_verified: isEmailVerified,
-      };
+        name: form.name.trim(),
+        phone: form.phone.trim() || null,
+        verification_token: form.verificationToken,
+      });
 
-      const data = await signup(payload);
-      window.alert(data?.message || "회원가입 성공");
-      navigate("/login");
+      window.alert("회원가입이 완료되었습니다.");
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error(error);
       const detail = error?.response?.data?.detail || "회원가입 실패";
-
-      if (String(detail).toLowerCase().includes("email")) {
-        setFieldErrors((prev) => ({
-          ...prev,
-          email: String(detail),
-        }));
-        return;
-      }
 
       setFieldErrors((prev) => ({
         ...prev,
@@ -346,7 +333,9 @@ export default function Signup() {
                 )}
               </InputGroup>
 
-              <MainButton type="submit">회원가입</MainButton>
+              <MainButton type="submit">
+                회원가입
+              </MainButton>
             </Form>
 
             <BottomRow>
@@ -393,30 +382,6 @@ const FormCard = styled.div`
   border: 1px solid #eee7dd;
 `;
 
-const CardHeader = styled.div`
-  margin-bottom: 28px;
-`;
-
-const LogoText = styled.div`
-  font-size: 14px;
-  font-weight: 700;
-  color: #8d8478;
-  margin-bottom: 8px;
-`;
-
-const CardTitle = styled.h2`
-  font-size: 32px;
-  font-weight: 800;
-  color: #111;
-  margin-bottom: 10px;
-`;
-
-const CardDesc = styled.p`
-  font-size: 15px;
-  line-height: 1.6;
-  color: #6f675d;
-`;
-
 const Form = styled.form`
   display: flex;
   flex-direction: column;
@@ -459,58 +424,6 @@ const InlineRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 118px;
   gap: 10px;
-`;
-
-const DoubleRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const ResidentRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 10px;
-  align-items: center;
-`;
-
-const ResidentHalf = styled.div`
-  width: 100%;
-`;
-
-const BackPart = styled.div`
-  display: grid;
-  grid-template-columns: 72px 1fr;
-  gap: 8px;
-  align-items: center;
-`;
-
-const BackDigitInput = styled(Input)`
-  padding: 0;
-  text-align: center;
-`;
-
-const MaskedBox = styled.div`
-  height: 56px;
-  border-radius: 16px;
-  border: 1px solid #e5ddd2;
-  background: #f4efe8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #8f8477;
-  font-size: 14px;
-  letter-spacing: 3px;
-`;
-
-const Dash = styled.span`
-  font-size: 18px;
-  font-weight: 700;
-  color: #666;
 `;
 
 const ErrorText = styled.p`
