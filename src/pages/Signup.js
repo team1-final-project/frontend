@@ -19,6 +19,8 @@ export default function Signup() {
   phone: "",
   });
 
+  const [isCodeSent, setIsCodeSent] = useState(false);
+
   const [isSendingCode, setIsSendingCode] = useState(false);
 
   const isEmailVerified = !!form.verificationToken;
@@ -55,12 +57,17 @@ export default function Signup() {
         [name]: nextValue,
       };
 
-      if (name === "email" || name === "code") {
+      if (name === "email") {
         nextForm.verificationToken = "";
+        nextForm.code = "";
       }
 
       return nextForm;
     });
+
+    if (name === "email") {
+      setIsCodeSent(false);
+    }
 
     setFieldErrors((prev) => ({
       ...prev,
@@ -103,6 +110,8 @@ export default function Signup() {
       }));
 
       const data = await sendEmailCode(form.email.trim());
+
+      setIsCodeSent(true);
 
       setFieldMessages((prev) => ({
         ...prev,
@@ -285,7 +294,7 @@ export default function Signup() {
                 )}
               </InputGroup>
 
-              {!isEmailVerified && (
+              {isCodeSent && !isEmailVerified && (
                 <InputGroup>
                   <Label>이메일 인증번호</Label>
                   <InlineRow>
