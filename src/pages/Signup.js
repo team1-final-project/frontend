@@ -10,13 +10,13 @@ export default function Signup() {
   const { signup } = useAuth();
 
   const [form, setForm] = useState({
-  email: "",
-  code: "",
-  verificationToken: "",
-  password: "",
-  confirmPassword: "",
-  name: "",
-  phone: "",
+    email: "",
+    code: "",
+    verificationToken: "",
+    password: "",
+    confirmPassword: "",
+    name: "",
+    phone: "",
   });
 
   const [isCodeSent, setIsCodeSent] = useState(false);
@@ -185,6 +185,12 @@ export default function Signup() {
     }
   };
 
+  const passwordRegex =
+    /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>_\-\\[\]/`~+=;'@]).{8,16}$/;
+
+  const isPasswordFilled = form.password.length > 0;
+  const isPasswordValid = passwordRegex.test(form.password);
+
   const handleSignup = async (e) => {
     e.preventDefault();
 
@@ -203,6 +209,10 @@ export default function Signup() {
       nextErrors.code = nextErrors.code || "이메일 인증을 완료해주세요.";
     }
     if (!form.password.trim()) nextErrors.password = "비밀번호를 입력해주세요.";
+    if (form.password && !passwordRegex.test(form.password)) {
+      nextErrors.password =
+        "비밀번호는 8~16자, 대문자 1개 이상, 특수문자 1개 이상이어야 합니다.";
+    }
     if (!form.confirmPassword.trim()) {
       nextErrors.confirmPassword = "비밀번호 확인을 입력해주세요.";
     }
@@ -288,7 +298,9 @@ export default function Signup() {
                   </InlineRow>
                 )}
 
-                {fieldErrors.email && <ErrorText>{fieldErrors.email}</ErrorText>}
+                {fieldErrors.email && (
+                  <ErrorText>{fieldErrors.email}</ErrorText>
+                )}
                 {!fieldErrors.email && fieldMessages.email && (
                   <SuccessText>{fieldMessages.email}</SuccessText>
                 )}
@@ -310,22 +322,41 @@ export default function Signup() {
                       인증 확인
                     </SmallButton>
                   </InlineRow>
-                  {fieldErrors.code && <ErrorText>{fieldErrors.code}</ErrorText>}
+                  {fieldErrors.code && (
+                    <ErrorText>{fieldErrors.code}</ErrorText>
+                  )}
                 </InputGroup>
               )}
 
               <InputGroup>
                 <Label>비밀번호</Label>
                 <Input
-                  $error={!!fieldErrors.password}
+                  $error={
+                    !!fieldErrors.password ||
+                    (isPasswordFilled && !isPasswordValid)
+                  }
                   type="password"
                   name="password"
                   value={form.password}
                   onChange={handleChange}
                   placeholder="비밀번호"
                 />
-                {fieldErrors.password && (
+
+                {fieldErrors.password ? (
                   <ErrorText>{fieldErrors.password}</ErrorText>
+                ) : isPasswordFilled ? (
+                  isPasswordValid ? (
+                    <SuccessText>사용 가능한 비밀번호 형식입니다.</SuccessText>
+                  ) : (
+                    <GuideText>
+                      비밀번호는 8~16자, 대문자 1개 이상, 특수문자 1개
+                      이상이어야 합니다.
+                    </GuideText>
+                  )
+                ) : (
+                  <GuideText>
+                    8~16자 / 대문자 1개 이상 / 특수문자 1개 이상
+                  </GuideText>
                 )}
               </InputGroup>
 
@@ -372,9 +403,7 @@ export default function Signup() {
                 )}
               </InputGroup>
 
-              <MainButton type="submit">
-                회원가입
-              </MainButton>
+              <MainButton type="submit">회원가입</MainButton>
             </Form>
 
             <BottomRow>
@@ -389,6 +418,13 @@ export default function Signup() {
     </Page>
   );
 }
+
+const GuideText = styled.p`
+  margin-top: -2px;
+  padding-left: 4px;
+  font-size: 13px;
+  color: #8f8477;
+`;
 
 const Page = styled.div`
   min-height: 100vh;
