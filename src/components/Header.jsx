@@ -10,7 +10,7 @@ export default function Header() {
       <Inner>
         <LeftArea>
           <MenuButton type="button">
-            <Menu size={22} />
+            <Menu size={24} />
           </MenuButton>
 
           <BrandLogoLink to="/">
@@ -18,27 +18,27 @@ export default function Header() {
           </BrandLogoLink>
 
           <Nav>
-            <NavItem href="/">Best</NavItem>
-            <NavItem href="/">Sales</NavItem>
-            <NavItem href="/">Hot Deal</NavItem>
-            <NavItem href="/">New Arrivals</NavItem>
+            <NavItem to="/">Best</NavItem>
+            <NavItem to="/">Sales</NavItem>
+            <NavItem to="/">Hot Deal</NavItem>
+            <NavItem to="/">New Arrivals</NavItem>
           </Nav>
         </LeftArea>
 
         <RightArea>
           <SearchBox>
             <SearchIcon>
-              <Search size={16} />
+              <Search size={17} />
             </SearchIcon>
             <SearchInput placeholder="Search for products..." />
           </SearchBox>
 
           <IconGroup>
             <IconButton type="button">
-              <ShoppingCart size={20} />
+              <ShoppingCart size={22} />
             </IconButton>
             <IconButton type="button">
-              <CircleUserRound size={20} />
+              <CircleUserRound size={22} />
             </IconButton>
           </IconGroup>
         </RightArea>
@@ -47,21 +47,9 @@ export default function Header() {
   );
 }
 
-const BrandLogoLink = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  margin-bottom: 12px;
-`;
-
-const BrandLogoImage = styled.img`
-  height: 32px;
-  width: auto;
-  display: block;
-`;
-
 const HeaderWrap = styled.header`
   width: 100%;
-  height: 58px;
+  height: 64px;
   background: #ffffff;
   border-bottom: 1px solid #efefef;
   display: flex;
@@ -70,19 +58,19 @@ const HeaderWrap = styled.header`
 
 const Inner = styled.div`
   width: 100%;
-  max-width: 1280px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0 22px;
+  padding: 0 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 24px;
 `;
 
 const LeftArea = styled.div`
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
   min-width: 0;
 `;
 
@@ -95,20 +83,36 @@ const MenuButton = styled.button`
   justify-content: center;
   cursor: pointer;
   color: #111;
+  flex-shrink: 0;
+`;
+
+const BrandLogoLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex-shrink: 0;
+`;
+
+const BrandLogoImage = styled.img`
+  height: 34px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  transform: translateY(-2px);
 `;
 
 const Nav = styled.nav`
   display: flex;
   align-items: center;
-  gap: 22px;
-  margin-left: 6px;
+  gap: 26px;
+  margin-left: 8px;
 
   @media (max-width: 980px) {
     display: none;
   }
 `;
 
-const NavItem = styled.a`
+const NavItem = styled(Link)`
   text-decoration: none;
   color: #222;
   font-size: 14px;
@@ -125,7 +129,7 @@ const RightArea = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 14px;
+  gap: 16px;
   min-width: 0;
 `;
 
@@ -146,6 +150,7 @@ const SearchIcon = styled.div`
   justify-content: center;
   color: #9a9a9a;
   margin-right: 8px;
+  flex-shrink: 0;
 `;
 
 const SearchInput = styled.input`
@@ -164,7 +169,8 @@ const SearchInput = styled.input`
 const IconGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  flex-shrink: 0;
 `;
 
 const IconButton = styled.button`
