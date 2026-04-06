@@ -57,6 +57,9 @@ export default function Home() {
                 <SecondaryButton type="button" onClick={handleLogout}>
                   로그아웃
                 </SecondaryButton>
+                <SecondaryButton type="button" onClick={() => navigate("/toss")}>
+                  토스 테스트 결제 페이지
+                </SecondaryButton>
               </ActionRow>
             </StatusCard>
           ) : (
