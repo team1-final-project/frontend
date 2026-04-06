@@ -59,8 +59,6 @@ export default function Login() {
       const data = await login(form);
       localStorage.setItem("accessToken", data.access_token);
       localStorage.setItem("refreshToken", data.refresh_token);
-
-      // navigate("/");
     } catch (error) {
       console.error(error);
 
@@ -209,23 +207,6 @@ const FormCard = styled.div`
   padding: 40px 32px;
   box-shadow: 0 18px 50px rgba(25, 25, 25, 0.08);
   border: 1px solid #eee7dd;
-`;
-
-const CardHeader = styled.div`
-  margin-bottom: 28px;
-`;
-
-const CardTitle = styled.h2`
-  font-size: 32px;
-  font-weight: 800;
-  color: #111;
-  margin-bottom: 10px;
-`;
-
-const CardDesc = styled.p`
-  font-size: 15px;
-  line-height: 1.6;
-  color: #6f675d;
 `;
 
 const Form = styled.form`
