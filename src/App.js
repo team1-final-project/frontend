@@ -4,12 +4,11 @@ import { ThemeProvider } from "styled-components";
 import GlobalStyle from "./styles/GlobalStyle";
 import theme from "./styles/Theme";
 import { AuthProvider } from "./context/AuthContext";
-import GoogleLoginCallbackPage from "./test/GoogleLoginCallbackPage";
-import KakaoLoginCallbackPage from "./test/KakaoLoginCallbackPage";
 
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import AuthTestPage from "./test/AuthTestPage";
+import SocialLoginCallback from "./pages/SocialLoginCallback";
 
 function App() {
   return (
@@ -17,19 +16,24 @@ function App() {
       <AuthProvider>
         <GlobalStyle />
         <Routes>
-          <Route path="/" element={<AuthTestPage />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+
           <Route
             path="/auth/google/callback"
-            element={<GoogleLoginCallbackPage />}
+            element={<SocialLoginCallback />}
           />
           <Route
             path="/auth/kakao/callback"
-            element={<KakaoLoginCallbackPage />}
+            element={<SocialLoginCallback />}
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route
+            path="/auth/naver/callback"
+            element={<SocialLoginCallback />}
+          />
 
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
     </ThemeProvider>

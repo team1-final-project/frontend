@@ -36,6 +36,8 @@ export const getGoogleLoginUrl = () => "http://localhost:8000/api/v1/auth/google
 
 export const getKakaoLoginUrl = () => "http://localhost:8000/api/v1/auth/kakao/login";
 
+export const getNaverLoginUrl = () => "http://localhost:8000/api/v1/auth/naver/login";
+
 export const getMe = async () => {
   const response = await api.get("/auth/me");
   return response.data;

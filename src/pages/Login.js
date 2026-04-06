@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { login } from "../api/auth";
+import {
+  getGoogleLoginUrl,
+  getKakaoLoginUrl,
+  getNaverLoginUrl,
+} from "../api/auth";
+import { useAuth } from "../context/AuthContext";
 import logo from "../assets/stocker-logo.svg";
 import { FcGoogle } from "react-icons/fc";
 import { SiNaver } from "react-icons/si";
@@ -9,6 +14,7 @@ import { RiKakaoTalkFill } from "react-icons/ri";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [form, setForm] = useState({
     email: "",
@@ -56,9 +62,8 @@ export default function Login() {
     }
 
     try {
-      const data = await login(form);
-      localStorage.setItem("accessToken", data.access_token);
-      localStorage.setItem("refreshToken", data.refresh_token);
+      await login(form);
+      navigate("/", { replace: true });
     } catch (error) {
       console.error(error);
 
@@ -84,7 +89,7 @@ export default function Login() {
 
       setFieldErrors({
         email: "이메일 또는 비밀번호를 확인해주세요.",
-        password: "이메일 또는 비밀번호를 확인해주세요.",
+        password: "",
       });
     }
   };
@@ -141,16 +146,34 @@ export default function Login() {
                 회원가입
               </TextButton>
             </SubActions>
+
             <SocialRow>
-              <SocialIconButton type="button">
+              <SocialIconButton
+                type="button"
+                onClick={() => {
+                  window.location.href = getGoogleLoginUrl();
+                }}
+              >
                 <FcGoogle size={30} />
               </SocialIconButton>
 
-              <SocialIconButton type="button" $kakao>
+              <SocialIconButton
+                type="button"
+                $kakao
+                onClick={() => {
+                  window.location.href = getKakaoLoginUrl();
+                }}
+              >
                 <RiKakaoTalkFill size={30} />
               </SocialIconButton>
 
-              <SocialIconButton type="button" $naver>
+              <SocialIconButton
+                type="button"
+                $naver
+                onClick={() => {
+                  window.location.href = getNaverLoginUrl();
+                }}
+              >
                 <SiNaver size={20} />
               </SocialIconButton>
             </SocialRow>
