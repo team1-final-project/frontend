@@ -174,7 +174,35 @@ export default function Signup() {
     isEmailVerified,
   ]);
 
+  const getErrorMessage = (error, fallback = "인증코드 발송 실패") => {
+    const detail = error?.response?.data?.detail;
+
+    if (typeof detail === "string") return detail;
+
+    if (Array.isArray(detail)) {
+      const first = detail[0];
+      if (typeof first === "string") return first;
+      if (first?.msg) return first.msg;
+    }
+
+    if (detail && typeof detail === "object") {
+      if (detail.msg) return detail.msg;
+    }
+
+    return fallback;
+  };
+
   const handleSendCode = async () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(form.email.trim())) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        email: "올바른 이메일 형식을 입력해주세요.",
+      }));
+      return;
+    }
+
     setFieldErrors((prev) => ({
       ...prev,
       email: "",
@@ -211,6 +239,7 @@ export default function Signup() {
       }));
     } catch (error) {
       console.error(error);
+
       setFieldMessages((prev) => ({
         ...prev,
         email: "",
@@ -218,7 +247,7 @@ export default function Signup() {
 
       setFieldErrors((prev) => ({
         ...prev,
-        email: error?.response?.data?.detail || "인증코드 발송 실패",
+        email: getErrorMessage(error, "인증코드 발송 실패"),
       }));
     } finally {
       setIsSendingCode(false);
