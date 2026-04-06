@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { sendEmailCode, verifyEmailCode } from "../api/auth";
@@ -9,6 +9,15 @@ export default function Signup() {
   const navigate = useNavigate();
   const { signup } = useAuth();
 
+  const [touched, setTouched] = useState({
+    email: false,
+    code: false,
+    password: false,
+    confirmPassword: false,
+    name: false,
+    phone: false,
+  });
+
   const [form, setForm] = useState({
     email: "",
     code: "",
@@ -18,6 +27,10 @@ export default function Signup() {
     name: "",
     phone: "",
   });
+
+  const isConfirmPasswordFilled = form.confirmPassword.length > 0;
+  const isConfirmPasswordMatched =
+    isConfirmPasswordFilled && form.password === form.confirmPassword;
 
   const [isCodeSent, setIsCodeSent] = useState(false);
 
@@ -68,19 +81,98 @@ export default function Signup() {
     if (name === "email") {
       setIsCodeSent(false);
     }
-
-    setFieldErrors((prev) => ({
-      ...prev,
-      [name]: "",
-    }));
-
-    if (name === "email" || name === "code") {
-      setFieldMessages((prev) => ({
+    if (name !== "confirmPassword") {
+      setFieldErrors((prev) => ({
         ...prev,
-        email: "",
+        [name]: touched[name] ? prev[name] : "",
       }));
+
+      if (name === "email" || name === "code") {
+        setFieldMessages((prev) => ({
+          ...prev,
+          email: "",
+        }));
+      }
     }
   };
+
+  const handleBlur = (e) => {
+    const { name } = e.target;
+
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+  };
+
+  useEffect(() => {
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+
+      if (touched.email) {
+        if (!form.email.trim()) {
+          next.email = "이메일을 입력하세요";
+        } else {
+        }
+      }
+
+      if (touched.code) {
+        if (isCodeSent && !isEmailVerified) {
+          if (!form.code.trim()) {
+            next.code = "인증번호를 입력해주세요.";
+          } else if (form.code.length !== 6) {
+            next.code = "인증번호 6자리를 입력해주세요.";
+          } else {
+            next.code = "";
+          }
+        }
+      }
+
+      if (touched.password) {
+        if (!form.password.trim()) {
+          next.password = "비밀번호를 입력해주세요.";
+        } else if (!passwordRegex.test(form.password)) {
+          next.password =
+            "비밀번호는 8~16자, 대문자 1개 포함, 특수문자 1개를 포함해야 합니다.";
+        } else {
+          next.password = "";
+        }
+      }
+
+      if (touched.name) {
+        if (!form.name.trim()) {
+          next.name = "이름을 입력해주세요";
+        } else {
+          next.name = "";
+        }
+      }
+
+      if (touched.phone) {
+        if (!form.phone.trim()) {
+          next.phone = "연락처를 입력해주세요";
+        } else if (form.phone.length < 11) {
+          next.phone = "올바른 연락처를 입력해주세요.";
+        } else {
+          next.phone = "";
+        }
+      }
+
+      return next;
+    });
+  }, [
+    form.email,
+    form.code,
+    form.password,
+    form.name,
+    form.phone,
+    touched.email,
+    touched.code,
+    touched.password,
+    touched.name,
+    touched.phone,
+    isCodeSent,
+    isEmailVerified,
+  ]);
 
   const handleSendCode = async () => {
     setFieldErrors((prev) => ({
@@ -119,6 +211,11 @@ export default function Signup() {
       }));
     } catch (error) {
       console.error(error);
+      setFieldMessages((prev) => ({
+        ...prev,
+        email: "",
+      }));
+
       setFieldErrors((prev) => ({
         ...prev,
         email: error?.response?.data?.detail || "인증코드 발송 실패",
@@ -192,6 +289,16 @@ export default function Signup() {
   const isPasswordValid = passwordRegex.test(form.password);
 
   const handleSignup = async (e) => {
+    setTouched((prev) => ({
+      ...prev,
+      email: true,
+      code: true,
+      password: true,
+      confirmPassword: true,
+      name: true,
+      phone: true,
+    }));
+
     e.preventDefault();
 
     const nextErrors = {
@@ -208,21 +315,19 @@ export default function Signup() {
     if (!form.verificationToken) {
       nextErrors.code = nextErrors.code || "이메일 인증을 완료해주세요.";
     }
-    if (!form.password.trim()) nextErrors.password = "비밀번호를 입력해주세요.";
-    if (form.password && !passwordRegex.test(form.password)) {
+    if (!form.password.trim()) {
+      nextErrors.password = "비밀번호를 입력해주세요.";
+    } else if (!passwordRegex.test(form.password)) {
       nextErrors.password =
         "비밀번호는 8~16자, 대문자 1개 이상, 특수문자 1개 이상이어야 합니다.";
     }
+
     if (!form.confirmPassword.trim()) {
       nextErrors.confirmPassword = "비밀번호 확인을 입력해주세요.";
-    }
-    if (
-      form.password &&
-      form.confirmPassword &&
-      form.password !== form.confirmPassword
-    ) {
+    } else if (form.password !== form.confirmPassword) {
       nextErrors.confirmPassword = "비밀번호 확인이 일치하지 않습니다.";
     }
+
     if (!form.name.trim()) nextErrors.name = "이름을 입력해주세요.";
     if (!form.phone.trim()) nextErrors.phone = "연락처를 입력해주세요.";
 
@@ -277,6 +382,7 @@ export default function Signup() {
                     onChange={handleChange}
                     placeholder="example@email.com"
                     disabled
+                    onBlur={handleBlur}
                   />
                 ) : (
                   <InlineRow>
@@ -286,6 +392,7 @@ export default function Signup() {
                       name="email"
                       value={form.email}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       placeholder="example@email.com"
                     />
                     <SmallButton
@@ -316,6 +423,7 @@ export default function Signup() {
                       name="code"
                       value={form.code}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       placeholder="인증번호 입력"
                     />
                     <SmallButton type="button" onClick={handleVerifyCode}>
@@ -339,6 +447,7 @@ export default function Signup() {
                   name="password"
                   value={form.password}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="비밀번호"
                 />
 
@@ -349,13 +458,14 @@ export default function Signup() {
                     <SuccessText>사용 가능한 비밀번호 형식입니다.</SuccessText>
                   ) : (
                     <GuideText>
-                      비밀번호는 8~16자, 대문자 1개 이상, 특수문자 1개
-                      이상이어야 합니다.
+                      비밀번호는 8~16자, 대문자 1개 포함, 특수문자 1개를
+                      포함해야 합니다.
                     </GuideText>
                   )
                 ) : (
                   <GuideText>
-                    8~16자 / 대문자 1개 이상 / 특수문자 1개 이상
+                    비밀번호는 8~16자, 대문자 1개 포함, 특수문자 1개를 포함해야
+                    합니다.
                   </GuideText>
                 )}
               </InputGroup>
@@ -363,16 +473,26 @@ export default function Signup() {
               <InputGroup>
                 <Label>비밀번호 확인</Label>
                 <Input
-                  $error={!!fieldErrors.confirmPassword}
+                  $error={
+                    !!fieldErrors.confirmPassword ||
+                    (isConfirmPasswordFilled && !isConfirmPasswordMatched)
+                  }
                   type="password"
                   name="confirmPassword"
                   value={form.confirmPassword}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="비밀번호 확인"
                 />
-                {fieldErrors.confirmPassword && (
+                {fieldErrors.confirmPassword ? (
                   <ErrorText>{fieldErrors.confirmPassword}</ErrorText>
-                )}
+                ) : isConfirmPasswordFilled ? (
+                  isConfirmPasswordMatched ? (
+                    <SuccessText>비밀번호가 일치합니다.</SuccessText>
+                  ) : (
+                    <ErrorText>비밀번호 확인이 일치하지 않습니다.</ErrorText>
+                  )
+                ) : null}
               </InputGroup>
 
               <InputGroup>
@@ -383,6 +503,7 @@ export default function Signup() {
                   name="name"
                   value={form.name}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="이름"
                 />
                 {fieldErrors.name && <ErrorText>{fieldErrors.name}</ErrorText>}
@@ -396,6 +517,7 @@ export default function Signup() {
                   name="phone"
                   value={form.phone}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="01012345678"
                 />
                 {fieldErrors.phone && (
