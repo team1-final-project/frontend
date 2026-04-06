@@ -10,6 +10,10 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import SocialLoginCallback from "./pages/SocialLoginCallback";
 
+import TossPayTestPage from "./pages/TossPayTestPage";
+import TossSuccessPage from "./pages/TossSuccessPage";
+import TossFailPage from "./pages/TossFailPage";
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -19,7 +23,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-
+          <Route path="/toss" element={<TossPayTestPage />} />
+        <Route path="/toss/success" element={<TossSuccessPage />} />
+        <Route path="/toss/fail" element={<TossFailPage />} />
           <Route
             path="/auth/google/callback"
             element={<SocialLoginCallback />}
