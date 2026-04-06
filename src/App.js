@@ -10,9 +10,9 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import SocialLoginCallback from "./pages/SocialLoginCallback";
 
-import TossPayTestPage from "./pages/TossPayTestPage";
-import TossSuccessPage from "./pages/TossSuccessPage";
-import TossFailPage from "./pages/TossFailPage";
+import TossPayTestPage from "./test/paymentapi/TossPayTestPage";
+import TossSuccessPage from "./test/paymentapi/TossSuccessPage";
+import TossFailPage from "./test/paymentapi/TossFailPage";
 
 function App() {
   return (
