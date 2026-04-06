@@ -129,14 +129,7 @@ export default function Signup() {
       }
 
       if (touched.password) {
-        if (!form.password.trim()) {
-          next.password = "비밀번호를 입력해주세요.";
-        } else if (!passwordRegex.test(form.password)) {
-          next.password =
-            "비밀번호는 8~16자, 대문자 1개 포함, 특수문자 1개를 포함해야 합니다.";
-        } else {
-          next.password = "";
-        }
+        next.password = getPasswordErrorMessage(form.password);
       }
 
       if (touched.name) {
@@ -311,11 +304,45 @@ export default function Signup() {
     }
   };
 
-  const passwordRegex =
-    /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>_\-\\[\]/`~+=;'@]).{8,16}$/;
+  const passwordRules = {
+    length: /^.{8,16}$/,
+    uppercase: /[A-Z]/,
+    special: /[!@#$%^&*(),.?":{}|<>_\-\\[\]/`~+=;']/,
+  };
 
+  const getPasswordValidation = (password) => {
+    return {
+      length: passwordRules.length.test(password),
+      uppercase: passwordRules.uppercase.test(password),
+      special: passwordRules.special.test(password),
+    };
+  };
+
+  const getPasswordErrorMessage = (password) => {
+    const checks = getPasswordValidation(password);
+
+    if (!password) return "비밀번호를 입력해주세요.";
+
+    const invalidRules = [];
+
+    if (!checks.length)
+      invalidRules.push("비밀번호 길이는 8~16자이여야 합니다");
+    if (!checks.uppercase)
+      invalidRules.push("대문자 1개 이상을 포함시켜야 합니다.");
+    if (!checks.special)
+      invalidRules.push("특수문자 1개 이상을 포함시켜야 합니다.");
+
+    if (invalidRules.length > 0) {
+      return `(${invalidRules.join(", ")})`;
+    }
+
+    return "";
+  };
+
+  const passwordChecks = getPasswordValidation(form.password);
   const isPasswordFilled = form.password.length > 0;
-  const isPasswordValid = passwordRegex.test(form.password);
+  const isPasswordValid =
+    passwordChecks.length && passwordChecks.uppercase && passwordChecks.special;
 
   const handleSignup = async (e) => {
     setTouched((prev) => ({
@@ -344,12 +371,7 @@ export default function Signup() {
     if (!form.verificationToken) {
       nextErrors.code = nextErrors.code || "이메일 인증을 완료해주세요.";
     }
-    if (!form.password.trim()) {
-      nextErrors.password = "비밀번호를 입력해주세요.";
-    } else if (!passwordRegex.test(form.password)) {
-      nextErrors.password =
-        "비밀번호는 8~16자, 대문자 1개 이상, 특수문자 1개 이상이어야 합니다.";
-    }
+    nextErrors.password = getPasswordErrorMessage(form.password);
 
     if (!form.confirmPassword.trim()) {
       nextErrors.confirmPassword = "비밀번호 확인을 입력해주세요.";
@@ -482,18 +504,11 @@ export default function Signup() {
 
                 {fieldErrors.password ? (
                   <ErrorText>{fieldErrors.password}</ErrorText>
-                ) : isPasswordFilled ? (
-                  isPasswordValid ? (
-                    <SuccessText>사용 가능한 비밀번호 형식입니다.</SuccessText>
-                  ) : (
-                    <GuideText>
-                      비밀번호는 8~16자, 대문자 1개 포함, 특수문자 1개를
-                      포함해야 합니다.
-                    </GuideText>
-                  )
+                ) : isPasswordFilled && isPasswordValid ? (
+                  <SuccessText>사용 가능한 비밀번호 형식입니다.</SuccessText>
                 ) : (
                   <GuideText>
-                    비밀번호는 8~16자, 대문자 1개 포함, 특수문자 1개를 포함해야
+                    비밀번호 길이는 8~16자, 대문자, 특수문자를 1개 이상 포함해야
                     합니다.
                   </GuideText>
                 )}
