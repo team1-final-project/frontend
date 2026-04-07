@@ -10,6 +10,10 @@ import jjajangImg from "../assets/jjajang.png";
 import potetochipImg from "../assets/potetochip.png";
 import seawookkangImg from "../assets/seawookkang.png";
 import sosiziImg from "../assets/sosizi.png";
+import salesShinramyunImg from "../assets/sales-shinramyun.png";
+import salesHetbanImg from "../assets/sales-hetban.png";
+import salesCurryImg from "../assets/sales-curry.png";
+import salesCokezeroImg from "../assets/sales-cokezero.png";
 
 const bestItems = [
   {
@@ -193,36 +197,43 @@ export default function Home() {
       </MainSection>
 
       <SalesSection>
-        <SectionTitle>Sales Item</SectionTitle>
 
         <SalesPanel>
+        <SectionTitle>Sales Item</SectionTitle>
           <SalesTopRow>
-            <SalesCard>
-              <SalesTitle>신라면</SalesTitle>
-              <MiniRamenCard />
-            </SalesCard>
+            <SalesImageCard $variant="shin">
+              <SalesImage
+                src={salesShinramyunImg}
+                alt="신라면"
+                $variant="shin"
+              />
+            </SalesImageCard>
 
-            <SalesCard>
-              <SalesTitle>햇반</SalesTitle>
-              <RiceCard />
-            </SalesCard>
+            <SalesImageCard $variant="hetban">
+              <SalesImage
+                src={salesHetbanImg}
+                alt="햇반"
+                $variant="hetban"
+              />
+            </SalesImageCard>
           </SalesTopRow>
 
           <SalesBottomRow>
-            <SalesWideCard>
-              <SalesTitle>3분카레</SalesTitle>
-              <CurryCard />
-            </SalesWideCard>
+            <SalesWideImageCard $variant="curry">
+              <SalesImage
+                src={salesCurryImg}
+                alt="3분카레"
+                $variant="curry"
+              />
+            </SalesWideImageCard>
 
-            <SalesSmallCard>
-              <SalesTitle>코카콜라제로</SalesTitle>
-              <CokeZeroCard>
-                <Can />
-                <Can />
-                <Can />
-                <Can />
-              </CokeZeroCard>
-            </SalesSmallCard>
+            <SalesSmallImageCard $variant="cokezero">
+              <SalesImage
+                src={salesCokezeroImg}
+                alt="코카콜라제로"
+                $variant="cokezero"
+              />
+            </SalesSmallImageCard>
           </SalesBottomRow>
         </SalesPanel>
       </SalesSection>
@@ -368,6 +379,7 @@ const SectionTitle = styled.h2`
   color: #111111;
   letter-spacing: -0.05em;
   margin-bottom: 42px;
+  margin-top: 22px;
 
   @media (max-width: 900px) {
     font-size: 42px;
@@ -497,174 +509,94 @@ const SectionDivider = styled.div`
 `;
 
 const SalesSection = styled.section`
-  max-width: 1265px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 34px 40px 60px;
-
-  @media (max-width: 1100px) {
-    padding: 34px 20px 48px;
-  }
+  padding: 26px 20px 56px;
 `;
 
 const SalesPanel = styled.div`
-  border-radius: 28px;
+  border-radius: 24px;
   background: #dddddd;
-  padding: 20px;
+  padding: 18px;
 
   @media (max-width: 640px) {
-    padding: 14px;
+    padding: 12px;
   }
 `;
 
 const SalesTopRow = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 0.74fr 1.26fr;
   gap: 10px;
 
-  @media (max-width: 900px) {
+  @media (max-width: 700px) {
     grid-template-columns: 1fr;
   }
 `;
 
 const SalesBottomRow = styled.div`
   display: grid;
-  grid-template-columns: 1.45fr 1fr;
+  grid-template-columns: 1.36fr 0.84fr;
   gap: 10px;
   margin-top: 10px;
 
-  @media (max-width: 900px) {
+  @media (max-width: 700px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const SalesCardBase = styled.article`
+const SalesImageCardBase = styled.article`
   position: relative;
   overflow: hidden;
-  border-radius: 18px;
+  border-radius: 12px;
   background: #e9dece;
 `;
 
-const SalesCard = styled(SalesCardBase)`
-  height: 260px;
+const SalesImageCard = styled(SalesImageCardBase)`
+  height: 350px;
 `;
 
-const SalesWideCard = styled(SalesCardBase)`
-  height: 220px;
+const SalesWideImageCard = styled(SalesImageCardBase)`
+  height: 280px;
 `;
 
-const SalesSmallCard = styled(SalesCardBase)`
-  height: 220px;
+const SalesSmallImageCard = styled(SalesImageCardBase)`
+  height: 280px;
 `;
 
-const SalesTitle = styled.div`
-  position: absolute;
-  left: 16px;
-  top: 14px;
-  z-index: 2;
-  font-size: 15px;
-  line-height: 1;
-  font-weight: 900;
-  color: #ffffff;
-`;
-
-const MiniRamenCard = styled.div`
-  position: absolute;
-  left: 22px;
-  right: 22px;
-  top: 34px;
-  bottom: 16px;
-
-  &::before {
-    content: "";
-    position: absolute;
-    left: 18px;
-    top: 34px;
-    width: 118px;
-    height: 140px;
-    border-radius: 12px;
-    background: #e41f1f;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    left: 34px;
-    bottom: 0;
-    width: 126px;
-    height: 72px;
-    border-radius: 50% 50% 42% 42% / 30% 30% 70% 70%;
-    background: linear-gradient(180deg, #3c261e 0%, #1f120d 100%);
-    box-shadow: 0 10px 16px rgba(0, 0, 0, 0.14);
-  }
-`;
-
-const RiceCard = styled.div`
-  position: absolute;
-  inset: 0;
-
-  &::before {
-    content: "";
-    position: absolute;
-    right: 46px;
-    top: 40px;
-    width: 126px;
-    height: 126px;
-    border-radius: 50%;
-    background: #f3ece2;
-    border: 7px solid #e7dccd;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    left: 48px;
-    bottom: 24px;
-    width: 116px;
-    height: 64px;
-    border-radius: 50% 50% 42% 42% / 32% 32% 68% 68%;
-    background: #d5c7b8;
-  }
-`;
-
-const CurryCard = styled.div`
-  position: absolute;
-  inset: 0;
-
-  &::before {
-    content: "";
-    position: absolute;
-    left: 34px;
-    top: 54px;
-    width: 140px;
-    height: 122px;
-    border-radius: 10px;
-    background: #ecd111;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    left: 136px;
-    bottom: 16px;
-    width: 116px;
-    height: 58px;
-    border-radius: 50% 50% 42% 42% / 32% 32% 68% 68%;
-    background: #ece8df;
-  }
-`;
-
-const CokeZeroCard = styled.div`
-  position: absolute;
-  right: 24px;
-  bottom: 24px;
-  display: flex;
-  gap: 6px;
-`;
-
-const Can = styled.div`
-  width: 32px;
-  height: 102px;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #f0c74f 0%, #df2626 42%, #bfbfbf 100%);
-  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.1);
+const SalesImage = styled.img`
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: ${({ $variant }) => {
+    switch ($variant) {
+      case "shin":
+        return "50% -28%";
+      case "hetban":
+        return "50% 0%";
+      case "curry":
+        return "50% -28%";
+      case "cokezero":
+        return "50% 0%";
+      default:
+        return "center center";
+    }
+  }};
+  transform: ${({ $variant }) => {
+    switch ($variant) {
+      case "shin":
+        return "scale(1.08)";
+      case "hetban":
+        return "scale(1.05)";
+      case "curry":
+        return "scale(1.06)";
+      case "cokezero":
+        return "scale(1.03)";
+      default:
+        return "scale(1)";
+    }
+  }};
+  transform-origin: center center;
+  // filter: brightness(0.8);
 `;
