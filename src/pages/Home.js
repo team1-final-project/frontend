@@ -4,6 +4,13 @@ import { useNavigate, Link } from "react-router-dom";
 import herosectionImg from "../assets/herosection.png";
 import brandlogosImg from "../assets/brandlogos.png";
 
+import shinramyunImg from "../assets/shinramyun.png";
+import cocacolaImg from "../assets/cocacola.png";
+import jjajangImg from "../assets/jjajang.png";
+import potetochipImg from "../assets/potetochip.png";
+import seawookkangImg from "../assets/seawookkang.png";
+import sosiziImg from "../assets/sosizi.png";
+
 const bestItems = [
   {
     id: 1,
@@ -12,10 +19,7 @@ const bestItems = [
     price: "4,150원",
     originalPrice: "5,000원",
     discount: "-17%",
-    visualType: "ramen",
-    color: "#e31e1e",
-    label: "辛",
-    labelSub: "라면",
+    image: shinramyunImg,
   },
   {
     id: 2,
@@ -24,10 +28,7 @@ const bestItems = [
     price: "16,630원",
     originalPrice: "33,690원",
     discount: "-50%",
-    visualType: "can",
-    color: "#df2323",
-    label: "Coca",
-    labelSub: "Cola",
+    image: cocacolaImg,
   },
   {
     id: 3,
@@ -36,10 +37,7 @@ const bestItems = [
     price: "980원",
     originalPrice: "840원",
     discount: "+16%",
-    visualType: "box",
-    color: "#edd20f",
-    label: "3분",
-    labelSub: "짜장",
+    image: jjajangImg,
   },
   {
     id: 4,
@@ -48,10 +46,7 @@ const bestItems = [
     price: "5,480원",
     originalPrice: "5,680원",
     discount: "-4%",
-    visualType: "bag",
-    color: "#7fba3c",
-    label: "포테",
-    labelSub: "칩",
+    image: potetochipImg,
   },
 ];
 
@@ -63,10 +58,7 @@ const hotDealItems = [
     price: "900원",
     originalPrice: "1,050원",
     discount: "-14%",
-    visualType: "bag",
-    color: "#f48722",
-    label: "새우",
-    labelSub: "깡",
+    image: seawookkangImg,
   },
   {
     id: 2,
@@ -75,10 +67,7 @@ const hotDealItems = [
     price: "5,860원",
     originalPrice: "7,250원",
     discount: "-19%",
-    visualType: "box",
-    color: "#d53d3d",
-    label: "비엔나",
-    labelSub: "소시지",
+    image: sosiziImg,
   },
   {
     id: 3,
@@ -87,10 +76,7 @@ const hotDealItems = [
     price: "16,630원",
     originalPrice: "33,690원",
     discount: "-50%",
-    visualType: "can",
-    color: "#df2323",
-    label: "Coca",
-    labelSub: "Cola",
+    image: cocacolaImg,
   },
   {
     id: 4,
@@ -99,51 +85,15 @@ const hotDealItems = [
     price: "4,150원",
     originalPrice: "5,000원",
     discount: "-17%",
-    visualType: "ramen",
-    color: "#e31e1e",
-    label: "辛",
-    labelSub: "라면",
+    image: shinramyunImg,
   },
 ];
-
-function ProductVisual({ item }) {
-  if (item.visualType === "can") {
-    return (
-      <VisualCenter>
-        <CanVisual color={item.color}>
-          <CanMain>{item.label}</CanMain>
-          <CanSub>{item.labelSub}</CanSub>
-        </CanVisual>
-      </VisualCenter>
-    );
-  }
-
-  if (item.visualType === "bag") {
-    return (
-      <VisualCenter>
-        <BagVisual color={item.color}>
-          <BagMain>{item.label}</BagMain>
-          <BagSub>{item.labelSub}</BagSub>
-        </BagVisual>
-      </VisualCenter>
-    );
-  }
-
-  return (
-    <VisualCenter>
-      <BoxVisual color={item.color}>
-        <BoxMain>{item.label}</BoxMain>
-        <BoxSub>{item.labelSub}</BoxSub>
-      </BoxVisual>
-    </VisualCenter>
-  );
-}
 
 function ProductCard({ item }) {
   return (
     <ProductCardWrap>
       <ProductThumb>
-        <ProductVisual item={item} />
+        <ProductImage src={item.image} alt={item.name} />
       </ProductThumb>
 
       <ProductName to="/product-detail">{item.name}</ProductName>
@@ -395,7 +345,7 @@ const BrandCanvas = styled.div`
 const BrandLogosImage = styled.img`
   display: block;
   width: 100%;
-  height: auto;
+  height: 81px;
 `;
 
 const MainSection = styled.section`
@@ -410,7 +360,7 @@ const MainSection = styled.section`
 
 const SectionTitle = styled.h2`
   text-align: center;
-  font-size: 58px;
+  font-size: 30px;
   line-height: 1;
   font-weight: 900;
   color: #111111;
@@ -448,95 +398,14 @@ const ProductThumb = styled.div`
   height: 158px;
   border-radius: 12px;
   background: #ececec;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
 `;
 
-const VisualCenter = styled.div`
+const ProductImage = styled.img`
+  display: block;
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const BoxVisual = styled.div`
-  width: 98px;
-  height: 126px;
-  border-radius: 10px;
-  background: ${({ color }) => color};
-  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-`;
-
-const BoxMain = styled.div`
-  font-size: 32px;
-  line-height: 1;
-  font-weight: 900;
-  color: #ffffff;
-`;
-
-const BoxSub = styled.div`
-  margin-top: 6px;
-  font-size: 11px;
-  font-weight: 800;
-  color: #ffffff;
-`;
-
-const BagVisual = styled.div`
-  width: 96px;
-  height: 126px;
-  border-radius: 14px 14px 10px 10px;
-  background: ${({ color }) => color};
-  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-`;
-
-const BagMain = styled.div`
-  font-size: 29px;
-  line-height: 1;
-  font-weight: 900;
-  color: #ffffff;
-`;
-
-const BagSub = styled.div`
-  margin-top: 6px;
-  font-size: 11px;
-  font-weight: 800;
-  color: #ffffff;
-`;
-
-const CanVisual = styled.div`
-  width: 56px;
-  height: 126px;
-  border-radius: 10px;
-  background: ${({ color }) => color};
-  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-`;
-
-const CanMain = styled.div`
-  font-size: 18px;
-  line-height: 1;
-  font-weight: 900;
-  color: #ffffff;
-`;
-
-const CanSub = styled.div`
-  margin-top: 6px;
-  font-size: 10px;
-  font-weight: 800;
-  color: #ffffff;
+  object-fit: contain;
 `;
 
 const ProductName = styled(Link)`
