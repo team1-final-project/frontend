@@ -10,7 +10,7 @@ export default function Header() {
       <Inner>
         <LeftArea>
           <MenuButton type="button">
-            <Menu size={24} />
+            <Menu size={25} />
           </MenuButton>
 
           <BrandLogoLink to="/">
@@ -28,17 +28,17 @@ export default function Header() {
         <RightArea>
           <SearchBox>
             <SearchIcon>
-              <Search size={17} />
+              <Search size={18} />
             </SearchIcon>
             <SearchInput placeholder="Search for products..." />
           </SearchBox>
 
           <IconGroup>
             <IconButton type="button">
-              <ShoppingCart size={22} />
+              <ShoppingCart size={23} />
             </IconButton>
             <IconButton type="button">
-              <CircleUserRound size={22} />
+              <CircleUserRound size={23} />
             </IconButton>
           </IconGroup>
         </RightArea>
@@ -49,7 +49,7 @@ export default function Header() {
 
 const HeaderWrap = styled.header`
   width: 100%;
-  height: 64px;
+  height: 68px;
   background: #ffffff;
   border-bottom: 1px solid #efefef;
   display: flex;
@@ -60,17 +60,17 @@ const Inner = styled.div`
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 0 28px;
+  padding: 0 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 28px;
 `;
 
 const LeftArea = styled.div`
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 22px;
   min-width: 0;
 `;
 
@@ -94,18 +94,17 @@ const BrandLogoLink = styled(Link)`
 `;
 
 const BrandLogoImage = styled.img`
-  height: 34px;
+  height: 24px;
   width: auto;
   display: block;
   object-fit: contain;
-  transform: translateY(-2px);
 `;
 
 const Nav = styled.nav`
   display: flex;
   align-items: center;
-  gap: 26px;
-  margin-left: 8px;
+  gap: 28px;
+  margin-left: 10px;
 
   @media (max-width: 980px) {
     display: none;
@@ -115,7 +114,7 @@ const Nav = styled.nav`
 const NavItem = styled(Link)`
   text-decoration: none;
   color: #222;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   white-space: nowrap;
 
@@ -129,19 +128,19 @@ const RightArea = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 16px;
+  gap: 18px;
   min-width: 0;
 `;
 
 const SearchBox = styled.div`
   width: 100%;
-  max-width: 460px;
-  height: 40px;
+  max-width: 500px;
+  height: 42px;
   border-radius: 999px;
   background: #f3f3f3;
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 18px;
 `;
 
 const SearchIcon = styled.div`
@@ -149,7 +148,7 @@ const SearchIcon = styled.div`
   align-items: center;
   justify-content: center;
   color: #9a9a9a;
-  margin-right: 8px;
+  margin-right: 9px;
   flex-shrink: 0;
 `;
 
@@ -158,7 +157,7 @@ const SearchInput = styled.input`
   border: none;
   outline: none;
   background: transparent;
-  font-size: 13px;
+  font-size: 14px;
   color: #111;
 
   &::placeholder {
@@ -169,7 +168,7 @@ const SearchInput = styled.input`
 const IconGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex-shrink: 0;
 `;
 
