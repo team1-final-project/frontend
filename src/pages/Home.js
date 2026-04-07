@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import herosectionImg from "../assets/herosection.png";
 import brandlogosImg from "../assets/brandlogos.png";
 
@@ -146,7 +146,7 @@ function ProductCard({ item }) {
         <ProductVisual item={item} />
       </ProductThumb>
 
-      <ProductName>{item.name}</ProductName>
+      <ProductName to="/product-detail">{item.name}</ProductName>
 
       <RatingRow>
         <Stars>★★★★★</Stars>
@@ -168,48 +168,50 @@ export default function Home() {
   return (
     <Page>
       <HeroSection>
-        <HeroBackgroundImage src={herosectionImg} alt="메인 히어로 배경" />
+        <HeroCanvas>
+          <HeroBaseImage src={herosectionImg} alt="메인 히어로" />
 
-        <HeroOverlay>
-          <HeroTitle>
-            농심 辛라면
-            <br />
-            Stock+er 에서
-            <br />
-            최저가로 구매 !
-          </HeroTitle>
+          <HeroOverlay>
+            <HeroTitle>
+              농심 辛라면
+              <br />
+              Stock+er 에서
+              <br />
+              최저가로 구매 !
+            </HeroTitle>
 
-          <HeroButton type="button" onClick={() => navigate("/signup")}>
-            Buy Now
-          </HeroButton>
+            <HeroButton type="button" onClick={() => navigate("/signup")}>
+              Buy Now
+            </HeroButton>
 
-          <StatsRow>
-            <StatBlock>
-              <StatValue>900만+</StatValue>
-              <StatLabel>누적 구매</StatLabel>
-            </StatBlock>
+            <StatsRow>
+              <StatBlock>
+                <StatValue>900만+</StatValue>
+                <StatLabel>누적 구매</StatLabel>
+              </StatBlock>
 
-            <StatDivider />
+              <StatDivider />
 
-            <StatBlock>
-              <StatValue>8.9만+</StatValue>
-              <StatLabel>리뷰 수</StatLabel>
-            </StatBlock>
+              <StatBlock>
+                <StatValue>8.9만+</StatValue>
+                <StatLabel>리뷰 수</StatLabel>
+              </StatBlock>
 
-            <StatDivider />
+              <StatDivider />
 
-            <StatBlock>
-              <StatValue>10억$+</StatValue>
-              <StatLabel>누적 수익액</StatLabel>
-            </StatBlock>
-          </StatsRow>
-        </HeroOverlay>
+              <StatBlock>
+                <StatValue>10억$+</StatValue>
+                <StatLabel>누적 수익액</StatLabel>
+              </StatBlock>
+            </StatsRow>
+          </HeroOverlay>
+        </HeroCanvas>
       </HeroSection>
 
       <BrandBar>
-        <BrandInner>
+        <BrandCanvas>
           <BrandLogosImage src={brandlogosImg} alt="브랜드 로고" />
-        </BrandInner>
+        </BrandCanvas>
       </BrandBar>
 
       <MainSection>
@@ -282,114 +284,69 @@ const Page = styled.div`
 `;
 
 const HeroSection = styled.section`
-  position: relative;
   width: 100%;
-  height: 296px;
-  overflow: hidden;
   background: #e7dccd;
-
-  @media (max-width: 1200px) {
-    height: 270px;
-  }
-
-  @media (max-width: 900px) {
-    height: 236px;
-  }
-
-  @media (max-width: 640px) {
-    height: 210px;
-  }
 `;
 
-const HeroBackgroundImage = styled.img`
-  position: absolute;
-  inset: 0;
+const HeroCanvas = styled.div`
+  position: relative;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center center;
-  pointer-events: none;
+  max-width: 1265px;
+  margin: 0 auto;
+`;
+
+const HeroBaseImage = styled.img`
+  display: block;
+  width: 100%;
+  height: auto;
   user-select: none;
+  pointer-events: none;
 `;
 
 const HeroOverlay = styled.div`
   position: absolute;
-  left: 52px;
-  top: 58px;
-  width: 355px;
+  left: 4.1%;
+  top: 16.4%;
+  width: 29.2%;
   z-index: 2;
 
-  @media (max-width: 1200px) {
-    left: 34px;
-    top: 42px;
-    width: 310px;
-  }
-
   @media (max-width: 900px) {
-    left: 22px;
-    top: 24px;
-    width: 245px;
+    width: 31%;
+    left: 4%;
+    top: 15%;
   }
 
-  @media (max-width: 560px) {
-    left: 16px;
-    top: 16px;
-    width: 185px;
+  @media (max-width: 640px) {
+    width: 33%;
+    left: 4%;
+    top: 14%;
   }
 `;
 
 const HeroTitle = styled.h1`
-  font-size: 33px;
-  line-height: 1.08;
-  letter-spacing: -0.055em;
+  font-size: clamp(18px, 4.35vw, 60px);
+  line-height: 1.05;
+  letter-spacing: -0.06em;
   font-weight: 900;
   color: #111111;
-
-  @media (max-width: 1200px) {
-    font-size: 29px;
-  }
-
-  @media (max-width: 900px) {
-    font-size: 23px;
-  }
-
-  @media (max-width: 560px) {
-    font-size: 18px;
-  }
 `;
 
 const HeroButton = styled.button`
-  width: 108px;
-  height: 34px;
-  margin-top: 26px;
+  width: clamp(74px, 9vw, 138px);
+  height: clamp(28px, 3vw, 44px);
+  margin-top: clamp(14px, 2.2vw, 36px);
   border-radius: 999px;
   background: #000000;
   color: #ffffff;
-  font-size: 10px;
+  font-size: clamp(8px, 1vw, 13px);
   font-weight: 700;
-
-  @media (max-width: 900px) {
-    width: 92px;
-    height: 30px;
-    margin-top: 18px;
-    font-size: 9px;
-  }
 `;
 
 const StatsRow = styled.div`
-  margin-top: 54px;
+  margin-top: clamp(20px, 4.1vw, 56px);
   display: flex;
   align-items: flex-start;
-  gap: 20px;
-
-  @media (max-width: 1200px) {
-    margin-top: 42px;
-  }
-
-  @media (max-width: 900px) {
-    margin-top: 30px;
-    gap: 12px;
-  }
+  gap: clamp(10px, 1.5vw, 22px);
 
   @media (max-width: 560px) {
     display: none;
@@ -401,7 +358,7 @@ const StatBlock = styled.div`
 `;
 
 const StatValue = styled.div`
-  font-size: 30px;
+  font-size: clamp(16px, 2.5vw, 42px);
   line-height: 1;
   letter-spacing: -0.05em;
   font-weight: 900;
@@ -410,8 +367,8 @@ const StatValue = styled.div`
 `;
 
 const StatLabel = styled.div`
-  margin-top: 5px;
-  font-size: 10px;
+  margin-top: 4px;
+  font-size: clamp(7px, 0.72vw, 12px);
   font-weight: 600;
   color: #7d7368;
   white-space: nowrap;
@@ -419,7 +376,7 @@ const StatLabel = styled.div`
 
 const StatDivider = styled.div`
   width: 1px;
-  height: 38px;
+  height: clamp(24px, 3vw, 52px);
   background: rgba(17, 17, 17, 0.12);
   margin-top: 1px;
 `;
@@ -429,36 +386,22 @@ const BrandBar = styled.section`
   background: #000000;
 `;
 
-const BrandInner = styled.div`
-  max-width: 1280px;
+const BrandCanvas = styled.div`
+  width: 100%;
+  max-width: 1265px;
   margin: 0 auto;
-  height: 66px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-
-  @media (max-width: 900px) {
-    height: 56px;
-  }
-
-  @media (max-width: 640px) {
-    height: 48px;
-  }
 `;
 
 const BrandLogosImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center center;
   display: block;
+  width: 100%;
+  height: auto;
 `;
 
 const MainSection = styled.section`
-  max-width: 1280px;
+  max-width: 1265px;
   margin: 0 auto;
-  padding: 36px 52px 18px;
+  padding: 42px 52px 18px;
 
   @media (max-width: 1100px) {
     padding: 34px 20px 18px;
@@ -467,12 +410,21 @@ const MainSection = styled.section`
 
 const SectionTitle = styled.h2`
   text-align: center;
-  font-size: 32px;
+  font-size: 58px;
   line-height: 1;
   font-weight: 900;
   color: #111111;
-  letter-spacing: -0.045em;
-  margin-bottom: 30px;
+  letter-spacing: -0.05em;
+  margin-bottom: 34px;
+
+  @media (max-width: 900px) {
+    font-size: 42px;
+    margin-bottom: 26px;
+  }
+
+  @media (max-width: 640px) {
+    font-size: 34px;
+  }
 `;
 
 const CardGrid = styled.div`
@@ -493,7 +445,7 @@ const ProductCardWrap = styled.article``;
 
 const ProductThumb = styled.div`
   width: 100%;
-  height: 152px;
+  height: 158px;
   border-radius: 12px;
   background: #ececec;
   display: flex;
@@ -510,8 +462,8 @@ const VisualCenter = styled.div`
 `;
 
 const BoxVisual = styled.div`
-  width: 96px;
-  height: 122px;
+  width: 98px;
+  height: 126px;
   border-radius: 10px;
   background: ${({ color }) => color};
   box-shadow: 0 8px 14px rgba(0, 0, 0, 0.08);
@@ -536,8 +488,8 @@ const BoxSub = styled.div`
 `;
 
 const BagVisual = styled.div`
-  width: 94px;
-  height: 124px;
+  width: 96px;
+  height: 126px;
   border-radius: 14px 14px 10px 10px;
   background: ${({ color }) => color};
   box-shadow: 0 8px 14px rgba(0, 0, 0, 0.08);
@@ -562,8 +514,8 @@ const BagSub = styled.div`
 `;
 
 const CanVisual = styled.div`
-  width: 54px;
-  height: 122px;
+  width: 56px;
+  height: 126px;
   border-radius: 10px;
   background: ${({ color }) => color};
   box-shadow: 0 8px 14px rgba(0, 0, 0, 0.08);
@@ -587,12 +539,17 @@ const CanSub = styled.div`
   color: #ffffff;
 `;
 
-const ProductName = styled.h3`
+const ProductName = styled(Link)`
   margin-top: 10px;
-  font-size: 10.5px;
+  font-size: 10.8px;
   line-height: 1.55;
   font-weight: 700;
   color: #111111;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const RatingRow = styled.div`
@@ -651,7 +608,7 @@ const ViewAllButton = styled.button`
   display: block;
   width: 122px;
   height: 34px;
-  margin: 22px auto 0;
+  margin: 24px auto 0;
   border-radius: 999px;
   border: 1px solid #d7cfc4;
   background: transparent;
@@ -661,14 +618,14 @@ const ViewAllButton = styled.button`
 `;
 
 const SectionDivider = styled.div`
-  max-width: 1280px;
+  max-width: 1265px;
   height: 1px;
   margin: 0 auto;
   background: #dfd9d1;
 `;
 
 const SalesSection = styled.section`
-  max-width: 1280px;
+  max-width: 1265px;
   margin: 0 auto;
   padding: 34px 40px 60px;
 
