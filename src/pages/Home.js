@@ -20,7 +20,7 @@ const bestItems = [
     originalPrice: "5,000원",
     discount: "-17%",
     image: shinramyunImg,
-    imageScale: 0.82,
+    imageScale: 0.70,
 
   },
   {
@@ -31,7 +31,7 @@ const bestItems = [
     originalPrice: "33,690원",
     discount: "-50%",
     image: cocacolaImg,
-    imageScale: 0.82,
+    imageScale: 0.79,
 
   },
   {
@@ -42,7 +42,7 @@ const bestItems = [
     originalPrice: "840원",
     discount: "+16%",
     image: jjajangImg,
-    imageScale: 0.82,
+    imageScale: 0.69,
 
   },
   {
@@ -78,7 +78,7 @@ const hotDealItems = [
     originalPrice: "7,250원",
     discount: "-19%",
     image: sosiziImg,
-    imageScale: 0.82,
+    imageScale: 0.75,
 
   },
   {
