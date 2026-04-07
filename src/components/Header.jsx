@@ -1,10 +1,24 @@
 import React from "react";
-import styled from "styled-components";
-import { Link } from "react-router-dom";
-import { Menu, Search, ShoppingCart, CircleUserRound } from "lucide-react";
+import styled, { css } from "styled-components";
+import { Link, useNavigate } from "react-router-dom";
+import { Menu, Search } from "lucide-react";
 import logo from "../assets/stocker-logo.svg";
+import { useAuth } from "../context/AuthContext";
 
 export default function Header() {
+  const navigate = useNavigate();
+  const { isAuthenticated, isInitializing, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      navigate("/");
+    }
+  };
+
   return (
     <HeaderWrap>
       <Inner>
@@ -33,14 +47,23 @@ export default function Header() {
             <SearchInput placeholder="Search for products..." />
           </SearchBox>
 
-          <IconGroup>
-            <IconButton type="button">
-              <ShoppingCart size={23} />
-            </IconButton>
-            <IconButton type="button">
-              <CircleUserRound size={23} />
-            </IconButton>
-          </IconGroup>
+          <ActionGroup>
+            {!isInitializing &&
+              (isAuthenticated ? (
+                <>
+                  <GhostActionLink to="/cart">장바구니</GhostActionLink>
+                  <GhostActionLink to="/profile">프로필</GhostActionLink>
+                  <LogoutButton type="button" onClick={handleLogout}>
+                    로그아웃
+                  </LogoutButton>
+                </>
+              ) : (
+                <>
+                  <GhostActionLink to="/login">로그인</GhostActionLink>
+                  <PrimaryActionLink to="/signup">회원가입</PrimaryActionLink>
+                </>
+              ))}
+          </ActionGroup>
         </RightArea>
       </Inner>
     </HeaderWrap>
@@ -165,20 +188,63 @@ const SearchInput = styled.input`
   }
 `;
 
-const IconGroup = styled.div`
+const ActionGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   flex-shrink: 0;
+  min-width: 280px;
+  justify-content: flex-end;
+
+  @media (max-width: 980px) {
+    display: none;
+  }
 `;
 
-const IconButton = styled.button`
-  border: none;
-  background: transparent;
-  padding: 0;
-  display: flex;
+const buttonBase = css`
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #111;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+`;
+
+const GhostActionLink = styled(Link)`
+  ${buttonBase}
+  border: 1px solid #dcdcdc;
+  background: #fff;
+  color: #222;
+
+  &:hover {
+    background: #f8f8f8;
+  }
+`;
+
+const PrimaryActionLink = styled(Link)`
+  ${buttonBase}
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+
+  &:hover {
+    opacity: 0.92;
+  }
+`;
+
+const LogoutButton = styled.button`
+  ${buttonBase}
+  border: 1px solid #dcdcdc;
+  background: #fff;
+  color: #222;
   cursor: pointer;
+
+  &:hover {
+    background: #f8f8f8;
+  }
 `;
