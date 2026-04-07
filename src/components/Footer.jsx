@@ -101,7 +101,7 @@ const BrandLogoLink = styled(Link)`
 `;
 
 const BrandLogoImage = styled.img`
-  height: 34px;
+  height: 28px;
   width: auto;
   display: block;
   object-fit: contain;

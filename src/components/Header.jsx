@@ -94,11 +94,10 @@ const BrandLogoLink = styled(Link)`
 `;
 
 const BrandLogoImage = styled.img`
-  height: 36px;
+  height: 24px;
   width: auto;
   display: block;
   object-fit: contain;
-  transform: translateY(-2px);
 `;
 
 const Nav = styled.nav`
