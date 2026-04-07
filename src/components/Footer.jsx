@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import logo from "../assets/stocker-logo.svg";
+import logo2 from "../assets/stocker-logo-2.svg";
 import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
 
 export default function Footer() {
@@ -10,9 +11,11 @@ export default function Footer() {
       <Inner>
         <SignupBanner>
           <BannerText>
-            <strong>STOCK+er</strong> 회원가입 하고
-            <br />
-            실시간 최저가를 합리적인 쇼핑하기 !
+            <BannerTopLine>
+              <BrandLogoImage2 src={logo2} alt="STOCK+er" />
+              <span>회원가입 하고</span>
+            </BannerTopLine>
+            <span>실시간 최저가를 합리적인 쇼핑하기 !</span>
           </BannerText>
 
           <SignupButton type="button">Sign Up</SignupButton>
@@ -20,7 +23,9 @@ export default function Footer() {
 
         <TopSection>
           <BrandArea>
-            <BrandLogo>STOCK+er</BrandLogo>
+            <BrandLogoLink to="/">
+              <BrandLogoImage src={logo} alt="STOCK+er" />
+            </BrandLogoLink>
             <BrandDesc>
               비교는 쉽게 즐거운
               <br />
@@ -88,6 +93,29 @@ export default function Footer() {
   );
 }
 
+const BrandLogoLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex-shrink: 0;
+`;
+
+const BrandLogoImage = styled.img`
+  height: 34px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  transform: translateY(-10px);
+`;
+
+const BrandLogoImage2 = styled.img`
+  height: 20px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  flex-shrink: 0;
+`;
+
 const FooterWrap = styled.footer`
   width: 100%;
   background: #f5f5f5;
@@ -118,18 +146,21 @@ const SignupBanner = styled.div`
   }
 `;
 
-const BannerText = styled.p`
+const BannerText = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   margin: 0;
   color: #fff;
   font-size: 16px;
   line-height: 1.7;
   font-weight: 500;
+`;
 
-  strong {
-    font-style: italic;
-    font-size: 24px;
-    margin-right: 6px;
-  }
+const BannerTopLine = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
 `;
 
 const SignupButton = styled.button`
