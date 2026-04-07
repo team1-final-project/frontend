@@ -60,6 +60,9 @@ export default function Home() {
                 <SecondaryButton type="button" onClick={() => navigate("/toss")}>
                   토스 테스트 결제 페이지
                 </SecondaryButton>
+                <SecondaryButton type="button" onClick={() => navigate("/product-detail")}>
+                  제품 상세 정보 테스트 페이지
+                </SecondaryButton>
               </ActionRow>
             </StatusCard>
           ) : (
