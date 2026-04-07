@@ -30,9 +30,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/toss" element={<TossPayTestPage />} />
-        <Route path="/toss/success" element={<TossSuccessPage />} />
-        <Route path="/toss/fail" element={<TossFailPage />} />
-        <Route path="/product-detail" element={<ProductDetailPage />} />
+          <Route path="/toss/success" element={<TossSuccessPage />} />
+          <Route path="/toss/fail" element={<TossFailPage />} />
+          <Route path="/product-detail" element={<ProductDetailPage />} />
           <Route
             path="/auth/google/callback"
             element={<SocialLoginCallback />}

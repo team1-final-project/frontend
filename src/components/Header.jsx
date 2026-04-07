@@ -47,7 +47,7 @@ export default function Header() {
             <SearchInput placeholder="Search for products..." />
           </SearchBox>
 
-          <ActionGroup>
+          <ActionGroup $isAuthenticated={isAuthenticated}>
             {!isInitializing &&
               (isAuthenticated ? (
                 <>
@@ -193,8 +193,10 @@ const ActionGroup = styled.div`
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
-  min-width: 280px;
-  justify-content: flex-end;
+  min-width: ${({ $isAuthenticated }) =>
+    $isAuthenticated ? "280px" : "200px"};
+  justify-content: ${({ $isAuthenticated }) =>
+    $isAuthenticated ? "flex-end" : "flex-end"};
 
   @media (max-width: 980px) {
     display: none;
