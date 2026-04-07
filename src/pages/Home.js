@@ -105,10 +105,10 @@ const hotDealItems = [
 ];
 
 const brandLogos = [
-  { id: 1, src: samyangImg, alt: "삼양", scale: 0.9 },
+  { id: 1, src: samyangImg, alt: "삼양", scale: 2.5 },
   { id: 2, src: oddugiImg, alt: "오뚜기", scale: 0.9 },
   { id: 3, src: nongsimImg, alt: "농심", scale: 0.9 },
-  { id: 4, src: orionImg, alt: "오리온", scale: 0.9 },
+  { id: 4, src: orionImg, alt: "오리온", scale: 2.5 },
   { id: 5, src: paldoImg, alt: "팔도", scale: 0.9 },
   { id: 6, src: cocacolaBrandImg, alt: "코카콜라", scale: 0.9 },
   { id: 7, src: chilsungImg, alt: "칠성", scale: 0.9 },
@@ -411,8 +411,9 @@ const BrandTrack = styled.div`
 const BrandGroup = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-around;
   gap: 46px;
-  padding: 0 56px;
+  padding: 0 23px;
   height: 81px;
   flex-shrink: 0;
 `;
@@ -431,6 +432,8 @@ const BrandLogo = styled.img`
   max-width: 100%;
   max-height: 40px;
   object-fit: contain;
+  transform: scale(${({ $scale }) => $scale || 1});
+  transform-origin: center;
 `;
 
 const MainSection = styled.section`
