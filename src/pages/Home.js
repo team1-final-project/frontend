@@ -4,12 +4,12 @@ import { useNavigate, Link } from "react-router-dom";
 import herosectionImg from "../assets/herosection.png";
 import brandlogosImg from "../assets/brandlogos.png";
 
-import shinramyunImg from "../assets/shinramyun.png";
-import cocacolaImg from "../assets/cocacola.png";
-import jjajangImg from "../assets/jjajang.png";
-import potetochipImg from "../assets/potetochip.png";
-import seawookkangImg from "../assets/seawookkang.png";
-import sosiziImg from "../assets/sosizi.png";
+import shinramyunImg from "../assets/shinramyeon.jpg";
+import cocacolaImg from "../assets/cocacola.jpg";
+import jjajangImg from "../assets/jjajang.jpg";
+import potetochipImg from "../assets/potetochip.jpg";
+import seawookkangImg from "../assets/seawooggang.jpg";
+import sosiziImg from "../assets/sosizi.jpg";
 
 const bestItems = [
   {
