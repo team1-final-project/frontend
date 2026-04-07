@@ -2,6 +2,9 @@ import React from "react";
 import styled, { keyframes } from "styled-components";
 import { useNavigate, Link } from "react-router-dom";
 import herosectionImg from "../assets/herosection.png";
+// imp CokezeroctionImg from "../assets/herosection.png";
+// impCurryctionImg from "../assets/herosection.png";
+// impHetbanctionImg from "../assets/hhetban.png";
 
 import shinramyunImg from "../assets/shinramyeon.jpg";
 import cocacolaImg from "../assets/cocacola.jpg";
@@ -17,6 +20,11 @@ import oddugiImg from "../assets/oddugi.png";
 import orionImg from "../assets/orion.png";
 import paldoImg from "../assets/paldo.png";
 import samyangImg from "../assets/samyang.png";
+
+import salesShinramyunImg from "../assets/sales-shinramyun.png"
+import salesCokezeroImg from "../assets/sales-cokezero.png"
+import salesCurryImg from "../assets/sales-curry.png"
+import salesHetbanImg from "../assets/sales-hetban.png"
 
 const bestItems = [
   {
