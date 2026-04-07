@@ -90,6 +90,8 @@ const hotDealItems = [
 ];
 
 function ProductCard({ item }) {
+  const isPositive = item.discount.trim().startsWith("+");
+
   return (
     <ProductCardWrap>
       <ProductThumb>
@@ -106,7 +108,7 @@ function ProductCard({ item }) {
       <PriceRow>
         <CurrentPrice>{item.price}</CurrentPrice>
         <OriginalPrice>{item.originalPrice}</OriginalPrice>
-        <DiscountBadge>{item.discount}</DiscountBadge>
+        <DiscountBadge $positive={isPositive}>{item.discount}</DiscountBadge>
       </PriceRow>
     </ProductCardWrap>
   );
@@ -365,7 +367,7 @@ const SectionTitle = styled.h2`
   font-weight: 900;
   color: #111111;
   letter-spacing: -0.05em;
-  margin-bottom: 34px;
+  margin-bottom: 42px;
 
   @media (max-width: 900px) {
     font-size: 42px;
@@ -395,7 +397,7 @@ const ProductCardWrap = styled.article``;
 
 const ProductThumb = styled.div`
   width: 100%;
-  height: 158px;
+  aspect-ratio: 1 / 1;
   border-radius: 12px;
   background: #ececec;
   overflow: hidden;
@@ -409,8 +411,9 @@ const ProductImage = styled.img`
 `;
 
 const ProductName = styled(Link)`
-  margin-top: 10px;
-  font-size: 10.8px;
+  display: block;
+  margin-top: 14px;
+  font-size: 16px;
   line-height: 1.55;
   font-weight: 700;
   color: #111111;
@@ -424,50 +427,50 @@ const ProductName = styled(Link)`
 const RatingRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 4px;
+  gap: 8px;
+  margin-top: 8px;
 `;
 
 const Stars = styled.span`
   color: #ffbf1a;
-  font-size: 9px;
+  font-size: 17px;
   letter-spacing: 0.8px;
 `;
 
 const RatingText = styled.span`
   color: #8d857b;
-  font-size: 9px;
+  font-size: 13px;
   font-weight: 600;
 `;
 
 const PriceRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 5px;
+  gap: 8px;
+  margin-top: 8px;
   flex-wrap: wrap;
 `;
 
 const CurrentPrice = styled.span`
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 900;
   color: #111111;
 `;
 
 const OriginalPrice = styled.span`
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: #999189;
   text-decoration: line-through;
 `;
 
 const DiscountBadge = styled.span`
-  height: 16px;
-  padding: 0 7px;
+  height: 22px;
+  padding: 0 10px;
   border-radius: 999px;
-  background: #f5dddd;
-  color: #c66a6a;
-  font-size: 8px;
+  background: ${({ $positive }) => ($positive ? "#dfeeff" : "#f5dddd")};
+  color: ${({ $positive }) => ($positive ? "#2f6fd6" : "#c66a6a")};
+  font-size: 10px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
@@ -475,15 +478,15 @@ const DiscountBadge = styled.span`
 
 const ViewAllButton = styled.button`
   display: block;
-  width: 122px;
-  height: 34px;
-  margin: 24px auto 0;
+  width: 170px;
+  height: 46px;
+  margin: 32px auto 36px;
   border-radius: 999px;
   border: 1px solid #d7cfc4;
   background: transparent;
   color: #111111;
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 500;
 `;
 
 const SectionDivider = styled.div`
