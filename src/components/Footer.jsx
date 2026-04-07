@@ -119,8 +119,9 @@ const BrandLogoImage2 = styled.img`
 const FooterWrap = styled.footer`
   width: 100%;
   background: #f5f5f5;
-  padding: 34px 0 22px;
+  padding: 0 0 22px;
   border-top: 1px solid #ededed;
+  overflow: visible;
 `;
 
 const Inner = styled.div`
@@ -138,7 +139,10 @@ const SignupBanner = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  margin-bottom: 28px;
+  margin-top: -51px;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 2;
 
   @media (max-width: 768px) {
     flex-direction: column;
