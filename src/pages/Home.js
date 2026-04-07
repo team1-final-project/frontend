@@ -1,686 +1,427 @@
 import React from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import herosectionImg from "../assets/herosection.png";
+import brandlogosImg from "../assets/brandlogos.png";
 
-const BEST_ITEMS = [
+const bestItems = [
   {
     id: 1,
-    name: "농심 신라면 멀티팩 120g, 5개",
-    brand: "농심",
+    name: "농심 신라면, 120g, 5개",
+    rating: "4.5/5",
     price: "4,150원",
     originalPrice: "5,000원",
     discount: "-17%",
-    rating: "4.5/5",
-    color: "#d8291d",
-    tone: "#fff3f0",
-    visual: "신",
+    visualType: "ramen",
+    color: "#e31e1e",
+    label: "辛",
+    labelSub: "라면",
   },
   {
     id: 2,
     name: "코카콜라 캔 190ml, 30개",
-    brand: "코카콜라",
+    rating: "3.5/5",
     price: "16,630원",
     originalPrice: "33,690원",
     discount: "-50%",
-    rating: "3.5/5",
-    color: "#d41f1f",
-    tone: "#fff2f2",
-    visual: "Coke",
+    visualType: "can",
+    color: "#df2323",
+    label: "Coca",
+    labelSub: "Cola",
   },
   {
     id: 3,
     name: "오뚜기 3분 쇠고기 짜장 200g, 1개",
-    brand: "오뚜기",
+    rating: "4.5/5",
     price: "980원",
     originalPrice: "840원",
     discount: "+16%",
-    rating: "4.5/5",
-    color: "#f2d21b",
-    tone: "#fffbe8",
-    visual: "3분",
+    visualType: "box",
+    color: "#edd20f",
+    label: "3분",
+    labelSub: "짜장",
   },
   {
     id: 4,
     name: "농심 포테토칩 오리지널 60g, 1개",
-    brand: "농심",
+    rating: "4.5/5",
     price: "5,480원",
     originalPrice: "5,680원",
     discount: "-4%",
-    rating: "4.5/5",
-    color: "#76b23a",
-    tone: "#f5faef",
-    visual: "칩",
+    visualType: "bag",
+    color: "#7fba3c",
+    label: "포테",
+    labelSub: "칩",
   },
 ];
 
-const HOT_DEAL_ITEMS = [
+const hotDealItems = [
   {
     id: 1,
-    name: "농심 새우깡 오리지널 90g, 1개",
-    brand: "농심",
+    name: "농심 새우깡 오리지널, 90g, 1개",
+    rating: "5.0/5",
     price: "900원",
     originalPrice: "1,050원",
     discount: "-14%",
-    rating: "5.0/5",
-    color: "#f07d1f",
-    tone: "#fff6ef",
-    visual: "새우깡",
+    visualType: "bag",
+    color: "#f48722",
+    label: "새우",
+    labelSub: "깡",
   },
   {
     id: 2,
     name: "롯데 맛있는 비엔나 소시지 1kg, 1개",
-    brand: "롯데",
+    rating: "4.0/5",
     price: "5,860원",
     originalPrice: "7,250원",
     discount: "-19%",
-    rating: "4.0/5",
-    color: "#d54040",
-    tone: "#fff1f1",
-    visual: "소시지",
+    visualType: "box",
+    color: "#d53d3d",
+    label: "비엔나",
+    labelSub: "소시지",
   },
   {
     id: 3,
     name: "코카콜라 캔 190ml, 30개",
-    brand: "코카콜라",
+    rating: "3.5/5",
     price: "16,630원",
     originalPrice: "33,690원",
     discount: "-50%",
-    rating: "3.5/5",
-    color: "#d41f1f",
-    tone: "#fff2f2",
-    visual: "Coke",
+    visualType: "can",
+    color: "#df2323",
+    label: "Coca",
+    labelSub: "Cola",
   },
   {
     id: 4,
-    name: "농심 신라면 멀티팩 120g, 5개",
-    brand: "농심",
+    name: "농심 신라면, 120g, 5개",
+    rating: "4.5/5",
     price: "4,150원",
     originalPrice: "5,000원",
     discount: "-17%",
-    rating: "4.5/5",
-    color: "#d8291d",
-    tone: "#fff3f0",
-    visual: "신",
+    visualType: "ramen",
+    color: "#e31e1e",
+    label: "辛",
+    labelSub: "라면",
   },
 ];
 
-const BRANDS = [
-  "SAMYANG",
-  "OTTOGI",
-  "NONGSHIM",
-  "ORION",
-  "PALDO",
-  "COCA-COLA",
-  "PEPSI",
-];
+function ProductVisual({ item }) {
+  if (item.visualType === "can") {
+    return (
+      <VisualCenter>
+        <CanVisual color={item.color}>
+          <CanMain>{item.label}</CanMain>
+          <CanSub>{item.labelSub}</CanSub>
+        </CanVisual>
+      </VisualCenter>
+    );
+  }
 
-const SALES_BANNERS = [
-  {
-    id: 1,
-    title: "신라면",
-    subtitle: "한 그릇으로 끝나는 베스트",
-    color: "#e23a2b",
-    tone: "#f5ede4",
-    size: "large",
-  },
-  {
-    id: 2,
-    title: "햇반",
-    subtitle: "집밥처럼 간편하게",
-    color: "#e86f2f",
-    tone: "#f5ede4",
-    size: "large",
-  },
-  {
-    id: 3,
-    title: "3분카레",
-    subtitle: "빠르고 든든한 한 끼",
-    color: "#f0c620",
-    tone: "#f5ede4",
-    size: "wide",
-  },
-  {
-    id: 4,
-    title: "코카콜라제로",
-    subtitle: "가볍게 즐기는 탄산",
-    color: "#db2a2a",
-    tone: "#f5ede4",
-    size: "small",
-  },
-];
+  if (item.visualType === "bag") {
+    return (
+      <VisualCenter>
+        <BagVisual color={item.color}>
+          <BagMain>{item.label}</BagMain>
+          <BagSub>{item.labelSub}</BagSub>
+        </BagVisual>
+      </VisualCenter>
+    );
+  }
+
+  return (
+    <VisualCenter>
+      <BoxVisual color={item.color}>
+        <BoxMain>{item.label}</BoxMain>
+        <BoxSub>{item.labelSub}</BoxSub>
+      </BoxVisual>
+    </VisualCenter>
+  );
+}
 
 function ProductCard({ item }) {
   return (
-    <Card>
-      <Thumb tone={item.tone}>
-        <Package color={item.color}>
-          <PackageMain>{item.visual}</PackageMain>
-          <PackageSub>{item.brand}</PackageSub>
-        </Package>
-      </Thumb>
+    <ProductCardWrap>
+      <ProductThumb>
+        <ProductVisual item={item} />
+      </ProductThumb>
 
-      <Meta>
-        <ProductName>{item.name}</ProductName>
+      <ProductName>{item.name}</ProductName>
 
-        <RatingRow>
-          <Stars>★★★★★</Stars>
-          <RatingText>{item.rating}</RatingText>
-        </RatingRow>
+      <RatingRow>
+        <Stars>★★★★★</Stars>
+        <RatingText>{item.rating}</RatingText>
+      </RatingRow>
 
-        <PriceRow>
-          <CurrentPrice>{item.price}</CurrentPrice>
-          <OriginalPrice>{item.originalPrice}</OriginalPrice>
-          <DiscountBadge>{item.discount}</DiscountBadge>
-        </PriceRow>
-      </Meta>
-    </Card>
+      <PriceRow>
+        <CurrentPrice>{item.price}</CurrentPrice>
+        <OriginalPrice>{item.originalPrice}</OriginalPrice>
+        <DiscountBadge>{item.discount}</DiscountBadge>
+      </PriceRow>
+    </ProductCardWrap>
   );
 }
 
 export default function Home() {
   const navigate = useNavigate();
-  const { isAuthenticated, member } = useAuth();
 
   return (
     <Page>
       <HeroSection>
-        <HeroInner>
-          <HeroLeft>
-            <HeroTitle>
-              농심 辛라면
-              <br />
-              Stock+er 에서
-              <br />
-              최저가로 구매!
-            </HeroTitle>
+        <HeroBackgroundImage src={herosectionImg} alt="메인 히어로 배경" />
 
-            <HeroDesc>
-              실시간 가격 비교와 합리적인 추천으로
-              <br />
-              인기 상품을 더 좋은 조건으로 만나보세요.
-            </HeroDesc>
+        <HeroOverlay>
+          <HeroTitle>
+            농심 辛라면
+            <br />
+            Stock+er 에서
+            <br />
+            최저가로 구매 !
+          </HeroTitle>
 
-            <HeroButtonRow>
-              <PrimaryButton
-                type="button"
-                onClick={() =>
-                  navigate(isAuthenticated ? "/" : "/signup")
-                }
-              >
-                Buy Now
-              </PrimaryButton>
+          <HeroButton type="button" onClick={() => navigate("/signup")}>
+            Buy Now
+          </HeroButton>
 
-              {!isAuthenticated && (
-                <SecondaryButton
-                  type="button"
-                  onClick={() => navigate("/login")}
-                >
-                  로그인
-                </SecondaryButton>
-              )}
-            </HeroButtonRow>
+          <StatsRow>
+            <StatBlock>
+              <StatValue>900만+</StatValue>
+              <StatLabel>누적 구매</StatLabel>
+            </StatBlock>
 
-            <StatRow>
-              <StatCard>
-                <StatValue>900만+</StatValue>
-                <StatLabel>누적 구매</StatLabel>
-              </StatCard>
-              <StatCard>
-                <StatValue>8.9만+</StatValue>
-                <StatLabel>리뷰 수</StatLabel>
-              </StatCard>
-              <StatCard>
-                <StatValue>10억$+</StatValue>
-                <StatLabel>누적 수익액</StatLabel>
-              </StatCard>
-            </StatRow>
-          </HeroLeft>
+            <StatDivider />
 
-          <HeroRight>
-            <SparkWrap>
-              <Spark />
-              <Spark small />
-            </SparkWrap>
+            <StatBlock>
+              <StatValue>8.9만+</StatValue>
+              <StatLabel>리뷰 수</StatLabel>
+            </StatBlock>
 
-            <HeroVisual>
-              <PackageBack>
-                <PackageBackInner>
-                  <PackageBackTitle>辛</PackageBackTitle>
-                  <PackageBackSub>라면</PackageBackSub>
-                </PackageBackInner>
-              </PackageBack>
+            <StatDivider />
 
-              <BowlArea>
-                <BowlOuter>
-                  <BowlInner>
-                    <Noodle />
-                    <Topping green />
-                    <Topping white />
-                    <Topping red />
-                  </BowlInner>
-                </BowlOuter>
-              </BowlArea>
-            </HeroVisual>
-          </HeroRight>
-        </HeroInner>
+            <StatBlock>
+              <StatValue>10억$+</StatValue>
+              <StatLabel>누적 수익액</StatLabel>
+            </StatBlock>
+          </StatsRow>
+        </HeroOverlay>
       </HeroSection>
 
       <BrandBar>
         <BrandInner>
-          {BRANDS.map((brand) => (
-            <BrandBadge key={brand}>{brand}</BrandBadge>
-          ))}
+          <BrandLogosImage src={brandlogosImg} alt="브랜드 로고" />
         </BrandInner>
       </BrandBar>
 
-      <ContentSection>
-        <SectionHeader>
-          <SectionTitle>Best</SectionTitle>
-          <SectionSub>
-            지금 가장 많이 찾는 인기 상품을 먼저 만나보세요.
-          </SectionSub>
-        </SectionHeader>
+      <MainSection>
+        <SectionTitle>Best</SectionTitle>
 
-        <ProductGrid>
-          {BEST_ITEMS.map((item) => (
+        <CardGrid>
+          {bestItems.map((item) => (
             <ProductCard key={item.id} item={item} />
           ))}
-        </ProductGrid>
+        </CardGrid>
 
-        <CenterButton type="button">View All</CenterButton>
-      </ContentSection>
+        <ViewAllButton type="button">View All</ViewAllButton>
+      </MainSection>
 
-      <DividerLine />
+      <SectionDivider />
 
-      <ContentSection>
-        <SectionHeader>
-          <SectionTitle>Hot Deal</SectionTitle>
-          <SectionSub>
-            빠르게 소진되는 특가 상품을 확인해보세요.
-          </SectionSub>
-        </SectionHeader>
+      <MainSection>
+        <SectionTitle>Hot Deal</SectionTitle>
 
-        <ProductGrid>
-          {HOT_DEAL_ITEMS.map((item) => (
+        <CardGrid>
+          {hotDealItems.map((item) => (
             <ProductCard key={item.id} item={item} />
           ))}
-        </ProductGrid>
+        </CardGrid>
 
-        <CenterButton type="button">View All</CenterButton>
-      </ContentSection>
+        <ViewAllButton type="button">View All</ViewAllButton>
+      </MainSection>
 
       <SalesSection>
-        <SectionHeader>
-          <SectionTitle>Sales Item</SectionTitle>
-          <SectionSub>
-            카테고리별 대표 상품을 큼직한 배너로 둘러볼 수 있어요.
-          </SectionSub>
-        </SectionHeader>
+        <SectionTitle>Sales Item</SectionTitle>
 
-        <SalesGrid>
-          {SALES_BANNERS.map((item) => (
-            <SalesCard key={item.id} $size={item.size} tone={item.tone}>
-              <SalesLabel>{item.title}</SalesLabel>
-              <SalesDesc>{item.subtitle}</SalesDesc>
-              <SalesVisual color={item.color}>
-                <SalesVisualInner>
-                  <SalesVisualText>{item.title}</SalesVisualText>
-                </SalesVisualInner>
-              </SalesVisual>
+        <SalesPanel>
+          <SalesTopRow>
+            <SalesCard>
+              <SalesTitle>신라면</SalesTitle>
+              <MiniRamenCard />
             </SalesCard>
-          ))}
-        </SalesGrid>
+
+            <SalesCard>
+              <SalesTitle>햇반</SalesTitle>
+              <RiceCard />
+            </SalesCard>
+          </SalesTopRow>
+
+          <SalesBottomRow>
+            <SalesWideCard>
+              <SalesTitle>3분카레</SalesTitle>
+              <CurryCard />
+            </SalesWideCard>
+
+            <SalesSmallCard>
+              <SalesTitle>코카콜라제로</SalesTitle>
+              <CokeZeroCard>
+                <Can />
+                <Can />
+                <Can />
+                <Can />
+              </CokeZeroCard>
+            </SalesSmallCard>
+          </SalesBottomRow>
+        </SalesPanel>
       </SalesSection>
-
-      <BottomInfoSection>
-        <BottomInfoInner>
-          <BottomTextBlock>
-            <BottomEyebrow>
-              {isAuthenticated
-                ? `${member?.name || "회원"}님을 위한 추천`
-                : "처음 방문하셨나요?"}
-            </BottomEyebrow>
-            <BottomTitle>
-              가격 비교는 빠르게,
-              <br />
-              선택은 더 합리적으로.
-            </BottomTitle>
-            <BottomDesc>
-              Stock+er는 상품별 가격 흐름과 할인 정보를
-              보기 쉽게 정리해주는 소비자 메인 화면을 준비 중입니다.
-            </BottomDesc>
-          </BottomTextBlock>
-
-          <BottomActionRow>
-            <PrimaryButton type="button" onClick={() => navigate("/signup")}>
-              회원가입
-            </PrimaryButton>
-            <SecondaryButton type="button" onClick={() => navigate("/login")}>
-              로그인
-            </SecondaryButton>
-          </BottomActionRow>
-        </BottomInfoInner>
-      </BottomInfoSection>
     </Page>
   );
 }
 
 const Page = styled.div`
   width: 100%;
-  background: #f2f2f2;
+  background: #efefef;
 `;
 
 const HeroSection = styled.section`
+  position: relative;
   width: 100%;
-  background:
-    radial-gradient(circle at top left, rgba(255,255,255,0.45), transparent 28%),
-    linear-gradient(180deg, #eee2d3 0%, #eadfce 100%);
-`;
+  height: 296px;
+  overflow: hidden;
+  background: #e7dccd;
 
-const HeroInner = styled.div`
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 44px 40px 38px;
-  display: grid;
-  grid-template-columns: 1.02fr 1fr;
-  gap: 24px;
-  min-height: 540px;
+  @media (max-width: 1200px) {
+    height: 270px;
+  }
 
-  @media (max-width: 1080px) {
-    grid-template-columns: 1fr;
-    padding: 32px 20px 28px;
+  @media (max-width: 900px) {
+    height: 236px;
+  }
+
+  @media (max-width: 640px) {
+    height: 210px;
   }
 `;
 
-const HeroLeft = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-right: 12px;
+const HeroBackgroundImage = styled.img`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  pointer-events: none;
+  user-select: none;
+`;
+
+const HeroOverlay = styled.div`
+  position: absolute;
+  left: 52px;
+  top: 58px;
+  width: 355px;
+  z-index: 2;
+
+  @media (max-width: 1200px) {
+    left: 34px;
+    top: 42px;
+    width: 310px;
+  }
+
+  @media (max-width: 900px) {
+    left: 22px;
+    top: 24px;
+    width: 245px;
+  }
+
+  @media (max-width: 560px) {
+    left: 16px;
+    top: 16px;
+    width: 185px;
+  }
 `;
 
 const HeroTitle = styled.h1`
-  font-size: 64px;
-  line-height: 1.04;
+  font-size: 33px;
+  line-height: 1.08;
+  letter-spacing: -0.055em;
   font-weight: 900;
   color: #111111;
-  letter-spacing: -0.04em;
 
-  @media (max-width: 1080px) {
-    font-size: 46px;
+  @media (max-width: 1200px) {
+    font-size: 29px;
   }
 
-  @media (max-width: 680px) {
-    font-size: 36px;
+  @media (max-width: 900px) {
+    font-size: 23px;
   }
-`;
 
-const HeroDesc = styled.p`
-  margin-top: 18px;
-  font-size: 17px;
-  line-height: 1.75;
-  color: #564d43;
-
-  @media (max-width: 680px) {
-    font-size: 15px;
+  @media (max-width: 560px) {
+    font-size: 18px;
   }
 `;
 
-const HeroButtonRow = styled.div`
-  display: flex;
-  gap: 12px;
-  margin-top: 28px;
-  flex-wrap: wrap;
-`;
-
-const PrimaryButton = styled.button`
-  min-width: 136px;
-  height: 52px;
-  padding: 0 24px;
+const HeroButton = styled.button`
+  width: 108px;
+  height: 34px;
+  margin-top: 26px;
   border-radius: 999px;
   background: #000000;
   color: #ffffff;
-  font-size: 15px;
+  font-size: 10px;
   font-weight: 700;
-`;
 
-const SecondaryButton = styled.button`
-  min-width: 136px;
-  height: 52px;
-  padding: 0 24px;
-  border-radius: 999px;
-  background: #ffffff;
-  border: 1px solid #d8cec0;
-  color: #111111;
-  font-size: 15px;
-  font-weight: 700;
-`;
-
-const StatRow = styled.div`
-  margin-top: 46px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-
-  @media (max-width: 680px) {
-    grid-template-columns: 1fr;
+  @media (max-width: 900px) {
+    width: 92px;
+    height: 30px;
+    margin-top: 18px;
+    font-size: 9px;
   }
 `;
 
-const StatCard = styled.div`
-  position: relative;
-  padding-left: 10px;
+const StatsRow = styled.div`
+  margin-top: 54px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
 
-  &:not(:first-child)::before {
-    content: "";
-    position: absolute;
-    left: -8px;
-    top: 8px;
-    width: 1px;
-    height: 48px;
-    background: rgba(17, 17, 17, 0.12);
+  @media (max-width: 1200px) {
+    margin-top: 42px;
   }
 
-  @media (max-width: 680px) {
-    &:not(:first-child)::before {
-      display: none;
-    }
-    padding-left: 0;
+  @media (max-width: 900px) {
+    margin-top: 30px;
+    gap: 12px;
   }
+
+  @media (max-width: 560px) {
+    display: none;
+  }
+`;
+
+const StatBlock = styled.div`
+  min-width: 0;
 `;
 
 const StatValue = styled.div`
-  font-size: 44px;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.05em;
   font-weight: 900;
   color: #111111;
-  letter-spacing: -0.04em;
-
-  @media (max-width: 680px) {
-    font-size: 34px;
-  }
+  white-space: nowrap;
 `;
 
 const StatLabel = styled.div`
-  margin-top: 8px;
-  font-size: 14px;
-  color: #7d7368;
+  margin-top: 5px;
+  font-size: 10px;
   font-weight: 600;
+  color: #7d7368;
+  white-space: nowrap;
 `;
 
-const HeroRight = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 420px;
-`;
-
-const SparkWrap = styled.div`
-  position: absolute;
-  left: 6%;
-  top: 12%;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-`;
-
-const Spark = styled.div`
-  width: ${({ small }) => (small ? "28px" : "40px")};
-  height: ${({ small }) => (small ? "28px" : "40px")};
-  background: #111111;
-  clip-path: polygon(
-    50% 0%,
-    62% 38%,
-    100% 50%,
-    62% 62%,
-    50% 100%,
-    38% 62%,
-    0% 50%,
-    38% 38%
-  );
-`;
-
-const HeroVisual = styled.div`
-  position: relative;
-  width: 100%;
-  max-width: 640px;
-  height: 100%;
-  min-height: 430px;
-`;
-
-const PackageBack = styled.div`
-  position: absolute;
-  top: 0;
-  right: 2%;
-  width: 240px;
-  height: 280px;
-  background: linear-gradient(180deg, #f5382a 0%, #d82119 100%);
-  border-radius: 18px 18px 12px 12px;
-  box-shadow: 0 26px 50px rgba(102, 41, 21, 0.18);
-  transform: rotate(-3deg);
-
-  &::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 52px;
-    border-radius: 18px 18px 0 0;
-    background: rgba(255, 255, 255, 0.12);
-  }
-
-  @media (max-width: 680px) {
-    width: 190px;
-    height: 220px;
-  }
-`;
-
-const PackageBackInner = styled.div`
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-`;
-
-const PackageBackTitle = styled.div`
-  font-size: 108px;
-  font-weight: 900;
-  color: #111111;
-  line-height: 1;
-  text-shadow: 3px 3px 0 rgba(255, 255, 255, 0.16);
-
-  @media (max-width: 680px) {
-    font-size: 84px;
-  }
-`;
-
-const PackageBackSub = styled.div`
-  margin-top: 6px;
-  font-size: 30px;
-  font-weight: 800;
-  color: #ffffff;
-
-  @media (max-width: 680px) {
-    font-size: 24px;
-  }
-`;
-
-const BowlArea = styled.div`
-  position: absolute;
-  right: 8%;
-  bottom: 10px;
-  width: 430px;
-  height: 290px;
-
-  @media (max-width: 680px) {
-    width: 320px;
-    height: 220px;
-  }
-`;
-
-const BowlOuter = styled.div`
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, #3f2f29 0%, #261914 100%);
-  border-radius: 50% 50% 42% 42% / 24% 24% 76% 76%;
-  box-shadow: 0 28px 50px rgba(54, 37, 24, 0.28);
-`;
-
-const BowlInner = styled.div`
-  position: absolute;
-  left: 5%;
-  right: 5%;
-  top: 9%;
-  height: 55%;
-  background: radial-gradient(circle at center, #ffbf69 0%, #ff9f34 48%, #ef7c12 100%);
-  border-radius: 50%;
-  overflow: hidden;
-`;
-
-const Noodle = styled.div`
-  position: absolute;
-  inset: 10% 8%;
-  border-radius: 50%;
-  background:
-    repeating-radial-gradient(circle at 50% 50%, rgba(255, 187, 82, 0.15) 0 4px, transparent 4px 8px),
-    repeating-linear-gradient(
-      0deg,
-      rgba(232, 149, 39, 0.9) 0 4px,
-      rgba(255, 189, 78, 0.96) 4px 8px
-    );
-  filter: saturate(1.08);
-`;
-
-const Topping = styled.div`
-  position: absolute;
-  width: ${({ red }) => (red ? "22px" : "34px")};
-  height: ${({ red, white }) => (red ? "48px" : white ? "30px" : "30px")};
-  border-radius: ${({ red }) => (red ? "14px" : "999px")};
-  background: ${({ green, white, red }) => {
-    if (green) return "#7cc94d";
-    if (white) return "#f4f0df";
-    if (red) return "#dd2d1f";
-    return "#ffffff";
-  }};
-  top: ${({ green, white, red }) => {
-    if (green) return "26%";
-    if (white) return "34%";
-    if (red) return "28%";
-    return "30%";
-  }};
-  left: ${({ green, white, red }) => {
-    if (green) return "40%";
-    if (white) return "56%";
-    if (red) return "50%";
-    return "30%";
-  }};
-  transform: ${({ red }) => (red ? "rotate(18deg)" : "rotate(-8deg)")};
-  opacity: 0.95;
+const StatDivider = styled.div`
+  width: 1px;
+  height: 38px;
+  background: rgba(17, 17, 17, 0.12);
+  margin-top: 1px;
 `;
 
 const BrandBar = styled.section`
@@ -689,73 +430,57 @@ const BrandBar = styled.section`
 `;
 
 const BrandInner = styled.div`
-  max-width: 1440px;
+  max-width: 1280px;
   margin: 0 auto;
-  min-height: 92px;
-  padding: 0 28px;
+  height: 66px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  flex-wrap: wrap;
+  justify-content: center;
+  overflow: hidden;
 
-  @media (max-width: 980px) {
-    justify-content: center;
-    padding: 18px 20px;
+  @media (max-width: 900px) {
+    height: 56px;
+  }
+
+  @media (max-width: 640px) {
+    height: 48px;
   }
 `;
 
-const BrandBadge = styled.div`
-  color: #ffffff;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  opacity: 0.92;
-
-  @media (max-width: 680px) {
-    font-size: 18px;
-  }
+const BrandLogosImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
 `;
 
-const ContentSection = styled.section`
-  max-width: 1440px;
+const MainSection = styled.section`
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 70px 40px 20px;
+  padding: 36px 52px 18px;
 
-  @media (max-width: 980px) {
-    padding: 54px 20px 12px;
+  @media (max-width: 1100px) {
+    padding: 34px 20px 18px;
   }
-`;
-
-const SectionHeader = styled.div`
-  text-align: center;
-  margin-bottom: 34px;
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 58px;
+  text-align: center;
+  font-size: 32px;
+  line-height: 1;
   font-weight: 900;
   color: #111111;
-  letter-spacing: -0.04em;
-
-  @media (max-width: 680px) {
-    font-size: 40px;
-  }
+  letter-spacing: -0.045em;
+  margin-bottom: 30px;
 `;
 
-const SectionSub = styled.p`
-  margin-top: 10px;
-  color: #7a7166;
-  font-size: 15px;
-  line-height: 1.7;
-`;
-
-const ProductGrid = styled.div`
+const CardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
+  gap: 14px;
 
-  @media (max-width: 1160px) {
+  @media (max-width: 1100px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -764,59 +489,108 @@ const ProductGrid = styled.div`
   }
 `;
 
-const Card = styled.article`
-  background: transparent;
-`;
+const ProductCardWrap = styled.article``;
 
-const Thumb = styled.div`
-  height: 330px;
-  border-radius: 24px;
-  background: ${({ tone }) => tone};
+const ProductThumb = styled.div`
+  width: 100%;
+  height: 152px;
+  border-radius: 12px;
+  background: #ececec;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 28px;
-
-  @media (max-width: 680px) {
-    height: 280px;
-  }
 `;
 
-const Package = styled.div`
-  width: 72%;
-  aspect-ratio: 0.8 / 1;
-  border-radius: 20px;
+const VisualCenter = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const BoxVisual = styled.div`
+  width: 96px;
+  height: 122px;
+  border-radius: 10px;
   background: ${({ color }) => color};
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 18px 28px rgba(25, 25, 25, 0.12);
 `;
 
-const PackageMain = styled.div`
-  font-size: 44px;
+const BoxMain = styled.div`
+  font-size: 32px;
+  line-height: 1;
   font-weight: 900;
   color: #ffffff;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
 `;
 
-const PackageSub = styled.div`
-  margin-top: 12px;
-  font-size: 14px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.92);
+const BoxSub = styled.div`
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
 `;
 
-const Meta = styled.div`
-  padding: 14px 6px 0;
+const BagVisual = styled.div`
+  width: 94px;
+  height: 124px;
+  border-radius: 14px 14px 10px 10px;
+  background: ${({ color }) => color};
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+const BagMain = styled.div`
+  font-size: 29px;
+  line-height: 1;
+  font-weight: 900;
+  color: #ffffff;
+`;
+
+const BagSub = styled.div`
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+`;
+
+const CanVisual = styled.div`
+  width: 54px;
+  height: 122px;
+  border-radius: 10px;
+  background: ${({ color }) => color};
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+const CanMain = styled.div`
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 900;
+  color: #ffffff;
+`;
+
+const CanSub = styled.div`
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #ffffff;
 `;
 
 const ProductName = styled.h3`
-  min-height: 48px;
-  font-size: 18px;
-  line-height: 1.45;
+  margin-top: 10px;
+  font-size: 10.5px;
+  line-height: 1.55;
   font-weight: 700;
   color: #111111;
 `;
@@ -824,235 +598,244 @@ const ProductName = styled.h3`
 const RatingRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 6px;
+  margin-top: 4px;
 `;
 
 const Stars = styled.span`
-  color: #ffb400;
-  font-size: 13px;
-  letter-spacing: 1px;
+  color: #ffbf1a;
+  font-size: 9px;
+  letter-spacing: 0.8px;
 `;
 
 const RatingText = styled.span`
-  font-size: 13px;
-  color: #8b8175;
+  color: #8d857b;
+  font-size: 9px;
   font-weight: 600;
 `;
 
 const PriceRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 14px;
+  gap: 6px;
+  margin-top: 5px;
   flex-wrap: wrap;
 `;
 
 const CurrentPrice = styled.span`
-  font-size: 34px;
+  font-size: 13px;
   font-weight: 900;
   color: #111111;
-  letter-spacing: -0.04em;
-
-  @media (max-width: 680px) {
-    font-size: 28px;
-  }
 `;
 
 const OriginalPrice = styled.span`
-  font-size: 24px;
-  color: #9f9589;
-  text-decoration: line-through;
+  font-size: 10px;
   font-weight: 700;
-
-  @media (max-width: 680px) {
-    font-size: 20px;
-  }
+  color: #999189;
+  text-decoration: line-through;
 `;
 
 const DiscountBadge = styled.span`
-  height: 28px;
-  padding: 0 12px;
+  height: 16px;
+  padding: 0 7px;
   border-radius: 999px;
-  background: #f6dcdc;
-  color: #c95d5d;
-  font-size: 13px;
+  background: #f5dddd;
+  color: #c66a6a;
+  font-size: 8px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
 `;
 
-const CenterButton = styled.button`
+const ViewAllButton = styled.button`
   display: block;
-  margin: 34px auto 0;
-  min-width: 166px;
-  height: 50px;
+  width: 122px;
+  height: 34px;
+  margin: 22px auto 0;
   border-radius: 999px;
-  border: 1px solid #ddd2c4;
+  border: 1px solid #d7cfc4;
   background: transparent;
   color: #111111;
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 700;
 `;
 
-const DividerLine = styled.div`
-  max-width: 1440px;
-  margin: 0 auto;
+const SectionDivider = styled.div`
+  max-width: 1280px;
   height: 1px;
-  background: #e3ddd4;
+  margin: 0 auto;
+  background: #dfd9d1;
 `;
 
 const SalesSection = styled.section`
-  max-width: 1440px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 78px 40px 100px;
+  padding: 34px 40px 60px;
 
-  @media (max-width: 980px) {
-    padding: 56px 20px 70px;
+  @media (max-width: 1100px) {
+    padding: 34px 20px 48px;
   }
 `;
 
-const SalesGrid = styled.div`
-  background: #e8e8e8;
-  border-radius: 34px;
-  padding: 34px;
+const SalesPanel = styled.div`
+  border-radius: 28px;
+  background: #dddddd;
+  padding: 20px;
+
+  @media (max-width: 640px) {
+    padding: 14px;
+  }
+`;
+
+const SalesTopRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 
-  @media (max-width: 980px) {
+  @media (max-width: 900px) {
     grid-template-columns: 1fr;
-    padding: 20px;
   }
 `;
 
-const SalesCard = styled.article`
-  grid-column: ${({ $size }) => {
-    if ($size === "large") return "span 6";
-    if ($size === "wide") return "span 7";
-    return "span 5";
-  }};
-  min-height: ${({ $size }) => ($size === "large" ? "390px" : "300px")};
-  border-radius: 24px;
-  background: ${({ tone }) => tone};
-  padding: 18px;
+const SalesBottomRow = styled.div`
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const SalesCardBase = styled.article`
   position: relative;
   overflow: hidden;
-
-  @media (max-width: 980px) {
-    grid-column: auto;
-    min-height: 280px;
-  }
-`;
-
-const SalesLabel = styled.div`
-  position: relative;
-  z-index: 2;
-  font-size: 24px;
-  font-weight: 900;
-  color: #ffffff;
-  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
-`;
-
-const SalesDesc = styled.div`
-  position: relative;
-  z-index: 2;
-  margin-top: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.94);
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
-`;
-
-const SalesVisual = styled.div`
-  position: absolute;
-  right: 20px;
-  bottom: 18px;
-  left: 20px;
-  top: 72px;
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at top left, rgba(255,255,255,0.28), transparent 35%),
-    linear-gradient(145deg, ${({ color }) => color} 0%, rgba(255,255,255,0.08) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const SalesVisualInner = styled.div`
-  width: min(72%, 280px);
-  aspect-ratio: 0.9 / 1;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(2px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: #e9dece;
 `;
 
-const SalesVisualText = styled.div`
-  font-size: 34px;
+const SalesCard = styled(SalesCardBase)`
+  height: 260px;
+`;
+
+const SalesWideCard = styled(SalesCardBase)`
+  height: 220px;
+`;
+
+const SalesSmallCard = styled(SalesCardBase)`
+  height: 220px;
+`;
+
+const SalesTitle = styled.div`
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  z-index: 2;
+  font-size: 15px;
+  line-height: 1;
   font-weight: 900;
   color: #ffffff;
-  letter-spacing: -0.04em;
-  text-align: center;
 `;
 
-const BottomInfoSection = styled.section`
-  background: #f7f3ec;
-  border-top: 1px solid #ede4d7;
-`;
+const MiniRamenCard = styled.div`
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  top: 34px;
+  bottom: 16px;
 
-const BottomInfoInner = styled.div`
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 70px 40px 80px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+  &::before {
+    content: "";
+    position: absolute;
+    left: 18px;
+    top: 34px;
+    width: 118px;
+    height: 140px;
+    border-radius: 12px;
+    background: #e41f1f;
+  }
 
-  @media (max-width: 980px) {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 56px 20px 64px;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 34px;
+    bottom: 0;
+    width: 126px;
+    height: 72px;
+    border-radius: 50% 50% 42% 42% / 30% 30% 70% 70%;
+    background: linear-gradient(180deg, #3c261e 0%, #1f120d 100%);
+    box-shadow: 0 10px 16px rgba(0, 0, 0, 0.14);
   }
 `;
 
-const BottomTextBlock = styled.div`
-  max-width: 760px;
-`;
+const RiceCard = styled.div`
+  position: absolute;
+  inset: 0;
 
-const BottomEyebrow = styled.div`
-  font-size: 14px;
-  font-weight: 800;
-  color: #8b8175;
-  letter-spacing: 0.02em;
-`;
+  &::before {
+    content: "";
+    position: absolute;
+    right: 46px;
+    top: 40px;
+    width: 126px;
+    height: 126px;
+    border-radius: 50%;
+    background: #f3ece2;
+    border: 7px solid #e7dccd;
+  }
 
-const BottomTitle = styled.h3`
-  margin-top: 12px;
-  font-size: 48px;
-  line-height: 1.2;
-  font-weight: 900;
-  color: #111111;
-  letter-spacing: -0.04em;
-
-  @media (max-width: 680px) {
-    font-size: 34px;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 48px;
+    bottom: 24px;
+    width: 116px;
+    height: 64px;
+    border-radius: 50% 50% 42% 42% / 32% 32% 68% 68%;
+    background: #d5c7b8;
   }
 `;
 
-const BottomDesc = styled.p`
-  margin-top: 16px;
-  color: #6f675d;
-  font-size: 16px;
-  line-height: 1.75;
+const CurryCard = styled.div`
+  position: absolute;
+  inset: 0;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 34px;
+    top: 54px;
+    width: 140px;
+    height: 122px;
+    border-radius: 10px;
+    background: #ecd111;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 136px;
+    bottom: 16px;
+    width: 116px;
+    height: 58px;
+    border-radius: 50% 50% 42% 42% / 32% 32% 68% 68%;
+    background: #ece8df;
+  }
 `;
 
-const BottomActionRow = styled.div`
+const CokeZeroCard = styled.div`
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 6px;
+`;
+
+const Can = styled.div`
+  width: 32px;
+  height: 102px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #f0c74f 0%, #df2626 42%, #bfbfbf 100%);
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.1);
 `;
