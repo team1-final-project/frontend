@@ -7,8 +7,8 @@ import brandlogosImg from "../assets/brandlogos.png";
 import shinramyunImg from "../assets/shinramyeon.jpg";
 import cocacolaImg from "../assets/cocacola.jpg";
 import jjajangImg from "../assets/jjajang.jpg";
-import potetochipImg from "../assets/potetochip.jpg";
-import seawookkangImg from "../assets/seawooggang.jpg";
+import potetochipImg from "../assets/potetochip.webp";
+import seawookkangImg from "../assets/seowookkang.webp";
 import sosiziImg from "../assets/sosizi.jpg";
 
 const bestItems = [
@@ -20,6 +20,8 @@ const bestItems = [
     originalPrice: "5,000원",
     discount: "-17%",
     image: shinramyunImg,
+    imageScale: 0.82,
+
   },
   {
     id: 2,
@@ -29,6 +31,8 @@ const bestItems = [
     originalPrice: "33,690원",
     discount: "-50%",
     image: cocacolaImg,
+    imageScale: 0.82,
+
   },
   {
     id: 3,
@@ -38,6 +42,8 @@ const bestItems = [
     originalPrice: "840원",
     discount: "+16%",
     image: jjajangImg,
+    imageScale: 0.82,
+
   },
   {
     id: 4,
@@ -47,6 +53,8 @@ const bestItems = [
     originalPrice: "5,680원",
     discount: "-4%",
     image: potetochipImg,
+    imageScale: 0.82,
+
   },
 ];
 
@@ -59,6 +67,8 @@ const hotDealItems = [
     originalPrice: "1,050원",
     discount: "-14%",
     image: seawookkangImg,
+    imageScale: 0.82,
+
   },
   {
     id: 2,
@@ -68,6 +78,8 @@ const hotDealItems = [
     originalPrice: "7,250원",
     discount: "-19%",
     image: sosiziImg,
+    imageScale: 0.82,
+
   },
   {
     id: 3,
@@ -77,6 +89,8 @@ const hotDealItems = [
     originalPrice: "33,690원",
     discount: "-50%",
     image: cocacolaImg,
+    imageScale: 0.82,
+
   },
   {
     id: 4,
@@ -86,6 +100,8 @@ const hotDealItems = [
     originalPrice: "5,000원",
     discount: "-17%",
     image: shinramyunImg,
+    imageScale: 0.82,
+
   },
 ];
 
@@ -95,7 +111,7 @@ function ProductCard({ item }) {
   return (
     <ProductCardWrap>
       <ProductThumb>
-        <ProductImage src={item.image} alt={item.name} />
+        <ProductImage src={item.image} alt={item.name} $scale={item.imageScale} />
       </ProductThumb>
 
       <ProductName to="/product-detail">{item.name}</ProductName>
@@ -399,7 +415,7 @@ const ProductThumb = styled.div`
   width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 12px;
-  background: #ececec;
+  background: #FFF;
   overflow: hidden;
 `;
 
@@ -407,7 +423,10 @@ const ProductImage = styled.img`
   display: block;
   width: 100%;
   height: 100%;
+  background-color: #FFF;
   object-fit: contain;
+  transform: scale(${({ $scale }) => $scale || 1});
+  transform-origin: center;
 `;
 
 const ProductName = styled(Link)`
