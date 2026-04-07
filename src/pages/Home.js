@@ -598,5 +598,4 @@ const SalesImage = styled.img`
     }
   }};
   transform-origin: center center;
-  // filter: brightness(0.8);
 `;
