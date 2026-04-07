@@ -1,19 +1,22 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { useNavigate, Link } from "react-router-dom";
 import herosectionImg from "../assets/herosection.png";
-import brandlogosImg from "../assets/brandlogos.png";
 
-import shinramyunImg from "../assets/shinramyun.png";
-import cocacolaImg from "../assets/cocacola.png";
-import jjajangImg from "../assets/jjajang.png";
-import potetochipImg from "../assets/potetochip.png";
-import seawookkangImg from "../assets/seawookkang.png";
-import sosiziImg from "../assets/sosizi.png";
-import salesShinramyunImg from "../assets/sales-shinramyun.png";
-import salesHetbanImg from "../assets/sales-hetban.png";
-import salesCurryImg from "../assets/sales-curry.png";
-import salesCokezeroImg from "../assets/sales-cokezero.png";
+import shinramyunImg from "../assets/shinramyeon.jpg";
+import cocacolaImg from "../assets/cocacola.jpg";
+import jjajangImg from "../assets/jjajang.jpg";
+import potetochipImg from "../assets/potetochip.webp";
+import seawookkangImg from "../assets/seowookkang.webp";
+import sosiziImg from "../assets/sosizi.jpg";
+
+import chilsungImg from "../assets/chilsung.png";
+import cocacolaBrandImg from "../assets/cocacola.png";
+import nongsimImg from "../assets/nongsim.png";
+import oddugiImg from "../assets/oddugi.png";
+import orionImg from "../assets/orion.png";
+import paldoImg from "../assets/paldo.png";
+import samyangImg from "../assets/samyang.png";
 
 const bestItems = [
   {
@@ -24,6 +27,7 @@ const bestItems = [
     originalPrice: "5,000원",
     discount: "-17%",
     image: shinramyunImg,
+    imageScale: 0.7,
   },
   {
     id: 2,
@@ -33,6 +37,7 @@ const bestItems = [
     originalPrice: "33,690원",
     discount: "-50%",
     image: cocacolaImg,
+    imageScale: 0.79,
   },
   {
     id: 3,
@@ -42,6 +47,7 @@ const bestItems = [
     originalPrice: "840원",
     discount: "+16%",
     image: jjajangImg,
+    imageScale: 0.69,
   },
   {
     id: 4,
@@ -51,6 +57,7 @@ const bestItems = [
     originalPrice: "5,680원",
     discount: "-4%",
     image: potetochipImg,
+    imageScale: 0.82,
   },
 ];
 
@@ -63,6 +70,7 @@ const hotDealItems = [
     originalPrice: "1,050원",
     discount: "-14%",
     image: seawookkangImg,
+    imageScale: 0.82,
   },
   {
     id: 2,
@@ -72,6 +80,7 @@ const hotDealItems = [
     originalPrice: "7,250원",
     discount: "-19%",
     image: sosiziImg,
+    imageScale: 0.75,
   },
   {
     id: 3,
@@ -81,6 +90,7 @@ const hotDealItems = [
     originalPrice: "33,690원",
     discount: "-50%",
     image: cocacolaImg,
+    imageScale: 0.82,
   },
   {
     id: 4,
@@ -90,7 +100,18 @@ const hotDealItems = [
     originalPrice: "5,000원",
     discount: "-17%",
     image: shinramyunImg,
+    imageScale: 0.82,
   },
+];
+
+const brandLogos = [
+  { id: 1, src: samyangImg, alt: "삼양", scale: 2.5 },
+  { id: 2, src: oddugiImg, alt: "오뚜기", scale: 0.9 },
+  { id: 3, src: nongsimImg, alt: "농심", scale: 0.9 },
+  { id: 4, src: orionImg, alt: "오리온", scale: 2.5 },
+  { id: 5, src: paldoImg, alt: "팔도", scale: 0.9 },
+  { id: 6, src: cocacolaBrandImg, alt: "코카콜라", scale: 0.9 },
+  { id: 7, src: chilsungImg, alt: "칠성", scale: 0.9 },
 ];
 
 function ProductCard({ item }) {
@@ -99,7 +120,7 @@ function ProductCard({ item }) {
   return (
     <ProductCardWrap>
       <ProductThumb>
-        <ProductImage src={item.image} alt={item.name} />
+        <ProductImage src={item.image} alt={item.name} $scale={item.imageScale} />
       </ProductThumb>
 
       <ProductName to="/product-detail">{item.name}</ProductName>
@@ -166,7 +187,23 @@ export default function Home() {
 
       <BrandBar>
         <BrandCanvas>
-          <BrandLogosImage src={brandlogosImg} alt="브랜드 로고" />
+          <BrandTrack>
+            <BrandGroup>
+              {brandLogos.map((logo) => (
+                <BrandLogoItem key={logo.id}>
+                  <BrandLogo src={logo.src} alt={logo.alt} $scale={logo.scale} />
+                </BrandLogoItem>
+              ))}
+            </BrandGroup>
+
+            <BrandGroup aria-hidden="true">
+              {brandLogos.map((logo) => (
+                <BrandLogoItem key={`clone-${logo.id} `}>
+                  <BrandLogo src={logo.src} alt={logo.alt} $scale={logo.scale} />
+                </BrandLogoItem>
+              ))}
+            </BrandGroup>
+          </BrandTrack>
         </BrandCanvas>
       </BrandBar>
 
@@ -344,6 +381,15 @@ const StatDivider = styled.div`
   margin-top: 1px;
 `;
 
+const marqueeMove = keyframes`
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+`;
+
 const BrandBar = styled.section`
   width: 100%;
   background: #000000;
@@ -352,13 +398,49 @@ const BrandBar = styled.section`
 const BrandCanvas = styled.div`
   width: 100%;
   max-width: 1265px;
+  height: 81px;
   margin: 0 auto;
+  overflow: hidden;
+  background: #000000;
 `;
 
-const BrandLogosImage = styled.img`
-  display: block;
-  width: 100%;
+const BrandTrack = styled.div`
+  display: flex;
+  width: max-content;
+  animation: ${marqueeMove} 20s linear infinite;
+  will-change: transform;
+
+  &:hover {
+    animation-play-state: paused;
+  }
+`;
+
+const BrandGroup = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 46px;
+  padding: 0 23px;
   height: 81px;
+  flex-shrink: 0;
+`;
+
+const BrandLogoItem = styled.div`
+  width: 124px;
+  height: 81px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+`;
+
+const BrandLogo = styled.img`
+  display: block;
+  max-width: 100%;
+  max-height: 40px;
+  object-fit: contain;
+  transform: scale(${({ $scale }) => $scale || 1});
+  transform-origin: center;
 `;
 
 const MainSection = styled.section`
@@ -411,7 +493,7 @@ const ProductThumb = styled.div`
   width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 12px;
-  background: #ececec;
+  background: #fff;
   overflow: hidden;
 `;
 
@@ -419,7 +501,10 @@ const ProductImage = styled.img`
   display: block;
   width: 100%;
   height: 100%;
+  background-color: #fff;
   object-fit: contain;
+  transform: scale(${({ $scale }) => $scale || 1});
+  transform-origin: center;
 `;
 
 const ProductName = styled(Link)`
