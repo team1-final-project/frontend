@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import {
   BadgeCheck,
@@ -10,12 +10,11 @@ import {
   MoreHorizontal,
   Plus,
 } from "lucide-react";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
 
-const PRODUCT_IMAGE =
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Shin_Ramyun_by_Nongshim.png/640px-Shin_Ramyun_by_Nongshim.png";
+import shinramyunImg from "../assets/shinramyeon.jpg";
 
+const PRODUCT_IMAGE =shinramyunImg;
+  
 const REVIEW_IMAGES = [
   "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=300&q=80",
   "https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=300&q=80",
@@ -71,9 +70,14 @@ const RETURN_DENIED_RULES = [
 ];
 
 export default function ProductDetailPage() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("상품평(788,617)");
   const [currentPage, setCurrentPage] = useState(1);
+
+  
 
   const reviews = useMemo(
     () =>
@@ -94,7 +98,7 @@ export default function ProductDetailPage() {
 
   return (
     <Page>
-      <Header />
+      
 
       <Content>
         <Breadcrumb>
@@ -121,7 +125,7 @@ export default function ProductDetailPage() {
             <PriceRow>
               <CurrentPrice>4,150원</CurrentPrice>
               <OriginalPrice>5,000원</OriginalPrice>
-              <DiscountBadge>-40%</DiscountBadge>
+              <DiscountBadge>- 40%</DiscountBadge>
             </PriceRow>
 
             <Description>
@@ -375,7 +379,7 @@ export default function ProductDetailPage() {
         )}
       </Content>
 
-      <Footer />
+      
     </Page>
   );
 }
@@ -402,7 +406,7 @@ const Breadcrumb = styled.div`
   gap: 7px;
   margin-bottom: 22px;
   padding-left: 2px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   color: #9b9b9b;
 `;
@@ -511,7 +515,7 @@ const CurrentPrice = styled.span`
 `;
 
 const OriginalPrice = styled.span`
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
   color: #d0d0d0;
   text-decoration: line-through;
@@ -775,7 +779,7 @@ const ReviewBody = styled.p`
   margin: 10px 0 0;
   min-height: 96px;
   color: #666666;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.52;
   display: -webkit-box;
   -webkit-line-clamp: 6;
@@ -786,7 +790,7 @@ const ReviewBody = styled.p`
 const ReviewDate = styled.p`
   margin: 18px 0 0;
   color: #777777;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
 `;
 
@@ -826,7 +830,7 @@ const QuestionBadge = styled.span`
   border-radius: 999px;
   background: #f2f2f2;
   color: #555555;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 `;
 

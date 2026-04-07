@@ -15,7 +15,7 @@ import SocialLoginCallback from "./pages/SocialLoginCallback";
 import TossPayTestPage from "./test/paymentapi/TossPayTestPage";
 import TossSuccessPage from "./test/paymentapi/TossSuccessPage";
 import TossFailPage from "./test/paymentapi/TossFailPage";
-import ProductDetailPage from "./test/product/ProductDetailPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
 
 function App() {
   return (
@@ -25,6 +25,7 @@ function App() {
         <Routes>
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
+            <Route path="/product-detail" element={<ProductDetailPage />} />
           </Route>
 
           <Route path="/login" element={<Login />} />
@@ -32,7 +33,7 @@ function App() {
           <Route path="/toss" element={<TossPayTestPage />} />
           <Route path="/toss/success" element={<TossSuccessPage />} />
           <Route path="/toss/fail" element={<TossFailPage />} />
-          <Route path="/product-detail" element={<ProductDetailPage />} />
+          
           <Route
             path="/auth/google/callback"
             element={<SocialLoginCallback />}
