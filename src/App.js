@@ -6,6 +6,7 @@ import theme from "./styles/Theme";
 import { AuthProvider } from "./context/AuthContext";
 
 import MainLayout from "./layout/MainLayout";
+import AdminLayout from "./layout/AdminLayout";
 
 import Home from "./pages/consumer/Home";
 import Login from "./pages/consumer/Login";
@@ -16,6 +17,8 @@ import TossPayTestPage from "./test/paymentapi/TossPayTestPage";
 import TossSuccessPage from "./test/paymentapi/TossSuccessPage";
 import TossFailPage from "./test/paymentapi/TossFailPage";
 import ProductDetailPage from "./pages/consumer/ProductDetailPage";
+
+import Dashboard from "./pages/admin/Dashboard";
 
 function App() {
   return (
@@ -33,6 +36,10 @@ function App() {
           <Route path="/toss" element={<TossPayTestPage />} />
           <Route path="/toss/success" element={<TossSuccessPage />} />
           <Route path="/toss/fail" element={<TossFailPage />} />
+
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="/admin" element={<Dashboard />} />
+          </Route>
 
           <Route
             path="/auth/google/callback"
