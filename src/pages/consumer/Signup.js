@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { sendEmailCode, verifyEmailCode } from "../api/auth";
-import { useAuth } from "../context/AuthContext";
-import logo from "../assets/stocker-logo.svg";
+import { sendEmailCode, verifyEmailCode } from "../../api/auth";
+import { useAuth } from "../../context/AuthContext";
+import logo from "../../assets/stocker-logo.svg";
 
 export default function Signup() {
   const navigate = useNavigate();

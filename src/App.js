@@ -7,15 +7,15 @@ import { AuthProvider } from "./context/AuthContext";
 
 import MainLayout from "./layout/MainLayout";
 
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import SocialLoginCallback from "./pages/SocialLoginCallback";
+import Home from "./pages/consumer/Home";
+import Login from "./pages/consumer/Login";
+import Signup from "./pages/consumer/Signup";
+import SocialLoginCallback from "./pages/consumer/SocialLoginCallback";
 
 import TossPayTestPage from "./test/paymentapi/TossPayTestPage";
 import TossSuccessPage from "./test/paymentapi/TossSuccessPage";
 import TossFailPage from "./test/paymentapi/TossFailPage";
-import ProductDetailPage from "./pages/ProductDetailPage";
+import ProductDetailPage from "./pages/consumer/ProductDetailPage";
 
 function App() {
   return (
@@ -33,7 +33,7 @@ function App() {
           <Route path="/toss" element={<TossPayTestPage />} />
           <Route path="/toss/success" element={<TossSuccessPage />} />
           <Route path="/toss/fail" element={<TossFailPage />} />
-          
+
           <Route
             path="/auth/google/callback"
             element={<SocialLoginCallback />}

@@ -11,10 +11,10 @@ import {
   Plus,
 } from "lucide-react";
 
-import shinramyunImg from "../assets/shinramyeon.jpg";
+import shinramyunImg from "../../assets/shinramyeon.jpg";
 
-const PRODUCT_IMAGE =shinramyunImg;
-  
+const PRODUCT_IMAGE = shinramyunImg;
+
 const REVIEW_IMAGES = [
   "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=300&q=80",
   "https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=300&q=80",
@@ -39,7 +39,8 @@ const PRODUCT_INQUIRIES = Array.from({ length: 4 }).map((_, index) => ({
 const RETURN_INFO_ROWS = [
   {
     label: "반품/교환 배송비",
-    value: "(구매자귀책) 3,000원 / 6,000원 초기도배송비 무료시 반품배송비 부과방법 : 편도",
+    value:
+      "(구매자귀책) 3,000원 / 6,000원 초기도배송비 무료시 반품배송비 부과방법 : 편도",
   },
   {
     label: "반품/교환지 주소",
@@ -77,18 +78,15 @@ export default function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState("상품평(788,617)");
   const [currentPage, setCurrentPage] = useState(1);
 
-  
-
   const reviews = useMemo(
     () =>
       Array.from({ length: 6 }).map((_, index) => ({
         id: index + 1,
         author: "김하* (hari***@naver.com)",
         date: "Posted on August 14, 2023",
-        body:
-          "라면을 워낙 좋아하는 터라 여러 종류의 라면을 구비해 두고 즐기는데요. 신라면만의 진한 표고 버섯 풍미와 매콤한 맛이 가장 손이 자주 갑니다. 특유의 감칠맛과 국물 밸런스가 좋아 무난하게 먹기 좋고, 가끔 느끼하다는 의견도 있지만 전체적으로는 꾸준히 찾게 되는 제품이에요. 신라면 본연의 맛이 오래 유지되었으면 좋겠습니다!",
+        body: "라면을 워낙 좋아하는 터라 여러 종류의 라면을 구비해 두고 즐기는데요. 신라면만의 진한 표고 버섯 풍미와 매콤한 맛이 가장 손이 자주 갑니다. 특유의 감칠맛과 국물 밸런스가 좋아 무난하게 먹기 좋고, 가끔 느끼하다는 의견도 있지만 전체적으로는 꾸준히 찾게 되는 제품이에요. 신라면 본연의 맛이 오래 유지되었으면 좋겠습니다!",
       })),
-    []
+    [],
   );
 
   const pages = Array.from({ length: 10 }, (_, i) => i + 1);
@@ -98,8 +96,6 @@ export default function ProductDetailPage() {
 
   return (
     <Page>
-      
-
       <Content>
         <Breadcrumb>
           <span>Home</span>
@@ -131,13 +127,13 @@ export default function ProductDetailPage() {
             <Description>
               <p>Spicy happiness In Noodles</p>
               <p>
-                1986년 한국인의 입맛에 맞춘 매운맛 라면으로 시작한 신라면은 진한 소고기
-                육수와 깊은 버섯의 조화로 전 세계인의 입맛까지 사로잡은 K-푸드 대표
-                아이콘입니다.
+                1986년 한국인의 입맛에 맞춘 매운맛 라면으로 시작한 신라면은 진한
+                소고기 육수와 깊은 버섯의 조화로 전 세계인의 입맛까지 사로잡은
+                K-푸드 대표 아이콘입니다.
               </p>
               <p>
-                SHIN : Spicy happiness In Noodles라는 슬로건으로 그 가치를 새롭게 이야기
-                합니다.
+                SHIN : Spicy happiness In Noodles라는 슬로건으로 그 가치를
+                새롭게 이야기 합니다.
               </p>
               <p>전 세계 100여 국가에서 사랑받는 신라면.</p>
               <p>Spicy happiness In Noodles.</p>
@@ -353,11 +349,13 @@ export default function ProductDetailPage() {
             <ReturnSubTitle>반품/교환 기준</ReturnSubTitle>
 
             <ReturnParagraph>
-              상품 수령 후 7일 이내에 신청하실 수 있습니다. 단, 제품이 표시·광고 내용과
-              다르거나, 계약과 다르게 이행된 경우는 제품 수령일로부터 3개월 이내, 그 사실을
-              안 날 또는 알 수 있었던 날부터 30일 이내에 교환/반품이 가능합니다.
+              상품 수령 후 7일 이내에 신청하실 수 있습니다. 단, 제품이 표시·광고
+              내용과 다르거나, 계약과 다르게 이행된 경우는 제품 수령일로부터
+              3개월 이내, 그 사실을 안 날 또는 알 수 있었던 날부터 30일 이내에
+              교환/반품이 가능합니다.
               <br />
-              ㆍ추가적으로 다음에 해당하는 반품/교환은 신청이 불가능할 수 있습니다.
+              ㆍ추가적으로 다음에 해당하는 반품/교환은 신청이 불가능할 수
+              있습니다.
             </ReturnParagraph>
 
             <ReturnBulletTitle>공통</ReturnBulletTitle>
@@ -378,8 +376,6 @@ export default function ProductDetailPage() {
           </ReturnSection>
         )}
       </Content>
-
-      
     </Page>
   );
 }

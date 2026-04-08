@@ -1,22 +1,22 @@
 import React from "react";
 import styled, { keyframes } from "styled-components";
 import { useNavigate, Link } from "react-router-dom";
-import herosectionImg from "../assets/herosection.png";
+import herosectionImg from "../../assets/herosection.png";
 
-import shinramyunImg from "../assets/shinramyeon.jpg";
-import cocacolaImg from "../assets/cocacola.jpg";
-import jjajangImg from "../assets/jjajang.jpg";
-import potetochipImg from "../assets/potetochip.webp";
-import seawookkangImg from "../assets/seowookkang.webp";
-import sosiziImg from "../assets/sosizi.jpg";
+import shinramyunImg from "../../assets/shinramyeon.jpg";
+import cocacolaImg from "../../assets/cocacola.jpg";
+import jjajangImg from "../../assets/jjajang.jpg";
+import potetochipImg from "../../assets/potetochip.webp";
+import seawookkangImg from "../../assets/seowookkang.webp";
+import sosiziImg from "../../assets/sosizi.jpg";
 
-import chilsungImg from "../assets/chilsung.png";
-import cocacolaBrandImg from "../assets/cocacola.png";
-import nongsimImg from "../assets/nongsim.png";
-import oddugiImg from "../assets/oddugi.png";
-import orionImg from "../assets/orion.png";
-import paldoImg from "../assets/paldo.png";
-import samyangImg from "../assets/samyang.png";
+import chilsungImg from "../../assets/chilsung.png";
+import cocacolaBrandImg from "../../assets/cocacola.png";
+import nongsimImg from "../../assets/nongsim.png";
+import oddugiImg from "../../assets/oddugi.png";
+import orionImg from "../../assets/orion.png";
+import paldoImg from "../../assets/paldo.png";
+import samyangImg from "../../assets/samyang.png";
 
 const bestItems = [
   {
@@ -120,7 +120,11 @@ function ProductCard({ item }) {
   return (
     <ProductCardWrap>
       <ProductThumb>
-        <ProductImage src={item.image} alt={item.name} $scale={item.imageScale} />
+        <ProductImage
+          src={item.image}
+          alt={item.name}
+          $scale={item.imageScale}
+        />
       </ProductThumb>
 
       <ProductName to="/product-detail">{item.name}</ProductName>
@@ -191,7 +195,11 @@ export default function Home() {
             <BrandGroup>
               {brandLogos.map((logo) => (
                 <BrandLogoItem key={logo.id}>
-                  <BrandLogo src={logo.src} alt={logo.alt} $scale={logo.scale} />
+                  <BrandLogo
+                    src={logo.src}
+                    alt={logo.alt}
+                    $scale={logo.scale}
+                  />
                 </BrandLogoItem>
               ))}
             </BrandGroup>
@@ -199,7 +207,11 @@ export default function Home() {
             <BrandGroup aria-hidden="true">
               {brandLogos.map((logo) => (
                 <BrandLogoItem key={`clone-${logo.id} `}>
-                  <BrandLogo src={logo.src} alt={logo.alt} $scale={logo.scale} />
+                  <BrandLogo
+                    src={logo.src}
+                    alt={logo.alt}
+                    $scale={logo.scale}
+                  />
                 </BrandLogoItem>
               ))}
             </BrandGroup>

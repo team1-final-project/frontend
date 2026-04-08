@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
       const me = await loadMe();
       return me;
     },
-    [loadMe]
+    [loadMe],
   );
 
   const signup = useCallback(async (payload) => {
@@ -90,7 +90,7 @@ export function AuthProvider({ children }) {
       const me = await loadMe();
       return me;
     },
-    [loadMe]
+    [loadMe],
   );
 
   useEffect(() => {
@@ -128,7 +128,7 @@ export function AuthProvider({ children }) {
       logout,
       loadMe,
       completeSocialLogin,
-    ]
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
