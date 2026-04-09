@@ -28,8 +28,6 @@ export default function Header() {
   const location = useLocation();
   const { isAuthenticated, isInitializing, logout } = useAuth();
 
-
-
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
 
@@ -39,6 +37,20 @@ export default function Header() {
     (category) => category.id === activeCategoryId
   );
 
+  const handleOpenCategory = () => {
+    setIsCategoryOpen(true);
+  };
+
+  const handleCloseCategory = () => {
+    setIsCategoryOpen(false);
+    setActiveCategoryId(null);
+  };
+
+
+  const handleClickMainCategory = (categoryId) => {
+    setActiveCategoryId(categoryId);
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -46,31 +58,9 @@ export default function Header() {
     } catch (error) {
       console.error(error);
     } finally {
-      setIsCategoryOpen(false);
-      setActiveCategoryId(null);
+      handleCloseCategory();
       navigate("/");
     }
-  };
-
-
-  const handleToggleCategory = () => {
-    setIsCategoryOpen((prev) => {
-      const nextValue = !prev;
-
-      if (!prev) {
-        setActiveCategoryId(null);
-      }
-
-      return nextValue;
-    });
-  };
-
-  const handleCloseCategory = () => {
-    setIsCategoryOpen(false);
-    setActiveCategoryId(null);
-  };
-  const handleClickMainCategory = (categoryId) => {
-    setActiveCategoryId(categoryId);
   };
 
   useEffect(() => {
@@ -79,15 +69,13 @@ export default function Header() {
         headerShellRef.current &&
         !headerShellRef.current.contains(event.target)
       ) {
-        setIsCategoryOpen(false);
-        setActiveCategoryId(null);
+        handleCloseCategory();
       }
     };
 
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
-        setIsCategoryOpen(false);
-        setActiveCategoryId(null);
+        handleCloseCategory();
       }
     };
 
@@ -101,8 +89,7 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    setIsCategoryOpen(false);
-    setActiveCategoryId(null);
+    handleCloseCategory();
   }, [location.pathname]);
 
   return (
@@ -110,9 +97,51 @@ export default function Header() {
       <HeaderWrap>
         <Inner>
           <LeftArea>
-            <MenuButton type="button" onClick={handleToggleCategory}>
-              <Menu size={25} />
-            </MenuButton>
+            <CategoryHoverArea
+              onMouseEnter={handleOpenCategory}
+              onMouseLeave={handleCloseCategory}
+            >
+              <MenuButton type="button">
+                <Menu size={25} />
+              </MenuButton>
+
+              {isCategoryOpen && (
+                <CategoryPanel>
+                  <CategoryInner>
+                    <CategoryBox>
+                      <MainCategoryList>
+                        {CATEGORY_DATA.map((category) => (
+                          <MainCategoryItem key={category.id}>
+                            <MainCategoryButton
+                              type="button"
+                              $isActive={activeCategoryId === category.id}
+                              onMouseEnter={() => handleClickMainCategory(category.id)}
+                            >
+                              {category.name}
+                            </MainCategoryButton>
+                          </MainCategoryItem>
+                        ))}
+                      </MainCategoryList>
+
+                      {activeCategory && (
+                        <SubCategoryList>
+                          {activeCategory.subCategories.map((subCategory) => (
+                            <SubCategoryItem key={subCategory}>
+                              <SubCategoryLink
+                                to="/"
+                                onClick={handleCloseCategory}
+                              >
+                                {subCategory}
+                              </SubCategoryLink>
+                            </SubCategoryItem>
+                          ))}
+                        </SubCategoryList>
+                      )}
+                    </CategoryBox>
+                  </CategoryInner>
+                </CategoryPanel>
+              )}
+            </CategoryHoverArea>
 
             <BrandLogoLink to="/" onClick={handleCloseCategory}>
               <BrandLogoImage src={logo} alt="STOCK+er" />
@@ -162,40 +191,6 @@ export default function Header() {
           </RightArea>
         </Inner>
       </HeaderWrap>
-
-      {isCategoryOpen && (
-        <CategoryPanel>
-          <CategoryInner>
-            <CategoryBox>
-              <MainCategoryList>
-                {CATEGORY_DATA.map((category) => (
-                  <MainCategoryItem key={category.id}>
-                    <MainCategoryButton
-                      type="button"
-                      $isActive={activeCategoryId === category.id}
-                      onClick={() => handleClickMainCategory(category.id)}
-                    >
-                      {category.name}
-                    </MainCategoryButton>
-                  </MainCategoryItem>
-                ))}
-              </MainCategoryList>
-
-              {activeCategory && (
-                <SubCategoryList>
-                  {activeCategory.subCategories.map((subCategory) => (
-                    <SubCategoryItem key={subCategory}>
-                      <SubCategoryLink to="/" onClick={handleCloseCategory}>
-                        {subCategory}
-                      </SubCategoryLink>
-                    </SubCategoryItem>
-                  ))}
-                </SubCategoryList>
-              )}
-            </CategoryBox>
-          </CategoryInner>
-        </CategoryPanel>
-      )}
     </HeaderShell>
   );
 }
@@ -385,45 +380,48 @@ const LogoutButton = styled.button`
       background: #f8f8f8;
     }
   `;
+
+const CategoryHoverArea = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 68px;
+`;
 /** 카테고리 부분 **/
 const CategoryPanel = styled.div`
   position: absolute;
-  top: 68px;
-  left: 0;
-  width: 100%;
+  top: 100%;
+  left: -32px;
   z-index: 1201;
-  pointer-events: none;
+  pointer-events: auto;
   `;
 
 const CategoryInner = styled.div`
-  width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0;               
-  box-sizing: border-box;
   position: relative;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   `;
 
 const CategoryBox = styled.div`
   position: relative;
-  width: 206px;             
-  min-height: 536px;        
-  background: #ffffff;
-  border-right: 1px solid #d9d9d9;
-  border-bottom: 1px solid #d9d9d9;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
-  pointer-events: auto;
   `;
 
 const MainCategoryList = styled.ul`
-  position: relative;
-  width: 206px;             
-  min-height: 536px;       
+   width: 206px;
+  min-height: 533px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
   background: #ffffff;
-  border-right: 1px solid #d9d9d9;
-  border-bottom: 1px solid #d9d9d9;
   box-sizing: border-box;
-  pointer-events: auto;
   `;
 
 const MainCategoryItem = styled.li`
@@ -455,15 +453,16 @@ const SubCategoryList = styled.ul`
   top: 0;
   left: 100%;              
   width: 206px;
-  min-height: 536px;
+  min-height: 533px;
   margin: 0;
+  padding: 0;
   list-style: none;
   background: #ffffff;
   border-left: 1px solid #d9d9d9;
   border-right: 1px solid #d9d9d9;
-  border-bottom: 1px solid #d9d9d9;
   box-sizing: border-box;
   `;
+
 
 const SubCategoryItem = styled.li`
     margin: 0;
