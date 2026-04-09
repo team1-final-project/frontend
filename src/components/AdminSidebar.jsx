@@ -187,7 +187,7 @@ const SidebarWrap = styled.aside`
   padding: 22px 14px 28px;
   background: #f7f7f8;
   border-right: 1px solid #ececef;
-  overflow-y: auto;
+  overflow-y: visible;
 
   scrollbar-width: thin;
   scrollbar-color: #cfd4dc transparent;
