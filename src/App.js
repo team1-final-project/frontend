@@ -55,8 +55,6 @@ function App() {
             path="/auth/naver/callback"
             element={<SocialLoginCallback />}
           />
-
-          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
     </ThemeProvider>

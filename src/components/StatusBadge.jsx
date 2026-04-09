@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import styled from "styled-components";
 import { ChevronDown, Check } from "lucide-react";
 
@@ -18,6 +19,10 @@ const DEFAULT_OPTIONS = [
   { label: "Active", value: "Active" },
 ];
 
+const MENU_WIDTH = 180;
+const MENU_GAP = 6;
+const VIEWPORT_GAP = 8;
+
 export default function StatusBadge({
   value,
   children,
@@ -29,18 +34,64 @@ export default function StatusBadge({
   disabled = false,
 }) {
   const rootRef = useRef(null);
+  const triggerRef = useRef(null);
+  const menuRef = useRef(null);
+
   const [open, setOpen] = useState(false);
+  const [menuStyle, setMenuStyle] = useState({
+    top: 0,
+    left: 0,
+    width: MENU_WIDTH,
+  });
 
   const displayValue = value ?? children ?? "";
   const currentVariant =
     variant || STATUS_VARIANT_MAP[displayValue] || "warning";
 
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (!rootRef.current) return;
-      if (!rootRef.current.contains(event.target)) {
-        setOpen(false);
+  const updateMenuPosition = () => {
+    if (!triggerRef.current) return;
+
+    const rect = triggerRef.current.getBoundingClientRect();
+    const menuWidth = MENU_WIDTH;
+
+    let left = rect.right - menuWidth;
+    let top = rect.bottom + MENU_GAP;
+
+    if (left < VIEWPORT_GAP) {
+      left = VIEWPORT_GAP;
+    }
+
+    if (left + menuWidth > window.innerWidth - VIEWPORT_GAP) {
+      left = window.innerWidth - menuWidth - VIEWPORT_GAP;
+    }
+
+    const estimatedMenuHeight = Math.max(options.length * 38 + 12, 80);
+    if (top + estimatedMenuHeight > window.innerHeight - VIEWPORT_GAP) {
+      top = rect.top - estimatedMenuHeight - MENU_GAP;
+      if (top < VIEWPORT_GAP) {
+        top = VIEWPORT_GAP;
       }
+    }
+
+    setMenuStyle({
+      top,
+      left,
+      width: menuWidth,
+    });
+  };
+
+  useEffect(() => {
+    if (!open) return;
+
+    updateMenuPosition();
+
+    const handleOutsideClick = (event) => {
+      const target = event.target;
+
+      if (rootRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+
+      setOpen(false);
     };
 
     const handleEscape = (event) => {
@@ -49,70 +100,97 @@ export default function StatusBadge({
       }
     };
 
+    const handleReposition = () => {
+      updateMenuPosition();
+    };
+
     document.addEventListener("mousedown", handleOutsideClick);
     document.addEventListener("keydown", handleEscape);
+    window.addEventListener("resize", handleReposition);
+    window.addEventListener("scroll", handleReposition, true);
 
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
       document.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("resize", handleReposition);
+      window.removeEventListener("scroll", handleReposition, true);
     };
-  }, []);
+  }, [open, options.length]);
 
   const handleSelect = (nextValue) => {
     onChange?.(nextValue);
     setOpen(false);
   };
 
+  const handleToggle = (event) => {
+    event.stopPropagation();
+    if (disabled) return;
+
+    if (!open) {
+      updateMenuPosition();
+    }
+    setOpen((prev) => !prev);
+  };
+
   if (mode === "select") {
     return (
-      <DropdownRoot ref={rootRef} $width={width}>
-        <TriggerButton
-          type="button"
-          $variant={currentVariant}
-          disabled={disabled}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (disabled) return;
-            setOpen((prev) => !prev);
-          }}
-        >
-          <TriggerText>{displayValue}</TriggerText>
+      <>
+        <DropdownRoot ref={rootRef} $width={width}>
+          <TriggerButton
+            ref={triggerRef}
+            type="button"
+            $variant={currentVariant}
+            disabled={disabled}
+            onClick={handleToggle}
+          >
+            <TriggerText>{displayValue}</TriggerText>
 
-          <TriggerIcon $open={open}>
-            <ChevronDown size={14} />
-          </TriggerIcon>
-        </TriggerButton>
+            <TriggerIcon $open={open}>
+              <ChevronDown size={14} />
+            </TriggerIcon>
+          </TriggerButton>
+        </DropdownRoot>
 
-        {open && (
-          <Menu onClick={(e) => e.stopPropagation()}>
-            {options.map((option) => {
-              const optionVariant =
-                STATUS_VARIANT_MAP[option.value] || "warning";
-              const isSelected = option.value === displayValue;
+        {open &&
+          createPortal(
+            <PortalMenu
+              ref={menuRef}
+              style={{
+                top: `${menuStyle.top}px`,
+                left: `${menuStyle.left}px`,
+                width: `${menuStyle.width}px`,
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {options.map((option) => {
+                const optionVariant =
+                  STATUS_VARIANT_MAP[option.value] || "warning";
+                const isSelected = option.value === displayValue;
 
-              return (
-                <MenuItem
-                  key={option.value}
-                  type="button"
-                  $selected={isSelected}
-                  onClick={() => handleSelect(option.value)}
-                >
-                  <ItemLeft>
-                    <ColorDot $variant={optionVariant} />
-                    <ItemLabel>{option.label}</ItemLabel>
-                  </ItemLeft>
+                return (
+                  <MenuItem
+                    key={option.value}
+                    type="button"
+                    $selected={isSelected}
+                    onClick={() => handleSelect(option.value)}
+                  >
+                    <ItemLeft>
+                      <ColorDot $variant={optionVariant} />
+                      <ItemLabel>{option.label}</ItemLabel>
+                    </ItemLeft>
 
-                  {isSelected && (
-                    <SelectedIcon>
-                      <Check size={14} />
-                    </SelectedIcon>
-                  )}
-                </MenuItem>
-              );
-            })}
-          </Menu>
-        )}
-      </DropdownRoot>
+                    {isSelected && (
+                      <SelectedIcon>
+                        <Check size={14} />
+                      </SelectedIcon>
+                    )}
+                  </MenuItem>
+                );
+              })}
+            </PortalMenu>,
+            document.body,
+          )}
+      </>
     );
   }
 
@@ -237,13 +315,9 @@ const TriggerIcon = styled.span`
   transition: transform 0.18s ease;
 `;
 
-const Menu = styled.div`
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  left: auto;
-  z-index: 999;
-  width: 140px;
+const PortalMenu = styled.div`
+  position: fixed;
+  z-index: 9999;
   box-sizing: border-box;
   padding: 6px;
   border: 1px solid #e5e7eb;
