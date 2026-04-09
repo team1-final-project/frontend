@@ -2,9 +2,6 @@ import React from "react";
 import styled, { keyframes } from "styled-components";
 import { useNavigate, Link } from "react-router-dom";
 import herosectionImg from "../../assets/herosection.png";
-// imp CokezeroctionImg from "../../assets/herosection.png";
-// impCurryctionImg from "../../assets/herosection.png";
-// impHetbanctionImg from "../../assets/hhetban.png";
 
 import shinramyunImg from "../../assets/shinramyeon.jpg";
 import cocacolaImg from "../../assets/cocacola.jpg";
@@ -309,6 +306,8 @@ const Page = styled.div`
 const HeroSection = styled.section`
   width: 100%;
   background: #e7dccd;
+  overflow: hidden;
+  height: 450px;
 `;
 
 const HeroCanvas = styled.div`
@@ -347,7 +346,7 @@ const HeroOverlay = styled.div`
 `;
 
 const HeroTitle = styled.h1`
-  font-size: clamp(18px, 4.35vw, 60px);
+  font-size: clamp(18px, 3vw, 60px);
   line-height: 1.05;
   letter-spacing: -0.06em;
   font-weight: 900;
@@ -381,7 +380,7 @@ const StatBlock = styled.div`
 `;
 
 const StatValue = styled.div`
-  font-size: clamp(16px, 2.5vw, 42px);
+  font-size: clamp(16px, 2vw, 42px);
   line-height: 1;
   letter-spacing: -0.05em;
   font-weight: 900;
@@ -467,7 +466,7 @@ const BrandLogo = styled.img`
 `;
 
 const MainSection = styled.section`
-  max-width: 800px;
+  max-width: 950px;
   margin: 0 auto;
   padding: 26px 20px 18px;
 `;
@@ -480,7 +479,7 @@ const MainSectionTitle = styled.h2`
   color: #111111;
   letter-spacing: -0.05em;
   margin-bottom: 50px;
-  margin-top: 16px;
+  margin-top: 50px;
 
   @media (max-width: 900px) {
     font-size: 30px;
@@ -515,7 +514,7 @@ const SectionTitle = styled.h2`
 const CardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  gap: 20px;
 
   @media (max-width: 700px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
