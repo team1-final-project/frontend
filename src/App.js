@@ -19,6 +19,7 @@ import TossFailPage from "./test/paymentapi/TossFailPage";
 import ProductDetailPage from "./pages/consumer/ProductDetailPage";
 
 import Dashboard from "./pages/admin/Dashboard";
+import OrderListPage from "./pages/admin/OrderListTest";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
 
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="/admin" element={<Dashboard />} />
+            <Route path="/admin/order-list" element={<OrderListPage />} />
           </Route>
 
           <Route

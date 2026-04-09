@@ -20,6 +20,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import SummaryCard from "../../components/SummaryCard";
 
 const revenueTrend = [
   { day: "MON", sales: 8, cost: 5 },
@@ -223,45 +224,37 @@ export default function Dashboard() {
           </TopMetricsGrid>
 
           <MiniMetricsGrid>
-            <MiniMetricCard>
-              <MetricLabel>현재 판매 상품 수</MetricLabel>
-              <MetricSub>Last 7 days</MetricSub>
-              <MiniMetricValue>25.7K</MiniMetricValue>
-              <MiniMetricFooter $up>
-                <TrendingUp size={14} />
-                7.8% <span>vs last 7 days</span>
-              </MiniMetricFooter>
-            </MiniMetricCard>
+            <SummaryCard
+              title="현재 판매 상품 수"
+              subText="Last 7 days"
+              value="25.7K"
+              change="7.8%"
+              up
+            />
 
-            <MiniMetricCard>
-              <MetricLabel>가격 변동 건수</MetricLabel>
-              <MetricSub>Last 7 days</MetricSub>
-              <MiniMetricValue>12K</MiniMetricValue>
-              <MiniMetricFooter $up={false}>
-                <TrendingDown size={14} />
-                2% <span>vs last 7 days</span>
-              </MiniMetricFooter>
-            </MiniMetricCard>
+            <SummaryCard
+              title="가격 변동 건수"
+              subText="Last 7 days"
+              value="12K"
+              change="2%"
+              up={false}
+            />
 
-            <MiniMetricCard>
-              <MetricLabel>최고 부족 상품</MetricLabel>
-              <MetricSub>Last 7 days</MetricSub>
-              <MiniMetricValue>25.7K</MiniMetricValue>
-              <MiniMetricFooter $up>
-                <TrendingUp size={14} />
-                6% <span>vs last 7 days</span>
-              </MiniMetricFooter>
-            </MiniMetricCard>
+            <SummaryCard
+              title="최고 부족 상품"
+              subText="Last 7 days"
+              value="25.7K"
+              change="6%"
+              up
+            />
 
-            <MiniMetricCard>
-              <MetricLabel>예상 매출</MetricLabel>
-              <MetricSub>Last 7 days</MetricSub>
-              <MiniMetricValue>12K</MiniMetricValue>
-              <MiniMetricFooter $up={false}>
-                <TrendingDown size={14} />
-                2% <span>vs last 7 days</span>
-              </MiniMetricFooter>
-            </MiniMetricCard>
+            <SummaryCard
+              title="예상 매출"
+              subText="Last 7 days"
+              value="12K"
+              change="2%"
+              up={false}
+            />
           </MiniMetricsGrid>
 
           <BottomGrid>
@@ -584,10 +577,6 @@ const MetricCardLarge = styled(Card)`
   min-height: 210px;
 `;
 
-const MiniMetricCard = styled(Card)`
-  min-height: 118px;
-`;
-
 const MetricCardHeader = styled.div`
   display: flex;
   align-items: flex-start;
@@ -662,29 +651,6 @@ const ChartBoxLarge = styled.div`
   width: 100%;
   height: 90px;
   margin-top: 12px;
-`;
-
-const MiniMetricValue = styled.div`
-  margin-top: 14px;
-  color: #111827;
-  font-size: 34px;
-  font-weight: 800;
-`;
-
-const MiniMetricFooter = styled.div`
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: ${({ $up }) => ($up ? "#22c55e" : "#ef4444")};
-  font-size: 12px;
-  font-weight: 700;
-
-  span {
-    color: #9ca3af;
-    font-weight: 500;
-    margin-left: 2px;
-  }
 `;
 
 const CardHeader = styled.div`
