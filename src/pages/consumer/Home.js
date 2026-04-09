@@ -122,6 +122,18 @@ const brandLogos = [
   { id: 7, src: chilsungImg, alt: "칠성", scale: 0.9 },
 ];
 
+function StarRating({ rating }) {
+  const numericRating = Number.parseFloat(rating) || 0;
+  const percentage = Math.max(0, Math.min(100, (numericRating / 5) * 100));
+
+  return (
+    <StarsWrap aria-label={`평점 ${numericRating}점 / 5점`}>
+      <StarsBase>★★★★★</StarsBase>
+      <StarsFill $width={percentage}>★★★★★</StarsFill>
+    </StarsWrap>
+  );
+}
+
 function ProductCard({ item }) {
   const isPositive = item.discount.trim().startsWith("+");
 
@@ -138,7 +150,7 @@ function ProductCard({ item }) {
       <ProductName to="/product-detail">{item.name}</ProductName>
 
       <RatingRow>
-        <Stars>★★★★★</Stars>
+        <StarRating rating={item.rating} />
         <RatingText>{item.rating}</RatingText>
       </RatingRow>
 
@@ -228,7 +240,7 @@ export default function Home() {
       </BrandBar>
 
       <MainSection>
-        <SectionTitle>Best</SectionTitle>
+        <MainSectionTitle>Best</MainSectionTitle>
 
         <CardGrid>
           {bestItems.map((item) => (
@@ -242,7 +254,7 @@ export default function Home() {
       <SectionDivider />
 
       <MainSection>
-        <SectionTitle>Hot Deal</SectionTitle>
+        <MainSectionTitle>Hot Deal</MainSectionTitle>
 
         <CardGrid>
           {hotDealItems.map((item) => (
@@ -455,12 +467,28 @@ const BrandLogo = styled.img`
 `;
 
 const MainSection = styled.section`
-  max-width: 1265px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 42px 52px 18px;
+  padding: 26px 20px 18px;
+`;
 
-  @media (max-width: 1100px) {
-    padding: 34px 20px 18px;
+const MainSectionTitle = styled.h2`
+  text-align: center;
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 900;
+  color: #111111;
+  letter-spacing: -0.05em;
+  margin-bottom: 50px;
+  margin-top: 16px;
+
+  @media (max-width: 900px) {
+    font-size: 30px;
+    margin-bottom: 22px;
+  }
+
+  @media (max-width: 640px) {
+    font-size: 24px;
   }
 `;
 
@@ -489,11 +517,11 @@ const CardGrid = styled.div`
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 
-  @media (max-width: 1100px) {
+  @media (max-width: 700px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  @media (max-width: 680px) {
+  @media (max-width: 480px) {
     grid-template-columns: 1fr;
   }
 `;
@@ -520,9 +548,9 @@ const ProductImage = styled.img`
 
 const ProductName = styled(Link)`
   display: block;
-  margin-top: 14px;
-  font-size: 16px;
-  line-height: 1.55;
+  margin-top: 9px;
+  font-size: 12px;
+  line-height: 1.45;
   font-weight: 700;
   color: #111111;
   text-decoration: none;
@@ -535,50 +563,65 @@ const ProductName = styled(Link)`
 const RatingRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 5px;
+  margin-top: 5px;
 `;
 
-const Stars = styled.span`
+const StarsWrap = styled.div`
+  position: relative;
+  display: inline-block;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.5px;
+`;
+
+const StarsBase = styled.span`
+  color: #c7c7c7;
+`;
+
+const StarsFill = styled.span`
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: ${({ $width }) => `${$width}%`};
+  overflow: hidden;
   color: #ffbf1a;
-  font-size: 17px;
-  letter-spacing: 0.8px;
+  white-space: nowrap;
 `;
 
 const RatingText = styled.span`
   color: #8d857b;
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 600;
 `;
 
 const PriceRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 5px;
+  margin-top: 5px;
   flex-wrap: wrap;
 `;
 
 const CurrentPrice = styled.span`
-  font-size: 17px;
+  font-size: 13px;
   font-weight: 900;
   color: #111111;
 `;
 
 const OriginalPrice = styled.span`
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
   color: #999189;
   text-decoration: line-through;
 `;
 
 const DiscountBadge = styled.span`
-  height: 22px;
-  padding: 0 10px;
+  height: 18px;
+  padding: 0 8px;
   border-radius: 999px;
   background: ${({ $positive }) => ($positive ? "#dfeeff" : "#f5dddd")};
   color: ${({ $positive }) => ($positive ? "#2f6fd6" : "#c66a6a")};
-  font-size: 10px;
+  font-size: 8px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
@@ -586,19 +629,19 @@ const DiscountBadge = styled.span`
 
 const ViewAllButton = styled.button`
   display: block;
-  width: 170px;
-  height: 46px;
-  margin: 32px auto 36px;
+  width: 150px;
+  height: 40px;
+  margin: 24px auto 28px;
   border-radius: 999px;
   border: 1px solid #d7cfc4;
   background: transparent;
   color: #111111;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
 `;
 
 const SectionDivider = styled.div`
-  max-width: 1265px;
+  max-width: 800px;
   height: 1px;
   margin: 0 auto;
   background: #dfd9d1;
