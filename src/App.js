@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import GlobalStyle from "./styles/GlobalStyle";
 import theme from "./styles/Theme";
@@ -17,9 +17,13 @@ import TossPayTestPage from "./test/paymentapi/TossPayTestPage";
 import TossSuccessPage from "./test/paymentapi/TossSuccessPage";
 import TossFailPage from "./test/paymentapi/TossFailPage";
 import ProductDetailPage from "./pages/consumer/ProductDetailPage";
+import CartPage from "./pages/consumer/CartPage";
+import CheckoutPage from "./pages/consumer/CheckoutPage";
+
 
 import Dashboard from "./pages/admin/Dashboard";
 import OrderListPage from "./pages/admin/OrderListTest";
+
 
 function App() {
   return (
@@ -30,6 +34,8 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/product-detail" element={<ProductDetailPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkoutPage" element={<CheckoutPage />} />
           </Route>
 
           <Route path="/login" element={<Login />} />
