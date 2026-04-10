@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import {
-  getGoogleLoginUrl,
-  getKakaoLoginUrl,
-  getNaverLoginUrl,
-} from "../../api/auth";
 import { useAuth } from "../../context/AuthContext";
 import logo from "../../assets/stocker-logo.svg";
 
@@ -242,50 +237,4 @@ const MainButton = styled.button`
   font-size: 16px;
   font-weight: 700;
   margin-top: 6px;
-`;
-
-const SubActions = styled.div`
-  margin-top: 22px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-`;
-
-const TextButton = styled.button`
-  font-size: 13px;
-  color: #6d655b;
-`;
-
-const Divider = styled.span`
-  width: 1px;
-  height: 12px;
-  background: #d8d1c8;
-`;
-
-const SocialRow = styled.div`
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
-  gap: 50px;
-`;
-
-const SocialIconButton = styled.button`
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 1px solid #e7dfd4;
-  background: ${({ $kakao, $naver }) => {
-    if ($kakao) return "#FEE500";
-    if ($naver) return "#03C75A";
-    return "#f7f3ed";
-  }};
-  color: ${({ $kakao, $naver }) => {
-    if ($kakao) return "#191919";
-    if ($naver) return "#ffffff";
-    return "#111111";
-  }};
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `;
