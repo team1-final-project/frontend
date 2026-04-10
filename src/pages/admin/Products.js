@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import styled from "styled-components";
-import { Package, Megaphone, AlertTriangle, ShoppingBag } from "lucide-react";
+import { Plus } from "lucide-react";
+import SummaryCard from "../../components/SummaryCard";
 import TableComponent from "../../components/TableComponent";
 import StatusBadge from "../../components/StatusBadge";
 
@@ -16,7 +17,7 @@ const initialProducts = [
     maxPrice: 1500,
     stock: 11111,
     saleStatus: "판매중",
-    updatedAt: "2026/04/07 09:07",
+    updatedAt: "2026-04-07 09:07",
   },
   {
     id: 2,
@@ -29,7 +30,7 @@ const initialProducts = [
     maxPrice: 0,
     stock: 30,
     saleStatus: "임시중지",
-    updatedAt: "2026/04/07 09:07",
+    updatedAt: "2026-04-07 09:07",
   },
   {
     id: 3,
@@ -42,7 +43,7 @@ const initialProducts = [
     maxPrice: 24900,
     stock: 0,
     saleStatus: "품절",
-    updatedAt: "2026/04/07 09:07",
+    updatedAt: "2026-04-07 09:07",
   },
   {
     id: 4,
@@ -55,7 +56,7 @@ const initialProducts = [
     maxPrice: 39000,
     stock: 12347,
     saleStatus: "판매중",
-    updatedAt: "2026/04/07 09:07",
+    updatedAt: "2026-04-06 09:07",
   },
   {
     id: 5,
@@ -68,7 +69,7 @@ const initialProducts = [
     maxPrice: 39000,
     stock: 4321,
     saleStatus: "판매중",
-    updatedAt: "2026/04/07 09:07",
+    updatedAt: "2026-04-06 09:07",
   },
   {
     id: 6,
@@ -81,7 +82,7 @@ const initialProducts = [
     maxPrice: 36500,
     stock: 842,
     saleStatus: "판매중",
-    updatedAt: "2026/04/07 09:07",
+    updatedAt: "2026-04-05 09:07",
   },
   {
     id: 7,
@@ -94,7 +95,7 @@ const initialProducts = [
     maxPrice: 19800,
     stock: 115,
     saleStatus: "판매중",
-    updatedAt: "2026/04/07 09:07",
+    updatedAt: "2026-04-04 09:07",
   },
   {
     id: 8,
@@ -107,7 +108,7 @@ const initialProducts = [
     maxPrice: 5900,
     stock: 71,
     saleStatus: "임시중지",
-    updatedAt: "2026/04/07 09:07",
+    updatedAt: "2026-04-03 09:07",
   },
   {
     id: 9,
@@ -120,7 +121,7 @@ const initialProducts = [
     maxPrice: 3500,
     stock: 12,
     saleStatus: "판매중",
-    updatedAt: "2026/04/07 09:07",
+    updatedAt: "2026-04-02 09:07",
   },
   {
     id: 10,
@@ -133,7 +134,7 @@ const initialProducts = [
     maxPrice: 6800,
     stock: 8,
     saleStatus: "판매중",
-    updatedAt: "2026/04/07 09:07",
+    updatedAt: "2026-04-01 09:07",
   },
   {
     id: 11,
@@ -268,7 +269,6 @@ const initialProducts = [
 ];
 
 const categoryOptions = [
-  { label: "전체 카테고리", value: "" },
   { label: "가공 / 간식류 > 라면", value: "가공 / 간식류 > 라면" },
   { label: "간식 / 음료 > 스낵식사", value: "간식 / 음료 > 스낵식사" },
   { label: "가공 / 간식류 > 즉석식품", value: "가공 / 간식류 > 즉석식품" },
@@ -288,23 +288,8 @@ function formatNumber(value) {
   return `${Number(value).toLocaleString()}원`;
 }
 
-function ProductSummaryCard({ title, value, diff, diffType = "up", icon }) {
-  return (
-    <Card>
-      <CardTop>
-        <CardTitle>{title}</CardTitle>
-        <CardIconWrap>{icon}</CardIconWrap>
-      </CardTop>
-
-      <CardValue>{value}</CardValue>
-
-      <CardBottom $type={diffType}>
-        <span>{diffType === "up" ? "↑" : "↓"}</span>
-        <span>{diff}</span>
-        <CardSubText>vs Yesterday</CardSubText>
-      </CardBottom>
-    </Card>
-  );
+function toDateValue(dateTimeText) {
+  return dateTimeText?.split(" ")[0] ?? "";
 }
 
 function VisibilityToggle({ checked, onClick }) {
@@ -319,24 +304,18 @@ export default function Products() {
   const [products, setProducts] = useState(initialProducts);
   const [searchValue, setSearchValue] = useState("");
   const [categoryValue, setCategoryValue] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   const summary = useMemo(() => {
-    const totalCount = products.length;
-    const saleCount = products.filter(
-      (item) => item.saleStatus === "판매중",
-    ).length;
-    const soldOutCount = products.filter(
-      (item) => item.saleStatus === "품절",
-    ).length;
-    const hiddenCount = products.filter((item) => !item.isVisible).length;
-
     return {
-      totalCount,
-      saleCount,
-      soldOutCount,
-      hiddenCount,
+      totalCount: products.length,
+      saleCount: products.filter((item) => item.saleStatus === "판매중").length,
+      soldOutCount: products.filter((item) => item.saleStatus === "품절")
+        .length,
+      hiddenCount: products.filter((item) => !item.isVisible).length,
     };
   }, [products]);
 
@@ -344,6 +323,8 @@ export default function Products() {
     const keyword = searchValue.trim().toLowerCase();
 
     return products.filter((item) => {
+      const itemDate = toDateValue(item.updatedAt);
+
       const matchesSearch =
         !keyword ||
         item.productCode.toLowerCase().includes(keyword) ||
@@ -353,9 +334,14 @@ export default function Products() {
         ? item.category === categoryValue
         : true;
 
-      return matchesSearch && matchesCategory;
+      const matchesStartDate = startDate ? itemDate >= startDate : true;
+      const matchesEndDate = endDate ? itemDate <= endDate : true;
+
+      return (
+        matchesSearch && matchesCategory && matchesStartDate && matchesEndDate
+      );
     });
-  }, [products, searchValue, categoryValue]);
+  }, [products, searchValue, categoryValue, startDate, endDate]);
 
   const handleToggleVisible = (id) => {
     setProducts((prev) =>
@@ -375,7 +361,7 @@ export default function Products() {
     {
       key: "productName",
       title: "상품명",
-      width: "260px",
+      width: "250px",
       render: (value) => <ProductName>{value}</ProductName>,
     },
     {
@@ -461,67 +447,90 @@ export default function Products() {
     <PageWrap>
       <HeaderRow>
         <Title>상품 목록</Title>
-        <PrimaryButton type="button">상품등록</PrimaryButton>
+
+        <PrimaryButton type="button">
+          <Plus size={14} />
+          상품등록
+        </PrimaryButton>
       </HeaderRow>
 
       <SummaryGrid>
-        <ProductSummaryCard
+        <SummaryCard
           title="전체 상품 수"
+          subText="전체 등록 상품"
           value={`${summary.totalCount}개`}
-          diff="6개"
-          diffType="up"
-          icon={<Package size={18} />}
+          change="6개"
+          up
         />
-        <ProductSummaryCard
+        <SummaryCard
           title="판매 중"
+          subText="현재 판매중 상품"
           value={`${summary.saleCount}개`}
-          diff="1개"
-          diffType="down"
-          icon={<Megaphone size={18} />}
+          change="1개"
+          up={false}
         />
-        <ProductSummaryCard
+        <SummaryCard
           title="품절"
+          subText="재고 소진 상품"
           value={`${summary.soldOutCount}개`}
-          diff="1개"
-          diffType="up"
-          icon={<AlertTriangle size={18} />}
+          change="1개"
+          up
         />
-        <ProductSummaryCard
+        <SummaryCard
           title="판매중지"
+          subText="비노출/중지 상품"
           value={`${summary.hiddenCount}개`}
-          diff="6개"
-          diffType="up"
-          icon={<ShoppingBag size={18} />}
+          change="6개"
+          up
         />
       </SummaryGrid>
 
-      <TableSection>
-        <TableComponent
-          columns={columns}
-          data={filteredData}
-          rowKey="id"
-          searchValue={searchValue}
-          onSearchChange={(value) => {
-            setSearchValue(value);
-            setPage(1);
-          }}
-          searchPlaceholder="상품명, 상품코드로 검색"
-          filterValue={categoryValue}
-          onFilterChange={(value) => {
-            setCategoryValue(value);
-            setPage(1);
-          }}
-          filterPlaceholder="카테고리"
-          filterOptions={categoryOptions.filter((item) => item.value !== "")}
-          page={page}
-          pageSize={pageSize}
-          onPageChange={setPage}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
-          }}
-        />
-      </TableSection>
+      <TableComponent
+        columns={columns}
+        data={filteredData}
+        rowKey="id"
+        searchValue={searchValue}
+        onSearchChange={(value) => {
+          setSearchValue(value);
+          setPage(1);
+        }}
+        searchPlaceholder="상품명, 상품코드로 검색"
+        filterValue={categoryValue}
+        onFilterChange={(value) => {
+          setCategoryValue(value);
+          setPage(1);
+        }}
+        filterPlaceholder="전체"
+        filterOptions={categoryOptions}
+        extraToolbar={
+          <DateFilterGroup>
+            <DateInput
+              type="date"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setPage(1);
+              }}
+            />
+            <DateDivider>~</DateDivider>
+            <DateInput
+              type="date"
+              value={endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setPage(1);
+              }}
+            />
+          </DateFilterGroup>
+        }
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+      />
     </PageWrap>
   );
 }
@@ -533,15 +542,17 @@ const PageWrap = styled.div`
 `;
 
 const HeaderRow = styled.div`
-  margin-bottom: 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin-bottom: 20px;
+  margin-top: 5px;
 `;
 
 const Title = styled.h2`
   margin: 0;
+
   color: #111827;
   font-size: 22px;
   font-weight: 800;
@@ -556,6 +567,9 @@ const PrimaryButton = styled.button`
   color: #ffffff;
   font-size: 13px;
   font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
 
   &:hover {
@@ -578,64 +592,48 @@ const SummaryGrid = styled.div`
   }
 `;
 
-const Card = styled.div`
-  padding: 16px 18px;
-  border: 1px solid #eef2f7;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
-`;
-
-const CardTop = styled.div`
-  margin-bottom: 10px;
+const DateFilterGroup = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
 `;
 
-const CardTitle = styled.div`
-  color: #6b7280;
+const DateInput = styled.input`
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #edf0f4;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  outline: none;
+
+  &:focus {
+    border-color: #cfd8e3;
+  }
+`;
+
+const DateDivider = styled.span`
+  color: #9ca3af;
   font-size: 13px;
   font-weight: 600;
 `;
 
-const CardIconWrap = styled.div`
-  width: 32px;
-  height: 32px;
+const ResetButton = styled.button`
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
-  background: #f3f6fb;
-  color: #64748b;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
+  background: #ffffff;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
 
-const CardValue = styled.div`
-  margin-bottom: 8px;
-  color: #111827;
-  font-size: 30px;
-  font-weight: 800;
-  line-height: 1;
-`;
-
-const CardBottom = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: ${({ $type }) => ($type === "up" ? "#16a34a" : "#ef4444")};
-  font-size: 12px;
-  font-weight: 700;
-`;
-
-const CardSubText = styled.span`
-  margin-left: 4px;
-  color: #9ca3af;
-  font-weight: 500;
-`;
-
-const TableSection = styled.div`
-  width: 100%;
+  &:hover {
+    background: #f8fafc;
+  }
 `;
 
 const CodeText = styled.strong`

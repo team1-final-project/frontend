@@ -20,6 +20,7 @@ export default function TableComponent({
   onFilterChange,
   filterOptions = [],
   filterPlaceholder = "Filter",
+  extraToolbar = null,
   page = 1,
   pageSize = 10,
   onPageChange,
@@ -171,34 +172,38 @@ export default function TableComponent({
   return (
     <Wrap>
       <Toolbar>
-        <SearchWrap>
-          <SearchIcon>
-            <Search size={15} />
-          </SearchIcon>
-          <SearchInput
-            value={searchValue}
-            onChange={(e) => onSearchChange?.(e.target.value)}
-            placeholder={searchPlaceholder}
-          />
-        </SearchWrap>
+        <ToolbarLeft>
+          <SearchWrap>
+            <SearchIcon>
+              <Search size={15} />
+            </SearchIcon>
+            <SearchInput
+              value={searchValue}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              placeholder={searchPlaceholder}
+            />
+          </SearchWrap>
 
-        <FilterSelectWrap>
-          <FilterSelect
-            value={filterValue}
-            onChange={(e) => onFilterChange?.(e.target.value)}
-          >
-            <option value="">{filterPlaceholder}</option>
-            {filterOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </FilterSelect>
+          <FilterSelectWrap>
+            <FilterSelect
+              value={filterValue}
+              onChange={(e) => onFilterChange?.(e.target.value)}
+            >
+              <option value="">{filterPlaceholder}</option>
+              {filterOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </FilterSelect>
 
-          <FilterIcon>
-            <ChevronDown size={15} />
-          </FilterIcon>
-        </FilterSelectWrap>
+            <FilterIcon>
+              <ChevronDown size={15} />
+            </FilterIcon>
+          </FilterSelectWrap>
+
+          {extraToolbar}
+        </ToolbarLeft>
       </Toolbar>
 
       <TableScroll>
@@ -290,20 +295,24 @@ const Wrap = styled.div`
 const Toolbar = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   margin-bottom: 10px;
+`;
 
-  @media (max-width: 900px) {
-    flex-direction: column;
-    align-items: stretch;
-  }
+const ToolbarLeft = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
 `;
 
 const SearchWrap = styled.div`
   position: relative;
   width: 100%;
-  max-width: 220px;
+  max-width: 240px;
 
   @media (max-width: 900px) {
     max-width: 100%;
@@ -387,7 +396,7 @@ const TableScroll = styled.div`
 
 const StyledTable = styled.table`
   width: 100%;
-  min-width: 900px;
+  min-width: 1200px;
   border-collapse: collapse;
 
   thead th {
