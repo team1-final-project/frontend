@@ -35,6 +35,7 @@ import HeatmapStat from "./pages/admin/HeatmapStat";
 import PriceTrendStat from "./pages/admin/PriceTrendStat";
 import AdminManage from "./pages/admin/AdminManage";
 import Settings from "./pages/admin/Settings";
+import AdminLogin from "./pages/admin/AdminLogin";
 
 function App() {
   return (
@@ -78,6 +79,8 @@ function App() {
             <Route path="/admin/manage-admins" element={<AdminManage />} />
             <Route path="/admin/settings" element={<Settings />} />
           </Route>
+
+          <Route path="/admin/login" element={<AdminLogin />} />
 
           <Route
             path="/auth/google/callback"
