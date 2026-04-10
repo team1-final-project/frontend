@@ -2,9 +2,9 @@ import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { Plus } from "lucide-react";
-import SummaryCard from "../../components/SummaryCard";
-import TableComponent from "../../components/TableComponent";
-import StatusBadge from "../../components/StatusBadge";
+import SummaryCard from "../../../components/SummaryCard";
+import TableComponent from "../../../components/TableComponent";
+import StatusBadge from "../../../components/StatusBadge";
 
 const initialProducts = [
   {

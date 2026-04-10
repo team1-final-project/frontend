@@ -21,20 +21,19 @@ import CartPage from "./pages/consumer/CartPage";
 import CheckoutPage from "./pages/consumer/CheckoutPage";
 
 import Dashboard from "./pages/admin/Dashboard";
-import ProductList from "./pages/admin/ProductList";
-import ProductRegist from "./pages/admin/ProductRegist";
-import PriceTrend from "./pages/admin/PriceTrend";
-import ProductManage from "./pages/admin/ProductManage";
-import PriceSearch from "./pages/admin/PriceSearch";
-import MatchingManage from "./pages/admin/MatchingManage";
-import AIHistory from "./pages/admin/AIHistory";
-import LiveInventory from "./pages/admin/LiveInventory";
-import InventoryHistory from "./pages/admin/InventoryHistory";
-import SalesStat from "./pages/admin/SalesStat";
-import HeatmapStat from "./pages/admin/HeatmapStat";
-import PriceTrendStat from "./pages/admin/PriceTrendStat";
-import AdminManage from "./pages/admin/AdminManage";
-import Settings from "./pages/admin/Settings";
+import ProductList from "./pages/admin/products/ProductList";
+import ProductRegist from "./pages/admin/products/ProductRegist";
+import ProductManage from "./pages/admin/products/ProductManage";
+import PriceSearch from "./pages/admin/price/PriceSearch";
+import MatchingManage from "./pages/admin/price/MatchingManage";
+import AIHistory from "./pages/admin/price/AIHistory";
+import LiveInventory from "./pages/admin/inventory/LiveInventory";
+import InventoryHistory from "./pages/admin/inventory/InventoryHistory";
+import SalesStat from "./pages/admin/statistics/SalesStat";
+import HeatmapStat from "./pages/admin/statistics/HeatmapStat";
+import PriceTrendStat from "./pages/admin/statistics/PriceTrendStat";
+import AdminManage from "./pages/admin/management/AdminManage";
+import Settings from "./pages/admin/management/Settings";
 import AdminLogin from "./pages/admin/AdminLogin";
 
 function App() {
@@ -61,7 +60,7 @@ function App() {
 
             <Route path="/admin/product-list" element={<ProductList />} />
             <Route path="/admin/product-regist" element={<ProductRegist />} />
-            <Route path="/admin/price-trend" element={<PriceTrend />} />
+
             <Route path="/admin/product-manage" element={<ProductManage />} />
             <Route path="/admin/price-search" element={<PriceSearch />} />
             <Route path="/admin/matching-manage" element={<MatchingManage />} />
