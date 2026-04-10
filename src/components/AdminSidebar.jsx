@@ -130,7 +130,7 @@ export default function AdminSidebar() {
         </TopIconButton>
       </TopArea>
 
-      <DashboardButton to="/admin/dashboard">
+      <DashboardButton to="/admin">
         <LayoutDashboard size={18} />
         <span>대시보드</span>
       </DashboardButton>

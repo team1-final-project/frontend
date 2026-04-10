@@ -21,7 +21,6 @@ import CartPage from "./pages/consumer/CartPage";
 import CheckoutPage from "./pages/consumer/CheckoutPage";
 
 import Dashboard from "./pages/admin/Dashboard";
-import OrderListPage from "./pages/admin/OrderListTest";
 import Products from "./pages/admin/Products";
 import PriceTrend from "./pages/admin/PriceTrend";
 import ProductManage from "./pages/admin/ProductManage";
@@ -58,7 +57,7 @@ function App() {
 
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="/admin" element={<Dashboard />} />
-            <Route path="/admin/order-list" element={<OrderListPage />} />
+
             <Route path="/admin/products" element={<Products />} />
             <Route path="/admin/price-trend" element={<PriceTrend />} />
             <Route path="/admin/product-manage" element={<ProductManage />} />
