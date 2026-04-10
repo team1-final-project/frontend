@@ -26,10 +26,7 @@ export default function AdminSidebar() {
         key: "favorite",
         title: "FAVORITE",
         defaultOpen: true,
-        items: [
-          { label: "상품 목록", to: "/admin/products", icon: Box },
-          { label: "최저가 추이", to: "/admin/price-trend", icon: FileText },
-        ],
+        items: [],
       },
       {
         key: "products",
@@ -61,12 +58,12 @@ export default function AdminSidebar() {
         items: [
           {
             label: "실시간 재고 현황",
-            to: "/admin/inventory/live",
+            to: "/admin/live-inventory",
             icon: ShoppingCart,
           },
           {
             label: "입출고 이력 조회",
-            to: "/admin/inventory/history",
+            to: "/admin/inventory-history",
             icon: ClipboardList,
           },
         ],
@@ -78,17 +75,17 @@ export default function AdminSidebar() {
         items: [
           {
             label: "판매 분석",
-            to: "/admin/statistics/sales",
+            to: "/admin/sales-stat",
             icon: BarChart3,
           },
           {
             label: "수요 히트 맵",
-            to: "/admin/statistics/heatmap",
+            to: "/admin/heatmap-stat",
             icon: Map,
           },
           {
             label: "최저가 추이",
-            to: "/admin/statistics/price-trend",
+            to: "/admin/price-trend-stat",
             icon: FileText,
           },
         ],
