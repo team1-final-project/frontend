@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { Plus } from "lucide-react";
 import SummaryCard from "../../components/SummaryCard";
@@ -300,7 +301,7 @@ function VisibilityToggle({ checked, onClick }) {
   );
 }
 
-export default function Products() {
+export default function ProductList() {
   const [products, setProducts] = useState(initialProducts);
   const [searchValue, setSearchValue] = useState("");
   const [categoryValue, setCategoryValue] = useState("");
@@ -308,6 +309,8 @@ export default function Products() {
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  const nav = useNavigate();
 
   const summary = useMemo(() => {
     return {
@@ -447,11 +450,6 @@ export default function Products() {
     <PageWrap>
       <HeaderRow>
         <Title>상품 목록</Title>
-
-        <PrimaryButton type="button">
-          <Plus size={14} />
-          상품등록
-        </PrimaryButton>
       </HeaderRow>
 
       <SummaryGrid>
@@ -522,6 +520,15 @@ export default function Products() {
               }}
             />
           </DateFilterGroup>
+        }
+        toolbarRight={
+          <PrimaryButton
+            type="button"
+            onClick={() => nav("/admin/product-regist")}
+          >
+            <Plus size={14} />
+            상품등록
+          </PrimaryButton>
         }
         page={page}
         pageSize={pageSize}
@@ -620,22 +627,6 @@ const DateDivider = styled.span`
   font-weight: 600;
 `;
 
-const ResetButton = styled.button`
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #4b5563;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover {
-    background: #f8fafc;
-  }
-`;
-
 const CodeText = styled.strong`
   color: #111827;
   font-weight: 700;
@@ -669,16 +660,21 @@ const ToggleButton = styled.button`
   background: ${({ $checked }) => ($checked ? "#2563eb" : "#d1d5db")};
   cursor: pointer;
   padding: 0;
+  box-sizing: border-box;
   transition: background 0.15s ease;
 `;
 
 const ToggleThumb = styled.span`
   position: absolute;
-  top: 2px;
+  top: 50%;
   left: ${({ $checked }) => ($checked ? "16px" : "2px")};
+  transform: translateY(-50%);
   width: 16px;
   height: 16px;
   border-radius: 999px;
   background: #ffffff;
-  transition: left 0.15s ease;
+  box-sizing: border-box;
+  transition:
+    left 0.15s ease,
+    transform 0.15s ease;
 `;

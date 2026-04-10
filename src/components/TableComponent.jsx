@@ -21,6 +21,7 @@ export default function TableComponent({
   filterOptions = [],
   filterPlaceholder = "Filter",
   extraToolbar = null,
+  toolbarRight = null,
   page = 1,
   pageSize = 10,
   onPageChange,
@@ -204,6 +205,8 @@ export default function TableComponent({
 
           {extraToolbar}
         </ToolbarLeft>
+
+        {toolbarRight && <ToolbarRight>{toolbarRight}</ToolbarRight>}
       </Toolbar>
 
       <TableScroll>
@@ -301,12 +304,18 @@ const Toolbar = styled.div`
 `;
 
 const ToolbarLeft = styled.div`
-  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 12px;
+  flex: 1;
+`;
+
+const ToolbarRight = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
 `;
 
 const SearchWrap = styled.div`
