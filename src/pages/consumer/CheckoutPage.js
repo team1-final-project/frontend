@@ -1,6 +1,9 @@
 import React, { useRef, useState } from "react";
 import styled from "styled-components";
 import { useLocation, useNavigate } from "react-router-dom";
+import { createOrder } from "../../api/order";
+
+const TOSS_CLIENT_KEY = process.env.REACT_APP_TOSS_CLIENT_KEY;
 
 let kakaoPostcodeScriptPromise = null;
 
@@ -73,6 +76,7 @@ export default function CheckoutPage() {
   });
 
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -129,7 +133,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!shippingInfo.receiver.trim()) {
@@ -152,10 +156,67 @@ export default function CheckoutPage() {
       return;
     }
 
-    console.log("주문 상품:", orderItems);
-    console.log("배송 정보:", shippingInfo);
+    if (orderItems.length === 0) {
+      alert("주문할 상품이 없습니다.");
+      return;
+    }
 
-    alert("배송지 입력까지 완료되었습니다.");
+    if (!TOSS_CLIENT_KEY) {
+      alert("REACT_APP_TOSS_CLIENT_KEY가 설정되지 않았습니다.");
+      return;
+    }
+
+    if (!window.TossPayments) {
+      alert("토스 SDK가 로드되지 않았습니다.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const payload = {
+        items: orderItems.map((item) => ({
+          product_id: item.productId,
+          quantity: item.quantity,
+          cart_item_id: item.cartItemId,
+        })),
+        shipping: {
+          recipient_name: shippingInfo.receiver,
+          recipient_phone: shippingInfo.phone,
+          zipcode: shippingInfo.zipCode,
+          address1: shippingInfo.address,
+          address2: shippingInfo.detailAddress,
+          delivery_request: shippingInfo.message || "",
+        },
+      };
+
+      const createdOrder = await createOrder(payload);
+
+      const tossPayments = window.TossPayments(TOSS_CLIENT_KEY);
+      const payment = tossPayments.payment({
+        customerKey: `member_order_${createdOrder.order_no}`,
+      });
+
+      await payment.requestPayment({
+        method: "CARD",
+        amount: {
+          currency: "KRW",
+          value: createdOrder.amount,
+        },
+        orderId: createdOrder.order_no,
+        orderName: createdOrder.order_name,
+        successUrl: `${window.location.origin}/payment/success`,
+        failUrl: `${window.location.origin}/payment/fail`,
+      });
+    } catch (error) {
+      console.error(error);
+
+      const detail =
+        error?.response?.data?.detail || "주문 생성 또는 결제창 호출에 실패했습니다.";
+
+      alert(detail);
+      setIsSubmitting(false);
+    }
   };
 
   if (orderItems.length === 0) {
@@ -297,10 +358,13 @@ export default function CheckoutPage() {
                 <SecondaryButton
                   type="button"
                   onClick={() => navigate("/cart")}
+                  disabled={isSubmitting}
                 >
                   장바구니로 가기
                 </SecondaryButton>
-                <SubmitButton type="submit">입력 완료</SubmitButton>
+                <SubmitButton type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "처리 중..." : "결제하기"}
+                </SubmitButton>
               </ButtonRow>
             </SummaryBox>
           </Form>
@@ -502,6 +566,11 @@ const SubmitButton = styled.button`
   color: #fff;
   font-size: 16px;
   font-weight: 700;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 `;
 
 const SecondaryButton = styled.button`
@@ -512,6 +581,11 @@ const SecondaryButton = styled.button`
   color: #111;
   font-size: 16px;
   font-weight: 700;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 `;
 
 const EmptyCard = styled.div`

@@ -1,85 +1,112 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import {
+  deleteCartItem,
+  getMyCart,
+  updateCartCheckAll,
+  updateCartItemChecked,
+  updateCartItemQuantity,
+} from "../../api/cart";
 
 export default function CartPage() {
   const navigate = useNavigate();
 
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "농심 신라면 5입",
-      price: 4200,
-      quantity: 2,
-      image: "https://via.placeholder.com/120",
-      checked: true,
-    },
-    {
-      id: 2,
-      name: "오리온 초코파이 12입",
-      price: 4800,
-      quantity: 1,
-      image: "https://via.placeholder.com/120",
-      checked: true,
-    },
-    {
-      id: 3,
-      name: "코카콜라 1.5L",
-      price: 3200,
-      quantity: 3,
-      image: "https://via.placeholder.com/120",
-      checked: false,
-    },
-  ]);
+  const [cartId, setCartId] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleToggleItem = (id) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
+  const fetchCart = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getMyCart();
+      setCartId(data.cartId);
+      setCartItems(data.items || []);
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.detail || "장바구니 조회에 실패했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  const isAllChecked = useMemo(() => {
+    return cartItems.length > 0 && cartItems.every((item) => item.checked);
+  }, [cartItems]);
+
+  const selectedItems = useMemo(() => {
+    return cartItems.filter((item) => item.checked);
+  }, [cartItems]);
+
+  const totalPrice = useMemo(() => {
+    return selectedItems.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0
     );
+  }, [selectedItems]);
+
+  const handleToggleItem = async (id, checked) => {
+    try {
+      const data = await updateCartItemChecked(id, !checked);
+      setCartId(data.cartId);
+      setCartItems(data.items || []);
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.detail || "선택 상태 변경에 실패했습니다.");
+    }
   };
 
-  const handleToggleAll = () => {
-    const isAllChecked =
-      cartItems.length > 0 && cartItems.every((item) => item.checked);
-
-    setCartItems((prev) =>
-      prev.map((item) => ({
-        ...item,
-        checked: !isAllChecked,
-      }))
-    );
+  const handleToggleAll = async () => {
+    try {
+      const data = await updateCartCheckAll(!isAllChecked);
+      setCartId(data.cartId);
+      setCartItems(data.items || []);
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.detail || "전체 선택 변경에 실패했습니다.");
+    }
   };
 
-  const handleIncrease = (id) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
+  const handleIncrease = async (item) => {
+    try {
+      const data = await updateCartItemQuantity(item.id, item.quantity + 1);
+      setCartId(data.cartId);
+      setCartItems(data.items || []);
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.detail || "수량 변경에 실패했습니다.");
+    }
   };
 
-  const handleDecrease = (id) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity - 1) }
-          : item
-      )
-    );
+  const handleDecrease = async (item) => {
+    if (item.quantity <= 1) {
+      return;
+    }
+
+    try {
+      const data = await updateCartItemQuantity(item.id, item.quantity - 1);
+      setCartId(data.cartId);
+      setCartItems(data.items || []);
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.detail || "수량 변경에 실패했습니다.");
+    }
   };
 
-  const handleDelete = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      const data = await deleteCartItem(id);
+      setCartId(data.cartId);
+      setCartItems(data.items || []);
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.detail || "상품 삭제에 실패했습니다.");
+    }
   };
-
-  const selectedItems = cartItems.filter((item) => item.checked);
-
-  const totalPrice = selectedItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
 
   const handleOrder = () => {
     if (selectedItems.length === 0) {
@@ -89,7 +116,15 @@ export default function CartPage() {
 
     navigate("/checkoutPage", {
       state: {
-        orderItems: selectedItems,
+        orderItems: selectedItems.map((item) => ({
+          id: item.id,
+          cartItemId: item.id,
+          productId: item.productId,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image,
+        })),
         totalPrice,
       },
     });
@@ -104,17 +139,18 @@ export default function CartPage() {
           <CheckboxLabel>
             <input
               type="checkbox"
-              checked={
-                cartItems.length > 0 && cartItems.every((item) => item.checked)
-              }
+              checked={isAllChecked}
               onChange={handleToggleAll}
+              disabled={isLoading || cartItems.length === 0}
             />
             전체 선택
           </CheckboxLabel>
         </TopBar>
 
         <ListSection>
-          {cartItems.length === 0 ? (
+          {isLoading ? (
+            <EmptyText>장바구니를 불러오는 중입니다.</EmptyText>
+          ) : cartItems.length === 0 ? (
             <EmptyText>장바구니에 담긴 상품이 없습니다.</EmptyText>
           ) : (
             cartItems.map((item) => (
@@ -123,11 +159,14 @@ export default function CartPage() {
                   <input
                     type="checkbox"
                     checked={item.checked}
-                    onChange={() => handleToggleItem(item.id)}
+                    onChange={() => handleToggleItem(item.id, item.checked)}
                   />
                 </CheckArea>
 
-                <Thumb src={item.image} alt={item.name} />
+                <Thumb
+                  src={item.image || "https://via.placeholder.com/120"}
+                  alt={item.name}
+                />
 
                 <InfoArea>
                   <ProductName>{item.name}</ProductName>
@@ -136,14 +175,14 @@ export default function CartPage() {
                   <QuantityBox>
                     <QtyButton
                       type="button"
-                      onClick={() => handleDecrease(item.id)}
+                      onClick={() => handleDecrease(item)}
                     >
                       -
                     </QtyButton>
                     <QtyText>{item.quantity}</QtyText>
                     <QtyButton
                       type="button"
-                      onClick={() => handleIncrease(item.id)}
+                      onClick={() => handleIncrease(item)}
                     >
                       +
                     </QtyButton>
@@ -170,6 +209,11 @@ export default function CartPage() {
           <SummaryTitle>주문 요약</SummaryTitle>
 
           <SummaryRow>
+            <span>장바구니 ID</span>
+            <span>{cartId ?? "-"}</span>
+          </SummaryRow>
+
+          <SummaryRow>
             <span>선택 상품 수</span>
             <span>{selectedItems.length}개</span>
           </SummaryRow>
@@ -179,7 +223,7 @@ export default function CartPage() {
             <TotalPrice>{totalPrice.toLocaleString()}원</TotalPrice>
           </SummaryRow>
 
-          <OrderButton type="button" onClick={handleOrder}>
+          <OrderButton type="button" onClick={handleOrder} disabled={isLoading}>
             주문하기
           </OrderButton>
         </SummaryCard>
@@ -346,6 +390,11 @@ const OrderButton = styled.button`
   font-size: 16px;
   font-weight: 700;
   margin-top: 16px;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 `;
 
 const EmptyText = styled.p`

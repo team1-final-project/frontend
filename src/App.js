@@ -12,13 +12,12 @@ import Home from "./pages/consumer/Home";
 import Login from "./pages/consumer/Login";
 import Signup from "./pages/consumer/Signup";
 import SocialLoginCallback from "./pages/consumer/SocialLoginCallback";
-
-import TossPayTestPage from "./test/paymentapi/TossPayTestPage";
-import TossSuccessPage from "./test/paymentapi/TossSuccessPage";
-import TossFailPage from "./test/paymentapi/TossFailPage";
 import ProductDetailPage from "./pages/consumer/ProductDetailPage";
 import CartPage from "./pages/consumer/CartPage";
 import CheckoutPage from "./pages/consumer/CheckoutPage";
+import PaymentSuccessPage from "./pages/consumer/PaymentSuccessPage";
+import PaymentFailPage from "./pages/consumer/PaymentFailPage";
+import OrderCompletePage from "./pages/consumer/OrderCompletePage";
 
 import Dashboard from "./pages/admin/Dashboard";
 import ProductList from "./pages/admin/products/ProductList";
@@ -47,20 +46,19 @@ function App() {
             <Route path="/product-detail" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkoutPage" element={<CheckoutPage />} />
+            <Route path="/order-complete" element={<OrderCompletePage />} />
           </Route>
 
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/toss" element={<TossPayTestPage />} />
-          <Route path="/toss/success" element={<TossSuccessPage />} />
-          <Route path="/toss/fail" element={<TossFailPage />} />
+
+          <Route path="/payment/success" element={<PaymentSuccessPage />} />
+          <Route path="/payment/fail" element={<PaymentFailPage />} />
 
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="/admin" element={<Dashboard />} />
-
             <Route path="/admin/product-list" element={<ProductList />} />
             <Route path="/admin/product-regist" element={<ProductRegist />} />
-
             <Route path="/admin/product-manage" element={<ProductManage />} />
             <Route path="/admin/price-search" element={<PriceSearch />} />
             <Route path="/admin/matching-manage" element={<MatchingManage />} />
