@@ -4,41 +4,29 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, Search } from "lucide-react";
 import logo from "../assets/stocker-logo.svg";
 import { useAuth } from "../context/AuthContext";
-
-const CATEGORY_DATA = [
-  {
-    id: 1,
-    name: "가공 / 간편식품",
-    subCategories: ["라면", "즉석식품", "카레"],
-  },
-  {
-    id: 2,
-    name: "간식 / 음료",
-    subCategories: ["스낵과자", "탄산음료"],
-  },
-  {
-    id: 3,
-    name: "냉장 / 육가공",
-    subCategories: ["소시지"],
-  },
-];
+import { getCategories } from "../api/category";
 
 export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, isInitializing, logout } = useAuth();
 
+  const [categories, setCategories] = useState([]);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
 
   const headerShellRef = useRef(null);
 
-  const activeCategory = CATEGORY_DATA.find(
+  const activeCategory = categories.find(
     (category) => category.id === activeCategoryId
   );
 
   const handleOpenCategory = () => {
     setIsCategoryOpen(true);
+
+    if (!activeCategoryId && categories.length > 0) {
+      setActiveCategoryId(categories[0].id);
+    }
   };
 
   const handleCloseCategory = () => {
@@ -46,9 +34,18 @@ export default function Header() {
     setActiveCategoryId(null);
   };
 
-
   const handleClickMainCategory = (categoryId) => {
     setActiveCategoryId(categoryId);
+  };
+
+  const handleClickSubCategory = (mainCategoryName, subCategoryName) => {
+    const searchParams = new URLSearchParams({
+      category: mainCategoryName,
+      subCategory: subCategoryName,
+    });
+
+    handleCloseCategory();
+    navigate(`/?${searchParams.toString()}`);
   };
 
   const handleLogout = async () => {
@@ -62,6 +59,23 @@ export default function Header() {
       navigate("/");
     }
   };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data);
+
+        if (data.length > 0) {
+          setActiveCategoryId(data[0].id);
+        }
+      } catch (error) {
+        console.error("카테고리 조회 실패:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -110,7 +124,7 @@ export default function Header() {
                   <CategoryInner>
                     <CategoryBox>
                       <MainCategoryList>
-                        {CATEGORY_DATA.map((category) => (
+                        {categories.map((category) => (
                           <MainCategoryItem key={category.id}>
                             <MainCategoryButton
                               type="button"
@@ -126,13 +140,18 @@ export default function Header() {
                       {activeCategory && (
                         <SubCategoryList>
                           {activeCategory.subCategories.map((subCategory) => (
-                            <SubCategoryItem key={subCategory}>
-                              <SubCategoryLink
-                                to="/"
-                                onClick={handleCloseCategory}
+                            <SubCategoryItem key={subCategory.id}>
+                              <SubCategoryButton
+                                type="button"
+                                onClick={() =>
+                                  handleClickSubCategory(
+                                    activeCategory.name,
+                                    subCategory.name
+                                  )
+                                }
                               >
-                                {subCategory}
-                              </SubCategoryLink>
+                                {subCategory.name}
+                              </SubCategoryButton>
                             </SubCategoryItem>
                           ))}
                         </SubCategoryList>
@@ -468,21 +487,40 @@ const SubCategoryItem = styled.li`
     margin: 0;
   `;
 
-const SubCategoryLink = styled(Link)`
+// const SubCategoryLink = styled(Link)`
+//   display: flex;
+//   align-items: center;
+//   width: 100%;
+//   height: 46px;
+//   padding: 0 22px;
+//   text-decoration: none;
+//   color: #111111;
+//   font-size: 15px;
+//   font-weight: 600;
+//   background: #ffffff;
+//   box-sizing: border-box;
+
+//   &:hover {
+//     background: #f5f5f5;
+//   }
+//   `;
+
+const SubCategoryButton = styled.button`
   display: flex;
   align-items: center;
   width: 100%;
   height: 46px;
   padding: 0 22px;
-  text-decoration: none;
+  border: none;
+  text-align: left;
   color: #111111;
   font-size: 15px;
   font-weight: 600;
   background: #ffffff;
   box-sizing: border-box;
+  cursor: pointer;
 
   &:hover {
     background: #f5f5f5;
   }
-  `;
-
+`;
