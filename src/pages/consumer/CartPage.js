@@ -12,7 +12,6 @@ import {
 export default function CartPage() {
   const navigate = useNavigate();
 
-  const [cartId, setCartId] = useState(null);
   const [cartItems, setCartItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -20,7 +19,6 @@ export default function CartPage() {
     try {
       setIsLoading(true);
       const data = await getMyCart();
-      setCartId(data.cartId);
       setCartItems(data.items || []);
     } catch (error) {
       console.error(error);
@@ -42,6 +40,8 @@ export default function CartPage() {
     return cartItems.filter((item) => item.checked);
   }, [cartItems]);
 
+  const selectedCount = selectedItems.length;
+
   const totalPrice = useMemo(() => {
     return selectedItems.reduce(
       (acc, item) => acc + item.price * item.quantity,
@@ -52,7 +52,6 @@ export default function CartPage() {
   const handleToggleItem = async (id, checked) => {
     try {
       const data = await updateCartItemChecked(id, !checked);
-      setCartId(data.cartId);
       setCartItems(data.items || []);
     } catch (error) {
       console.error(error);
@@ -63,7 +62,6 @@ export default function CartPage() {
   const handleToggleAll = async () => {
     try {
       const data = await updateCartCheckAll(!isAllChecked);
-      setCartId(data.cartId);
       setCartItems(data.items || []);
     } catch (error) {
       console.error(error);
@@ -74,7 +72,6 @@ export default function CartPage() {
   const handleIncrease = async (item) => {
     try {
       const data = await updateCartItemQuantity(item.id, item.quantity + 1);
-      setCartId(data.cartId);
       setCartItems(data.items || []);
     } catch (error) {
       console.error(error);
@@ -83,13 +80,10 @@ export default function CartPage() {
   };
 
   const handleDecrease = async (item) => {
-    if (item.quantity <= 1) {
-      return;
-    }
+    if (item.quantity <= 1) return;
 
     try {
       const data = await updateCartItemQuantity(item.id, item.quantity - 1);
-      setCartId(data.cartId);
       setCartItems(data.items || []);
     } catch (error) {
       console.error(error);
@@ -100,7 +94,6 @@ export default function CartPage() {
   const handleDelete = async (id) => {
     try {
       const data = await deleteCartItem(id);
-      setCartId(data.cartId);
       setCartItems(data.items || []);
     } catch (error) {
       console.error(error);
@@ -109,10 +102,7 @@ export default function CartPage() {
   };
 
   const handleOrder = () => {
-    if (selectedItems.length === 0) {
-      alert("주문할 상품을 선택해주세요.");
-      return;
-    }
+    if (selectedItems.length === 0) return;
 
     navigate("/checkoutPage", {
       state: {
@@ -130,30 +120,49 @@ export default function CartPage() {
     });
   };
 
-  return (
-    <Page>
-      <Inner>
-        <Title>장바구니</Title>
+  const renderContent = () => {
+    if (isLoading) {
+      return <StateCard>장바구니를 불러오는 중입니다.</StateCard>;
+    }
 
-        <TopBar>
-          <CheckboxLabel>
-            <input
-              type="checkbox"
-              checked={isAllChecked}
-              onChange={handleToggleAll}
-              disabled={isLoading || cartItems.length === 0}
-            />
-            전체 선택
-          </CheckboxLabel>
-        </TopBar>
+    if (cartItems.length === 0) {
+      return (
+        <EmptyWrap>
+          <EmptyCard>
+            <EmptyTitle>장바구니가 비어 있어요</EmptyTitle>
+            <EmptyDescription>
+              원하는 상품을 담아 주문을 시작해보세요.
+            </EmptyDescription>
+            <EmptyButton type="button" onClick={() => navigate("/")}>
+              쇼핑 계속하기
+            </EmptyButton>
+          </EmptyCard>
+        </EmptyWrap>
+      );
+    }
 
-        <ListSection>
-          {isLoading ? (
-            <EmptyText>장바구니를 불러오는 중입니다.</EmptyText>
-          ) : cartItems.length === 0 ? (
-            <EmptyText>장바구니에 담긴 상품이 없습니다.</EmptyText>
-          ) : (
-            cartItems.map((item) => (
+    return (
+      <ContentGrid>
+        <LeftColumn>
+          <TopBar>
+            <TopBarLeft>
+              <CheckboxLabel>
+                <input
+                  type="checkbox"
+                  checked={isAllChecked}
+                  onChange={handleToggleAll}
+                  disabled={isLoading || cartItems.length === 0}
+                />
+                전체 선택
+              </CheckboxLabel>
+              <SelectedMeta>
+                선택된 상품 <strong>{selectedCount}</strong>개
+              </SelectedMeta>
+            </TopBarLeft>
+          </TopBar>
+
+          <ListSection>
+            {cartItems.map((item) => (
               <CartCard key={item.id}>
                 <CheckArea>
                   <input
@@ -176,6 +185,7 @@ export default function CartPage() {
                     <QtyButton
                       type="button"
                       onClick={() => handleDecrease(item)}
+                      disabled={item.quantity <= 1}
                     >
                       -
                     </QtyButton>
@@ -201,32 +211,42 @@ export default function CartPage() {
                   </DeleteButton>
                 </RightArea>
               </CartCard>
-            ))
-          )}
-        </ListSection>
+            ))}
+          </ListSection>
+        </LeftColumn>
 
-        <SummaryCard>
-          <SummaryTitle>주문 요약</SummaryTitle>
+        <RightColumn>
+          <SummaryCard>
+            <SummaryTitle>주문 요약</SummaryTitle>
 
-          <SummaryRow>
-            <span>장바구니 ID</span>
-            <span>{cartId ?? "-"}</span>
-          </SummaryRow>
+            <SummaryRow>
+              <span>선택 상품 수</span>
+              <span>{selectedCount}개</span>
+            </SummaryRow>
 
-          <SummaryRow>
-            <span>선택 상품 수</span>
-            <span>{selectedItems.length}개</span>
-          </SummaryRow>
+            <SummaryRow>
+              <span>총 주문금액</span>
+              <TotalPrice>{totalPrice.toLocaleString()}원</TotalPrice>
+            </SummaryRow>
 
-          <SummaryRow>
-            <span>총 주문금액</span>
-            <TotalPrice>{totalPrice.toLocaleString()}원</TotalPrice>
-          </SummaryRow>
+            <OrderButton
+              type="button"
+              onClick={handleOrder}
+              disabled={isLoading || selectedCount === 0}
+            >
+              {selectedCount === 0 ? "상품을 선택해주세요" : "주문하기"}
+            </OrderButton>
+          </SummaryCard>
+        </RightColumn>
+      </ContentGrid>
+    );
+  };
 
-          <OrderButton type="button" onClick={handleOrder} disabled={isLoading}>
-            주문하기
-          </OrderButton>
-        </SummaryCard>
+  return (
+    <Page>
+      <Inner>
+        <Title>장바구니</Title>
+        {renderContent()}
       </Inner>
     </Page>
   );
@@ -239,21 +259,53 @@ const Page = styled.div`
 `;
 
 const Inner = styled.div`
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
 `;
 
 const Title = styled.h1`
   font-size: 32px;
-  font-weight: 700;
+  font-weight: 800;
   color: #111;
   margin-bottom: 28px;
 `;
 
+const ContentGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+  align-items: start;
+
+  @media (max-width: 980px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const LeftColumn = styled.div`
+  min-width: 0;
+`;
+
+const RightColumn = styled.div`
+  position: sticky;
+  top: 92px;
+
+  @media (max-width: 980px) {
+    position: static;
+  }
+`;
+
 const TopBar = styled.div`
   display: flex;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 18px;
+`;
+
+const TopBarLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
 `;
 
 const CheckboxLabel = styled.label`
@@ -262,6 +314,17 @@ const CheckboxLabel = styled.label`
   gap: 8px;
   font-size: 15px;
   color: #222;
+  font-weight: 600;
+`;
+
+const SelectedMeta = styled.div`
+  font-size: 14px;
+  color: #6f675d;
+
+  strong {
+    color: #111;
+    font-weight: 800;
+  }
 `;
 
 const ListSection = styled.div`
@@ -276,12 +339,18 @@ const CartCard = styled.div`
   gap: 18px;
   background: #fff;
   border: 1px solid #ece5db;
-  border-radius: 20px;
+  border-radius: 22px;
   padding: 20px;
+
+  @media (max-width: 680px) {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
 `;
 
 const CheckArea = styled.div`
   flex-shrink: 0;
+  padding-top: 4px;
 `;
 
 const Thumb = styled.img`
@@ -290,6 +359,12 @@ const Thumb = styled.img`
   object-fit: cover;
   border-radius: 16px;
   background: #f3efe8;
+  flex-shrink: 0;
+
+  @media (max-width: 680px) {
+    width: 96px;
+    height: 96px;
+  }
 `;
 
 const InfoArea = styled.div`
@@ -299,9 +374,10 @@ const InfoArea = styled.div`
 
 const ProductName = styled.h3`
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 800;
   color: #111;
   margin-bottom: 10px;
+  line-height: 1.4;
 `;
 
 const ProductPrice = styled.p`
@@ -317,6 +393,7 @@ const QuantityBox = styled.div`
   border: 1px solid #ddd3c6;
   border-radius: 12px;
   padding: 8px 12px;
+  background: #fff;
 `;
 
 const QtyButton = styled.button`
@@ -326,58 +403,79 @@ const QtyButton = styled.button`
   background: #f6f1ea;
   color: #111;
   font-size: 16px;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 `;
 
 const QtyText = styled.span`
   min-width: 20px;
   text-align: center;
-  font-weight: 700;
+  font-weight: 800;
 `;
 
 const RightArea = styled.div`
   min-width: 120px;
   text-align: right;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  @media (max-width: 680px) {
+    width: 100%;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 8px;
+  }
 `;
 
 const ItemTotal = styled.p`
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   color: #111;
-  margin-bottom: 14px;
 `;
 
 const DeleteButton = styled.button`
   font-size: 14px;
   color: #8a8176;
+  align-self: flex-end;
+
+  @media (max-width: 680px) {
+    align-self: auto;
+  }
 `;
 
 const SummaryCard = styled.div`
-  margin-top: 28px;
   background: #fff;
   border: 1px solid #ece5db;
-  border-radius: 20px;
+  border-radius: 22px;
   padding: 24px;
+  margin-top: 40px;
 `;
 
 const SummaryTitle = styled.h2`
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 800;
   color: #111;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 `;
 
 const SummaryRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   font-size: 16px;
   color: #333;
 `;
 
 const TotalPrice = styled.span`
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 900;
   color: #111;
 `;
 
@@ -388,21 +486,61 @@ const OrderButton = styled.button`
   background: #111;
   color: #fff;
   font-size: 16px;
-  font-weight: 700;
-  margin-top: 16px;
+  font-weight: 800;
+  margin-top: 18px;
 
   &:disabled {
-    opacity: 0.7;
+    opacity: 0.55;
     cursor: not-allowed;
   }
 `;
 
-const EmptyText = styled.p`
+const StateCard = styled.div`
   background: #fff;
   border: 1px solid #ece5db;
-  border-radius: 20px;
-  padding: 40px 20px;
+  border-radius: 22px;
+  padding: 44px 24px;
   text-align: center;
   color: #777;
   font-size: 16px;
+`;
+
+const EmptyWrap = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+const EmptyCard = styled.div`
+  width: 100%;
+  max-width: 640px;
+  background: #fff;
+  border: 1px solid #ece5db;
+  border-radius: 24px;
+  padding: 54px 24px;
+  text-align: center;
+`;
+
+const EmptyTitle = styled.h2`
+  font-size: 28px;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 12px;
+`;
+
+const EmptyDescription = styled.p`
+  font-size: 15px;
+  color: #6f675d;
+  line-height: 1.7;
+  margin-bottom: 24px;
+`;
+
+const EmptyButton = styled.button`
+  min-width: 180px;
+  height: 54px;
+  padding: 0 20px;
+  border-radius: 16px;
+  background: #111;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
 `;
