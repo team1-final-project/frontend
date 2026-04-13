@@ -15,7 +15,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { getCategories } from "../../../api/category";
 
-const saleStatusOptions = ["판매중", "판매대기", "임시중지", "품절"];
+const saleStatusOptions = ["판매중", "판매대기", "일시품절", "품절"];
 
 const editorTools = [
   { icon: <Bold size={14} />, label: "bold" },
@@ -383,53 +383,6 @@ export default function ProductRegist() {
                     value={form.costPrice}
                     onChange={(e) => handleChange("costPrice", e.target.value)}
                     placeholder="원가"
-                  />
-                  <UnitText>원</UnitText>
-                </UnitInputWrap>
-              </FormField>
-            </FormRow>
-
-            <FormRow>
-              <FormLabel>Ai 가격 변경</FormLabel>
-              <FormField>
-                <ToggleRow>
-                  <ToggleButton
-                    type="button"
-                    $checked={form.useAiMinPrice}
-                    onClick={() =>
-                      handleChange("useAiMinPrice", !form.useAiMinPrice)
-                    }
-                  >
-                    <ToggleThumb $checked={form.useAiMinPrice} />
-                  </ToggleButton>
-                </ToggleRow>
-              </FormField>
-            </FormRow>
-
-            <FormRow>
-              <FormLabel>최소가 제한</FormLabel>
-              <FormField>
-                <UnitInputWrap>
-                  <Input
-                    value={form.minPrice}
-                    onChange={(e) => handleChange("minPrice", e.target.value)}
-                    placeholder="최소가 제한"
-                    disabled={!form.useAiMinPrice}
-                  />
-                  <UnitText>원</UnitText>
-                </UnitInputWrap>
-              </FormField>
-            </FormRow>
-
-            <FormRow>
-              <FormLabel>최대가 제한</FormLabel>
-              <FormField>
-                <UnitInputWrap>
-                  <Input
-                    value={form.maxPrice}
-                    onChange={(e) => handleChange("maxPrice", e.target.value)}
-                    placeholder="최대가 제한"
-                    disabled={!form.useAiMinPrice}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>

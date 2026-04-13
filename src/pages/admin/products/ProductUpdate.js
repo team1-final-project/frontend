@@ -61,7 +61,7 @@ const dummyProductMap = {
   },
 };
 
-const saleStatusOptions = ["판매중", "판매대기", "임시중지", "품절"];
+const saleStatusOptions = ["판매중", "판매대기", "일시품절", "품절"];
 
 const editorTools = [
   { icon: <Bold size={14} />, label: "bold" },

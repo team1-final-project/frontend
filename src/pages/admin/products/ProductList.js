@@ -30,7 +30,7 @@ const initialProducts = [
     minPrice: 0,
     maxPrice: 0,
     stock: 30,
-    saleStatus: "임시중지",
+    saleStatus: "일시품절",
     updatedAt: "2026-04-07 09:07",
   },
   {
@@ -108,7 +108,7 @@ const initialProducts = [
     minPrice: 4300,
     maxPrice: 5900,
     stock: 71,
-    saleStatus: "임시중지",
+    saleStatus: "일시품절",
     updatedAt: "2026-04-03 09:07",
   },
   {
@@ -281,7 +281,7 @@ const categoryOptions = [
 
 const statusStyleMap = {
   판매중: { label: "판매중", variant: "success" },
-  임시중지: { label: "임시중지", variant: "warning" },
+  일시품절: { label: "일시품절", variant: "warning" },
   품절: { label: "품절", variant: "danger" },
 };
 
