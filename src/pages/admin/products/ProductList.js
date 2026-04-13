@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import SummaryCard from "../../../components/SummaryCard";
 import TableComponent from "../../../components/TableComponent";
 import StatusBadge from "../../../components/StatusBadge";
+import ToggleSwitch from "../../../components/ToggleSwitch";
 
 const initialProducts = [
   {
@@ -293,14 +294,6 @@ function toDateValue(dateTimeText) {
   return dateTimeText?.split(" ")[0] ?? "";
 }
 
-function VisibilityToggle({ checked, onClick }) {
-  return (
-    <ToggleButton type="button" $checked={checked} onClick={onClick}>
-      <ToggleThumb $checked={checked} />
-    </ToggleButton>
-  );
-}
-
 export default function ProductList() {
   const [products, setProducts] = useState(initialProducts);
   const [searchValue, setSearchValue] = useState("");
@@ -400,9 +393,9 @@ export default function ProductList() {
       sortable: false,
       render: (value, row) => (
         <CenterCell>
-          <VisibilityToggle
+          <ToggleSwitch
             checked={value}
-            onClick={() => handleToggleVisible(row.id)}
+            onChange={() => handleToggleVisible(row.id)}
           />
         </CenterCell>
       ),
@@ -625,11 +618,6 @@ const DateDivider = styled.span`
   font-weight: 600;
 `;
 
-const CodeText = styled.strong`
-  color: #111827;
-  font-weight: 700;
-`;
-
 const ProductName = styled.div`
   min-width: 0;
   color: #111827;
@@ -647,34 +635,6 @@ const CenterCell = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-`;
-
-const ToggleButton = styled.button`
-  position: relative;
-  width: 34px;
-  height: 20px;
-  border: none;
-  border-radius: 999px;
-  background: ${({ $checked }) => ($checked ? "#2563eb" : "#d1d5db")};
-  cursor: pointer;
-  padding: 0;
-  box-sizing: border-box;
-  transition: background 0.15s ease;
-`;
-
-const ToggleThumb = styled.span`
-  position: absolute;
-  top: 50%;
-  left: ${({ $checked }) => ($checked ? "16px" : "2px")};
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  background: #ffffff;
-  box-sizing: border-box;
-  transition:
-    left 0.15s ease,
-    transform 0.15s ease;
 `;
 
 const CodeLink = styled.button`

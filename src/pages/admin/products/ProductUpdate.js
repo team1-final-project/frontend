@@ -12,6 +12,7 @@ import {
   Image as ImageIcon,
   Link as LinkIcon,
 } from "lucide-react";
+import ToggleSwitch from "../../../components/ToggleSwitch";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getCategories } from "../../../api/category";
 
@@ -507,13 +508,12 @@ export default function ProductUpdate() {
               <FormLabel>Ai 가격 변경</FormLabel>
               <FormField>
                 <ToggleRow>
-                  <ToggleButton
-                    type="button"
-                    $checked={form.useAiPrice}
-                    onClick={() => handleChange("useAiPrice", !form.useAiPrice)}
-                  >
-                    <ToggleThumb $checked={form.useAiPrice} />
-                  </ToggleButton>
+                  <ToggleSwitch
+                    checked={form.useAiPrice}
+                    onChange={(nextChecked) =>
+                      handleChange("useAiPrice", nextChecked)
+                    }
+                  />
                 </ToggleRow>
               </FormField>
             </FormRow>
@@ -1093,31 +1093,6 @@ const DateIconWrap = styled.div`
 const ToggleRow = styled.div`
   display: flex;
   align-items: center;
-`;
-
-const ToggleButton = styled.button`
-  position: relative;
-  width: 34px;
-  height: 20px;
-  border: none;
-  border-radius: 999px;
-  background: ${({ $checked }) => ($checked ? "#2563eb" : "#d1d5db")};
-  cursor: pointer;
-  padding: 0;
-  box-sizing: border-box;
-  transition: background 0.15s ease;
-`;
-
-const ToggleThumb = styled.span`
-  position: absolute;
-  top: 50%;
-  left: ${({ $checked }) => ($checked ? "16px" : "2px")};
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  background: #ffffff;
-  transition: left 0.15s ease;
 `;
 
 const ImageUploadArea = styled.div`

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getCategories } from "../../../api/category";
+import ToggleSwitch from "../../../components/ToggleSwitch";
 
 const saleStatusOptions = ["판매중", "판매대기", "일시품절", "품절"];
 
@@ -392,17 +393,12 @@ export default function ProductRegist() {
             <FormRow>
               <FormLabel>Ai 가격 변경</FormLabel>
               <FormField>
-                <ToggleRow>
-                  <ToggleButton
-                    type="button"
-                    $checked={form.useAiMaxPrice}
-                    onClick={() =>
-                      handleChange("useAiMaxPrice", !form.useAiMaxPrice)
-                    }
-                  >
-                    <ToggleThumb $checked={form.useAiMaxPrice} />
-                  </ToggleButton>
-                </ToggleRow>
+                <ToggleSwitch
+                  checked={form.useAiMinPrice}
+                  onChange={(nextChecked) =>
+                    handleChange("useAiMinPrice", nextChecked)
+                  }
+                />
               </FormField>
             </FormRow>
 
