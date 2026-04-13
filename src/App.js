@@ -23,6 +23,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import ProductList from "./pages/admin/products/ProductList";
 import ProductRegist from "./pages/admin/products/ProductRegist";
 import ProductManage from "./pages/admin/products/ProductManage";
+import ProductUpdate from "./pages/admin/products/ProductUpdate";
 import PriceSearch from "./pages/admin/price/PriceSearch";
 import MatchingManage from "./pages/admin/price/MatchingManage";
 import AIHistory from "./pages/admin/price/AIHistory";
@@ -59,6 +60,10 @@ function App() {
             <Route path="/admin" element={<Dashboard />} />
             <Route path="/admin/product-list" element={<ProductList />} />
             <Route path="/admin/product-regist" element={<ProductRegist />} />
+            <Route
+              path="/admin/product-update/:productCode"
+              element={<ProductUpdate />}
+            />
             <Route path="/admin/product-manage" element={<ProductManage />} />
             <Route path="/admin/price-search" element={<PriceSearch />} />
             <Route path="/admin/matching-manage" element={<MatchingManage />} />

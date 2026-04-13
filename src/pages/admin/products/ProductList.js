@@ -359,7 +359,18 @@ export default function ProductList() {
       key: "productCode",
       title: "상품코드",
       width: "120px",
-      render: (value) => <CodeText>{value}</CodeText>,
+      render: (value, row) => (
+        <CodeLink
+          type="button"
+          onClick={() =>
+            nav(`/admin/product-update/${row.productCode}`, {
+              state: { product: row },
+            })
+          }
+        >
+          {value}
+        </CodeLink>
+      ),
     },
     {
       key: "productName",
@@ -677,4 +688,20 @@ const ToggleThumb = styled.span`
   transition:
     left 0.15s ease,
     transform 0.15s ease;
+`;
+
+const CodeLink = styled.button`
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
 `;
