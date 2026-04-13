@@ -407,20 +407,7 @@ export default function ProductList() {
         </CenterCell>
       ),
     },
-    {
-      key: "minPrice",
-      title: "최저가판매",
-      width: "110px",
-      sortType: "number",
-      render: (value) => (value > 0 ? formatNumber(value) : "-"),
-    },
-    {
-      key: "maxPrice",
-      title: "최고가판매",
-      width: "110px",
-      sortType: "number",
-      render: (value) => (value > 0 ? formatNumber(value) : "-"),
-    },
+
     {
       key: "stock",
       title: "재고",
