@@ -456,29 +456,29 @@ export default function ProductList() {
         <SummaryCard
           title="전체 상품 수"
           subText="전체 등록 상품"
-          value={`${summary.totalCount}개`}
-          change="6개"
+          value={`${summary.totalCount} SKU`}
+          change="6 SKU"
           up
         />
         <SummaryCard
           title="판매 중"
           subText="현재 판매중 상품"
-          value={`${summary.saleCount}개`}
-          change="1개"
+          value={`${summary.saleCount} SKU`}
+          change="1 SKU"
           up={false}
         />
         <SummaryCard
           title="품절"
           subText="재고 소진 상품"
-          value={`${summary.soldOutCount}개`}
-          change="1개"
+          value={`${summary.soldOutCount} SKU`}
+          change="1 SKU"
           up
         />
         <SummaryCard
           title="판매중지"
           subText="비노출/중지 상품"
-          value={`${summary.hiddenCount}개`}
-          change="6개"
+          value={`${summary.hiddenCount} SKU`}
+          change="6 SKU"
           up
         />
       </SummaryGrid>
