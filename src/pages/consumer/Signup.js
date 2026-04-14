@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { sendEmailCode, verifyEmailCode } from "../../api/auth";
 import { useAuth } from "../../context/AuthContext";
 import logo from "../../assets/stocker-logo.svg";
-import * as S from "./Signup.styles.js";
+import * as S from "./SignupStyles.js";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -505,7 +505,9 @@ export default function Signup() {
                 {fieldErrors.password ? (
                   <S.ErrorText>{fieldErrors.password}</S.ErrorText>
                 ) : isPasswordFilled && isPasswordValid ? (
-                  <S.SuccessText>사용 가능한 비밀번호 형식입니다.</S.SuccessText>
+                  <S.SuccessText>
+                    사용 가능한 비밀번호 형식입니다.
+                  </S.SuccessText>
                 ) : (
                   <S.GuideText>
                     비밀번호 길이는 8~16자, 대문자, 특수문자를 1개 이상 포함해야
@@ -534,7 +536,9 @@ export default function Signup() {
                   isConfirmPasswordMatched ? (
                     <S.SuccessText>비밀번호가 일치합니다.</S.SuccessText>
                   ) : (
-                    <S.ErrorText>비밀번호 확인이 일치하지 않습니다.</S.ErrorText>
+                    <S.ErrorText>
+                      비밀번호 확인이 일치하지 않습니다.
+                    </S.ErrorText>
                   )
                 ) : null}
               </S.InputGroup>
@@ -550,7 +554,9 @@ export default function Signup() {
                   onBlur={handleBlur}
                   placeholder="이름"
                 />
-                {fieldErrors.name && <S.ErrorText>{fieldErrors.name}</S.ErrorText>}
+                {fieldErrors.name && (
+                  <S.ErrorText>{fieldErrors.name}</S.ErrorText>
+                )}
               </S.InputGroup>
 
               <S.InputGroup>

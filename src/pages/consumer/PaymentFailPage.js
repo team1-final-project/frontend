@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertCircle } from "lucide-react";
-import * as S from "./PaymentFailPage.styles.js";
+import * as S from "./PaymentFailPageStyles.js";
 
 export default function PaymentFailPage() {
   const navigate = useNavigate();

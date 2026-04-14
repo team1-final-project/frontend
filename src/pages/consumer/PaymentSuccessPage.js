@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { confirmTossPayment } from "../../api/payment";
-import * as S from "./PaymentSuccessPage.styles.js";
+import * as S from "./PaymentSuccessPageStyles.js";
 
 export default function PaymentSuccessPage() {
   const navigate = useNavigate();

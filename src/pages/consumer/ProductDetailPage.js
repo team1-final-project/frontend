@@ -9,7 +9,7 @@ import {
   MoreHorizontal,
   Plus,
 } from "lucide-react";
-import * as S from "./ProductDetailPage.styles.js";
+import * as S from "./ProductDetailPageStyles.js";
 import shinramyunImg from "../../assets/shinramyeon.jpg";
 
 const PRODUCT_IMAGE = shinramyunImg;

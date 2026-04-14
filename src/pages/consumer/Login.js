@@ -10,7 +10,7 @@ import logo from "../../assets/stocker-logo.svg";
 import { FcGoogle } from "react-icons/fc";
 import { SiNaver } from "react-icons/si";
 import { RiKakaoTalkFill } from "react-icons/ri";
-import * as S from "./Login.styles.js";
+import * as S from "./LoginStyles.js";
 
 export default function Login() {
   const navigate = useNavigate();

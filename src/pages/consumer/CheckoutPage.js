@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createOrder } from "../../api/order";
-import * as S from "./CheckoutPage.styles.js";
+import * as S from "./CheckoutPageStyles.js";
 
 const TOSS_CLIENT_KEY = process.env.REACT_APP_TOSS_CLIENT_KEY;
 

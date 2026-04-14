@@ -1,7 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Check, Receipt, ShoppingBag } from "lucide-react";
-import * as S from "./OrderCompletePage.styles.js";
+import * as S from "./OrderCompletePageStyles.js";
 
 export default function OrderCompletePage() {
   const navigate = useNavigate();

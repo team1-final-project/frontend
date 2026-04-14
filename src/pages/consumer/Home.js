@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import herosectionImg from "../../assets/herosection.png";
-import * as S from "./Home.styles";
+import * as S from "./HomeStyles";
 
 import { bestItems, hotDealItems, brandLogos } from "./HomeData";
 

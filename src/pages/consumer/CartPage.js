@@ -7,7 +7,7 @@ import {
   updateCartItemChecked,
   updateCartItemQuantity,
 } from "../../api/cart";
-import * as S from "./CartPage.styles.js";
+import * as S from "./CartPageStyles.js";
 
 export default function CartPage() {
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ export default function CartPage() {
   const totalPrice = useMemo(() => {
     return selectedItems.reduce(
       (acc, item) => acc + item.price * item.quantity,
-      0
+      0,
     );
   }, [selectedItems]);
 
@@ -179,7 +179,9 @@ export default function CartPage() {
 
                 <S.InfoArea>
                   <S.ProductName>{item.name}</S.ProductName>
-                  <S.ProductPrice>{item.price.toLocaleString()}원</S.ProductPrice>
+                  <S.ProductPrice>
+                    {item.price.toLocaleString()}원
+                  </S.ProductPrice>
 
                   <S.QuantityBox>
                     <S.QtyButton
