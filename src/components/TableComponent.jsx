@@ -126,7 +126,9 @@ export default function TableComponent({
   const sortedData = useMemo(() => {
     if (!sortConfig.key) return data;
 
-    const targetColumn = columns.find((column) => column.key === sortConfig.key);
+    const targetColumn = columns.find(
+      (column) => column.key === sortConfig.key,
+    );
     if (!targetColumn) return data;
 
     const copied = [...data];
@@ -316,7 +318,8 @@ const Wrap = styled.div`
       border: 1px solid #eef1f5;
       border-radius: 18px;
       padding: 0;
-      box-shadow: 0 1px 0 rgba(17, 24, 39, 0.02),
+      box-shadow:
+        0 1px 0 rgba(17, 24, 39, 0.02),
         0 8px 20px rgba(31, 41, 55, 0.04);
     `}
 
@@ -381,7 +384,8 @@ const CustomToolbarWrap = styled.div`
 const SearchWrap = styled.div`
   position: relative;
   width: 100%;
-  max-width: ${({ $variant }) => ($variant === "inventory" ? "224px" : "240px")};
+  max-width: ${({ $variant }) =>
+    $variant === "inventory" ? "224px" : "240px"};
 
   @media (max-width: 900px) {
     max-width: 100%;
@@ -435,7 +439,8 @@ const SearchInput = styled.input`
 
 const FilterSelectWrap = styled.div`
   position: relative;
-  min-width: ${({ $variant }) => ($variant === "inventory" ? "126px" : "180px")};
+  min-width: ${({ $variant }) =>
+    $variant === "inventory" ? "126px" : "180px"};
 
   @media (max-width: 900px) {
     width: 100%;
@@ -495,7 +500,8 @@ const TableScroll = styled.div`
 const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  min-width: ${({ $variant }) => ($variant === "inventory" ? "1280px" : "1200px")};
+  min-width: ${({ $variant }) =>
+    $variant === "inventory" ? "1280px" : "1200px"};
 
   thead th {
     white-space: nowrap;

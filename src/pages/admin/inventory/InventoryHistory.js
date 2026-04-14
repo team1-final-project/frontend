@@ -208,9 +208,7 @@ const buildPolylinePoints = (values, width, height, padding = 12) => {
         padding +
         (index * (width - padding * 2)) / Math.max(values.length - 1, 1);
       const y =
-        height -
-        padding -
-        ((value - min) * (height - padding * 2)) / range;
+        height - padding - ((value - min) * (height - padding * 2)) / range;
       return `${x},${y}`;
     })
     .join(" ");
@@ -231,8 +229,10 @@ export default function InventoryHistory() {
     const inboundRows = rows.filter((row) => row.type === "입고");
     const outboundRows = rows.filter((row) => row.type === "출고");
 
-    const inboundSkuCount = new Set(inboundRows.map((row) => row.productCode)).size;
-    const outboundSkuCount = new Set(outboundRows.map((row) => row.productCode)).size;
+    const inboundSkuCount = new Set(inboundRows.map((row) => row.productCode))
+      .size;
+    const outboundSkuCount = new Set(outboundRows.map((row) => row.productCode))
+      .size;
 
     const inboundQty = inboundRows.reduce(
       (acc, row) => acc + Math.abs(row.movementQty),
@@ -331,7 +331,9 @@ export default function InventoryHistory() {
       width: "120px",
       sortType: "number",
       render: (value) => (
-        <QuantityText $positive={value > 0}>{formatSignedCount(value)}</QuantityText>
+        <QuantityText $positive={value > 0}>
+          {formatSignedCount(value)}
+        </QuantityText>
       ),
     },
     {
@@ -357,76 +359,76 @@ export default function InventoryHistory() {
       </HeaderRow>
 
       <SummaryGrid>
-  <StatCard>
-    <CardTitle>입고</CardTitle>
-    <BigLine>
-      <BigNumber>{summary.inboundSkuCount}</BigNumber>
-      <Unit>SKU</Unit>
-      <Slash>/</Slash>
-      <SubNumber>{summary.inboundQty.toLocaleString()}개</SubNumber>
-    </BigLine>
-    <ChangeRow $up>
-      ↑ 6 SKU / 2,000개 <span>vs Yesterday</span>
-    </ChangeRow>
-  </StatCard>
+        <StatCard>
+          <CardTitle>입고</CardTitle>
+          <BigLine>
+            <BigNumber>{summary.inboundSkuCount}</BigNumber>
+            <Unit>SKU</Unit>
+            <Slash>/</Slash>
+            <SubNumber>{summary.inboundQty.toLocaleString()}개</SubNumber>
+          </BigLine>
+          <ChangeRow $up>
+            ↑ 6 SKU / 2,000개 <span>vs Yesterday</span>
+          </ChangeRow>
+        </StatCard>
 
-  <StatCard>
-    <CardTitle>출고</CardTitle>
-    <BigLine>
-      <BigNumber>{summary.outboundSkuCount}</BigNumber>
-      <Unit>SKU</Unit>
-      <Slash>/</Slash>
-      <SubNumber>{summary.outboundQty.toLocaleString()}개</SubNumber>
-    </BigLine>
-    <ChangeRow $up={false}>
-      ↓ 4 SKU / 3,000개 <span>vs Yesterday</span>
-    </ChangeRow>
-  </StatCard>
+        <StatCard>
+          <CardTitle>출고</CardTitle>
+          <BigLine>
+            <BigNumber>{summary.outboundSkuCount}</BigNumber>
+            <Unit>SKU</Unit>
+            <Slash>/</Slash>
+            <SubNumber>{summary.outboundQty.toLocaleString()}개</SubNumber>
+          </BigLine>
+          <ChangeRow $up={false}>
+            ↓ 4 SKU / 3,000개 <span>vs Yesterday</span>
+          </ChangeRow>
+        </StatCard>
 
-  <TrendCard>
-    <TrendHeader>입출고 추이</TrendHeader>
+        <TrendCard>
+          <TrendHeader>입출고 추이</TrendHeader>
 
-    <TrendInner>
-      <LegendArea>
-        <LegendItem>
-          <LegendDot $color="#2563eb" />
-          입고
-        </LegendItem>
-        <LegendItem>
-          <LegendDot $color="#ef4444" />
-          출고
-        </LegendItem>
-      </LegendArea>
+          <TrendInner>
+            <LegendArea>
+              <LegendItem>
+                <LegendDot $color="#2563eb" />
+                입고
+              </LegendItem>
+              <LegendItem>
+                <LegendDot $color="#ef4444" />
+                출고
+              </LegendItem>
+            </LegendArea>
 
-      <ChartArea>
-        <TrendSvg viewBox="0 0 260 96" preserveAspectRatio="none">
-          <polyline
-            fill="none"
-            stroke="#2563eb"
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            points={buildPolylinePoints(inboundTrend, 260, 96, 10)}
-          />
-          <polyline
-            fill="none"
-            stroke="#ef4444"
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            points={buildPolylinePoints(outboundTrend, 260, 96, 10)}
-          />
-        </TrendSvg>
+            <ChartArea>
+              <TrendSvg viewBox="0 0 260 96" preserveAspectRatio="none">
+                <polyline
+                  fill="none"
+                  stroke="#2563eb"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  points={buildPolylinePoints(inboundTrend, 260, 96, 10)}
+                />
+                <polyline
+                  fill="none"
+                  stroke="#ef4444"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  points={buildPolylinePoints(outboundTrend, 260, 96, 10)}
+                />
+              </TrendSvg>
 
-        <XAxis>
-          {weekLabels.map((label) => (
-            <span key={label}>{label}</span>
-          ))}
-        </XAxis>
-      </ChartArea>
-    </TrendInner>
-  </TrendCard>
-</SummaryGrid>
+              <XAxis>
+                {weekLabels.map((label) => (
+                  <span key={label}>{label}</span>
+                ))}
+              </XAxis>
+            </ChartArea>
+          </TrendInner>
+        </TrendCard>
+      </SummaryGrid>
 
       <TableComponent
         variant="inventory"
@@ -502,7 +504,7 @@ const HeaderRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
   margin-top: 5px;
 `;
 
@@ -514,7 +516,7 @@ const Title = styled.h2`
 `;
 
 const SummaryGrid = styled.div`
-  margin-bottom: 12px;
+  margin-bottom: 18px;
   display: grid;
   grid-template-columns: 1fr 1fr 1.42fr;
   gap: 14px;
@@ -526,11 +528,10 @@ const SummaryGrid = styled.div`
 
 const CardBase = styled.div`
   background: #ffffff;
-  border-radius: 18px;
-  padding: 14px 14px;
-  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.02),
-    0 8px 20px rgba(31, 41, 55, 0.04);
-  min-height: 104px;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
+  min-height: 118px;
   box-sizing: border-box;
 `;
 
@@ -541,10 +542,10 @@ const TrendCard = styled(CardBase)`
 `;
 
 const CardTitle = styled.div`
+  color: #111827;
   font-size: 14px;
   font-weight: 700;
-  color: #2f3645;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 `;
 
 const BigLine = styled.div`
@@ -585,24 +586,26 @@ const SubNumber = styled.div`
 `;
 
 const ChangeRow = styled.div`
-  margin-top: 6px;
-  font-size: 12px;
-  line-height: 1.2;
-  font-weight: 700;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   color: ${({ $up }) => ($up ? "#22c55e" : "#ef4444")};
+  font-size: 12px;
+  font-weight: 700;
 
   span {
     color: #9ca3af;
-    font-weight: 600;
-    margin-left: 4px;
+    font-weight: 500;
+    margin-left: 2px;
   }
 `;
 
 const TrendHeader = styled.div`
-  font-size: 15px;
+  color: #111827;
+  font-size: 14px;
   font-weight: 700;
-  color: #2f3645;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 `;
 
 const TrendInner = styled.div`

@@ -156,20 +156,8 @@ const inventoryData = [
   },
 ];
 
-const inventoryStatusOptions = [
-  "안전재고",
-  "발주권고",
-  "일시품절",
-  "악성재고",
-];
-
-const salesStatusOptions = [
-  "판매중",
-  "판매중지",
-  "일시품절",
-  "판매종료",
-];
-
+const inventoryStatusOptions = ["안전재고", "발주권고", "일시품절", "악성재고"];
+const salesStatusOptions = ["판매중", "판매중지", "일시품절", "판매종료"];
 const salesStatusList = ["판매중", "판매중지", "일시품절", "판매종료"];
 
 const categoryOptions = [
@@ -211,10 +199,14 @@ export default function LiveInventory() {
         판매종료: rows.filter((item) => item.salesStatus === "판매종료").length,
       },
       inventorySummary: {
-        안전재고: rows.filter((item) => item.inventoryStatus === "안전재고").length,
-        발주권고: rows.filter((item) => item.inventoryStatus === "발주권고").length,
-        일시품절: rows.filter((item) => item.inventoryStatus === "일시품절").length,
-        악성재고: rows.filter((item) => item.inventoryStatus === "악성재고").length,
+        안전재고: rows.filter((item) => item.inventoryStatus === "안전재고")
+          .length,
+        발주권고: rows.filter((item) => item.inventoryStatus === "발주권고")
+          .length,
+        일시품절: rows.filter((item) => item.inventoryStatus === "일시품절")
+          .length,
+        악성재고: rows.filter((item) => item.inventoryStatus === "악성재고")
+          .length,
       },
       warningItems: rows
         .filter((item) => item.inventoryStatus === "발주권고")
@@ -231,7 +223,9 @@ export default function LiveInventory() {
         item.productName.toLowerCase().includes(q) ||
         item.productCode.toLowerCase().includes(q);
 
-      const matchCategory = categoryValue ? item.category === categoryValue : true;
+      const matchCategory = categoryValue
+        ? item.category === categoryValue
+        : true;
       const matchInventory = inventoryValue
         ? item.inventoryStatus === inventoryValue
         : true;
@@ -289,7 +283,7 @@ export default function LiveInventory() {
     },
     {
       key: "badStock",
-      title: "불용재고",
+      title: "불량재고",
       width: "100px",
       sortType: "number",
       render: (value) => formatCount(value),
@@ -355,358 +349,358 @@ export default function LiveInventory() {
   ];
 
   return (
-    <Page>
-      <Content>
-        <TopBar>
-          <PageTitle>실시간 재고 현황</PageTitle>
-        </TopBar>
+    <PageWrap>
+      <HeaderRow>
+        <Title>실시간 재고 현황</Title>
+      </HeaderRow>
 
-        <CardGrid>
-          <SummaryCardBox>
-            <CardTitle>전체 재고 수</CardTitle>
-            <BigValueRow>
-              <BigValue>{summary.totalCount}</BigValue>
-              <BigSuffix>SKU</BigSuffix>
-            </BigValueRow>
-            <GrowthText>↑ 6개 vs Yesterday</GrowthText>
-          </SummaryCardBox>
+      <SummaryGrid>
+        <SummaryCardBox>
+          <CardTitle>전체 재고 수</CardTitle>
+          <CardValueWrap>
+            <CardValue>{summary.totalCount}개</CardValue>
+          </CardValueWrap>
+          <CardMeta>↑ 6개 vs Yesterday</CardMeta>
+        </SummaryCardBox>
 
-          <SummaryCardBox>
-            <CardTitle>판매 상태별</CardTitle>
-            <StatusList>
-              <StatusRow>
-                <StatusLabel>
-                  <Dot $color="green" />
-                  판매중
-                </StatusLabel>
-                <StatusValue>{summary.salesSummary["판매중"]} SKU</StatusValue>
-              </StatusRow>
-              <StatusRow>
-                <StatusLabel>
-                  <Dot $color="yellow" />
-                  판매중지
-                </StatusLabel>
-                <StatusValue>{summary.salesSummary["판매중지"]} SKU</StatusValue>
-              </StatusRow>
-              <StatusRow>
-                <StatusLabel>
-                  <Dot $color="pink" />
-                  일시품절
-                </StatusLabel>
-                <StatusValue>{summary.salesSummary["일시품절"]} SKU</StatusValue>
-              </StatusRow>
-              <StatusRow>
-                <StatusLabel>
-                  <Dot $color="indigo" />
-                  판매종료
-                </StatusLabel>
-                <StatusValue>{summary.salesSummary["판매종료"]} SKU</StatusValue>
-              </StatusRow>
-            </StatusList>
-          </SummaryCardBox>
+        <SummaryCardBox>
+          <CardTitle>판매 상태별</CardTitle>
+          <SummaryList>
+            <SummaryRow>
+              <SummaryLabel>
+                <Dot $color="green" />
+                판매중
+              </SummaryLabel>
+              <SummaryValue>{summary.salesSummary["판매중"]} SKU</SummaryValue>
+            </SummaryRow>
+            <SummaryRow>
+              <SummaryLabel>
+                <Dot $color="yellow" />
+                판매중지
+              </SummaryLabel>
+              <SummaryValue>
+                {summary.salesSummary["판매중지"]} SKU
+              </SummaryValue>
+            </SummaryRow>
+            <SummaryRow>
+              <SummaryLabel>
+                <Dot $color="pink" />
+                일시품절
+              </SummaryLabel>
+              <SummaryValue>
+                {summary.salesSummary["일시품절"]} SKU
+              </SummaryValue>
+            </SummaryRow>
+            <SummaryRow>
+              <SummaryLabel>
+                <Dot $color="indigo" />
+                판매종료
+              </SummaryLabel>
+              <SummaryValue>
+                {summary.salesSummary["판매종료"]} SKU
+              </SummaryValue>
+            </SummaryRow>
+          </SummaryList>
+        </SummaryCardBox>
 
-          <SummaryCardBox>
-            <CardTitle>재고 상태별</CardTitle>
-            <StatusList>
-              <StatusRow>
-                <StatusLabel>
-                  <Dot $color="green" />
-                  안전재고
-                </StatusLabel>
-                <StatusValue>{summary.inventorySummary["안전재고"]} SKU</StatusValue>
-              </StatusRow>
-              <StatusRow>
-                <StatusLabel>
-                  <Dot $color="yellow" />
-                  발주권고
-                </StatusLabel>
-                <StatusValue>{summary.inventorySummary["발주권고"]} SKU</StatusValue>
-              </StatusRow>
-              <StatusRow>
-                <StatusLabel>
-                  <Dot $color="pink" />
-                  일시품절
-                </StatusLabel>
-                <StatusValue>{summary.inventorySummary["일시품절"]} SKU</StatusValue>
-              </StatusRow>
-              <StatusRow>
-                <StatusLabel>
-                  <Dot $color="red" />
-                  악성재고
-                </StatusLabel>
-                <StatusValue>{summary.inventorySummary["악성재고"]} SKU</StatusValue>
-              </StatusRow>
-            </StatusList>
-          </SummaryCardBox>
+        <SummaryCardBox>
+          <CardTitle>재고 상태별</CardTitle>
+          <SummaryList>
+            <SummaryRow>
+              <SummaryLabel>
+                <Dot $color="green" />
+                안전재고
+              </SummaryLabel>
+              <SummaryValue>
+                {summary.inventorySummary["안전재고"]} SKU
+              </SummaryValue>
+            </SummaryRow>
+            <SummaryRow>
+              <SummaryLabel>
+                <Dot $color="yellow" />
+                발주권고
+              </SummaryLabel>
+              <SummaryValue>
+                {summary.inventorySummary["발주권고"]} SKU
+              </SummaryValue>
+            </SummaryRow>
+            <SummaryRow>
+              <SummaryLabel>
+                <Dot $color="pink" />
+                일시품절
+              </SummaryLabel>
+              <SummaryValue>
+                {summary.inventorySummary["일시품절"]} SKU
+              </SummaryValue>
+            </SummaryRow>
+            <SummaryRow>
+              <SummaryLabel>
+                <Dot $color="red" />
+                악성재고
+              </SummaryLabel>
+              <SummaryValue>
+                {summary.inventorySummary["악성재고"]} SKU
+              </SummaryValue>
+            </SummaryRow>
+          </SummaryList>
+        </SummaryCardBox>
 
-          <SummaryCardBox>
-            <CardHeaderRow>
-              <CardTitle>발주 권고</CardTitle>
-              <CardRightValue>{summary.inventorySummary["발주권고"]} SKU</CardRightValue>
-            </CardHeaderRow>
+        <SummaryCardBox>
+          <CardHeaderRow>
+            <CardTitle>발주 권고</CardTitle>
+            <CardRightValue>
+              {summary.inventorySummary["발주권고"]} SKU
+            </CardRightValue>
+          </CardHeaderRow>
 
-            <WarningHeader>
-              <span>재고 부족 예상</span>
-              <span>현재고</span>
-            </WarningHeader>
+          <WarningHeader>
+            <span>재고 부족 예상</span>
+            <span>현재고</span>
+          </WarningHeader>
 
-            <WarningList>
-              {summary.warningItems.length > 0 ? (
-                summary.warningItems.map((row) => (
-                  <WarningItem key={row.id}>
-                    <WarningName>{row.productName}</WarningName>
-                    <WarningStock>{formatCount(row.availableStock)}</WarningStock>
-                  </WarningItem>
-                ))
-              ) : (
-                <WarningEmpty>발주 권고 대상이 없습니다.</WarningEmpty>
-              )}
-            </WarningList>
-          </SummaryCardBox>
-        </CardGrid>
+          <WarningList>
+            {summary.warningItems.length > 0 ? (
+              summary.warningItems.map((row) => (
+                <WarningItem key={row.id}>
+                  <WarningName>{row.productName}</WarningName>
+                  <WarningStock>{formatCount(row.availableStock)}</WarningStock>
+                </WarningItem>
+              ))
+            ) : (
+              <WarningEmpty>발주 권고 대상이 없습니다.</WarningEmpty>
+            )}
+          </WarningList>
+        </SummaryCardBox>
+      </SummaryGrid>
 
-        <TableComponent
-          variant="inventory"
-          columns={columns}
-          data={filteredData}
-          rowKey="id"
-          searchValue={keyword}
-          onSearchChange={(value) => {
-            setKeyword(value);
-            setPage(1);
-          }}
-          searchPlaceholder="상품명, 상품코드로 검색"
-          filterValue={categoryValue}
-          onFilterChange={(value) => {
-            setCategoryValue(value);
-            setPage(1);
-          }}
-          filterPlaceholder="카테고리"
-          filterOptions={categoryOptions}
-          extraToolbar={
-            <FilterGroup>
-              <ToolbarSelect
-                value={inventoryValue}
-                onChange={(e) => {
-                  setInventoryValue(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">재고상태별</option>
-                {inventoryStatusOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </ToolbarSelect>
+      <TableComponent
+        columns={columns}
+        data={filteredData}
+        rowKey="id"
+        searchValue={keyword}
+        onSearchChange={(value) => {
+          setKeyword(value);
+          setPage(1);
+        }}
+        searchPlaceholder="상품명, 상품코드로 검색"
+        filterValue={categoryValue}
+        onFilterChange={(value) => {
+          setCategoryValue(value);
+          setPage(1);
+        }}
+        filterPlaceholder="카테고리"
+        filterOptions={categoryOptions}
+        extraToolbar={
+          <FilterGroup>
+            <ToolbarSelect
+              value={inventoryValue}
+              onChange={(e) => {
+                setInventoryValue(e.target.value);
+                setPage(1);
+              }}
+            >
+              <option value="">재고상태별</option>
+              {inventoryStatusOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </ToolbarSelect>
 
-              <ToolbarSelect
-                value={salesValue}
-                onChange={(e) => {
-                  setSalesValue(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">판매상태별</option>
-                {salesStatusOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </ToolbarSelect>
-            </FilterGroup>
-          }
-          page={page}
-          pageSize={pageSize}
-          onPageChange={setPage}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
-          }}
-        />
-      </Content>
-    </Page>
+            <ToolbarSelect
+              value={salesValue}
+              onChange={(e) => {
+                setSalesValue(e.target.value);
+                setPage(1);
+              }}
+            >
+              <option value="">판매상태별</option>
+              {salesStatusOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </ToolbarSelect>
+          </FilterGroup>
+        }
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+      />
+    </PageWrap>
   );
 }
 
-const Page = styled.div`
-  min-height: 100vh;
-  background: #f5f7fb;
-  color: #2d3648;
-  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+const PageWrap = styled.div`
+  padding: 24px;
+  background: #f8fafc;
+  min-height: 100%;
 `;
 
-const Content = styled.main`
-  padding: 26px 26px 30px;
-  min-width: 0;
-`;
-
-const TopBar = styled.div`
+const HeaderRow = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 26px;
+  justify-content: space-between;
+  margin-bottom: 18px;
 `;
 
-const PageTitle = styled.h1`
+const Title = styled.h2`
   margin: 0;
+  color: #111827;
   font-size: 22px;
   font-weight: 800;
-  color: #2c3445;
 `;
 
-const CardGrid = styled.div`
+const SummaryGrid = styled.div`
+  margin-bottom: 18px;
   display: grid;
-  grid-template-columns: 1.1fr 1.1fr 1.1fr 1fr;
-  gap: 18px;
-  margin-bottom: 22px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
 
-  @media (max-width: 1280px) {
-    grid-template-columns: repeat(2, minmax(260px, 1fr));
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  @media (max-width: 820px) {
+  @media (max-width: 700px) {
     grid-template-columns: 1fr;
   }
 `;
 
 const SummaryCardBox = styled.div`
   background: #ffffff;
-  border-radius: 18px;
-  padding: 16px 16px;
-  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.02),
-    0 8px 20px rgba(31, 41, 55, 0.04);
-  height: 156px;
+  border-radius: 16px;
+  padding: 18px;
+  min-height: 118px;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
   box-sizing: border-box;
 `;
 
 const CardTitle = styled.div`
-  font-size: 16px;
-  font-weight: 700;
-  color: #323a49;
-  margin-bottom: 10px;
-`;
-
-const BigValueRow = styled.div`
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 8px;
-`;
-
-const BigValue = styled.div`
-  font-size: 48px;
-  line-height: 1;
-  font-weight: 800;
-  color: #1f2937;
-`;
-
-const BigSuffix = styled.div`
-  font-size: 16px;
-  font-weight: 700;
-  color: #1f2937;
-`;
-
-const GrowthText = styled.div`
+  color: #111827;
   font-size: 14px;
-  color: #48bb78;
-  font-weight: 600;
+  font-weight: 700;
 `;
 
-const StatusList = styled.div`
+const CardValueWrap = styled.div`
+  margin-top: 14px;
+`;
+
+const CardValue = styled.div`
+  color: #111827;
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+`;
+
+const CardMeta = styled.div`
+  margin-top: 10px;
+  color: #22c55e;
+  font-size: 12px;
+  font-weight: 700;
+`;
+
+const SummaryList = styled.div`
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 `;
 
-const StatusRow = styled.div`
+const SummaryRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
 `;
 
-const StatusLabel = styled.div`
+const SummaryLabel = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  color: #2f3645;
+  gap: 8px;
+  color: #374151;
+  font-size: 13px;
   font-weight: 600;
 `;
 
-const StatusValue = styled.div`
-  font-size: 14px;
-  color: #1f2937;
+const SummaryValue = styled.div`
+  color: #111827;
+  font-size: 12px;
   font-weight: 700;
 `;
 
 const Dot = styled.span`
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
   background: ${({ $color }) => {
-    if ($color === "green") return "#3ecf78";
-    if ($color === "yellow") return "#f6b800";
-    if ($color === "pink") return "#cc35ff";
-    if ($color === "indigo") return "#4338ca";
-    if ($color === "red") return "#ff5f5f";
+    if ($color === "green") return "#22c55e";
+    if ($color === "yellow") return "#f59e0b";
+    if ($color === "pink") return "#d946ef";
+    if ($color === "indigo") return "#6366f1";
+    if ($color === "red") return "#ef4444";
     return "#cbd5e1";
   }};
 `;
 
 const CardHeaderRow = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  justify-content: space-between;
 `;
 
 const CardRightValue = styled.div`
-  font-size: 16px;
+  color: #111827;
+  font-size: 14px;
   font-weight: 800;
-  color: #1f2937;
 `;
 
 const WarningHeader = styled.div`
+  margin-top: 10px;
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
-  color: #7b8494;
-  margin-bottom: 10px;
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 600;
 `;
 
 const WarningList = styled.div`
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 `;
 
 const WarningItem = styled.div`
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
 `;
 
 const WarningName = styled.div`
-  font-size: 14px;
-  color: #374151;
+  min-width: 0;
+  color: #111827;
+  font-size: 12px;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `;
 
 const WarningStock = styled.div`
-  font-size: 14px;
+  color: #111827;
+  font-size: 12px;
   font-weight: 700;
-  color: #374151;
 `;
 
 const WarningEmpty = styled.div`
-  font-size: 14px;
-  color: #98a2b3;
-  padding-top: 8px;
+  color: #9ca3af;
+  font-size: 12px;
 `;
 
 const FilterGroup = styled.div`
@@ -717,19 +711,19 @@ const FilterGroup = styled.div`
 `;
 
 const ToolbarSelect = styled.select`
-  height: 44px;
-  min-width: 126px;
-  padding: 0 14px;
-  border: 1px solid #e6eaf2;
+  height: 38px;
+  min-width: 120px;
+  padding: 0 12px;
+  border: 1px solid #edf0f4;
   border-radius: 10px;
   background: #ffffff;
-  color: #7b8494;
+  color: #6b7280;
   font-size: 13px;
   outline: none;
   cursor: pointer;
 
   &:focus {
-    border-color: #c9d6ff;
+    border-color: #cfd8e3;
   }
 `;
 
@@ -743,74 +737,69 @@ const InventoryStatusBadge = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 72px;
   height: 28px;
   padding: 0 10px;
-  border-radius: 7px;
+  border-radius: 8px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
+  white-space: nowrap;
   background: ${({ $type }) => {
-    if ($type === "안전재고") return "#dcf6e7";
-    if ($type === "발주권고") return "#fff2bf";
-    if ($type === "일시품절") return "#f4d5ff";
-    if ($type === "악성재고") return "#ffd9d9";
+    if ($type === "안전재고") return "#dcfce7";
+    if ($type === "발주권고") return "#fef3c7";
+    if ($type === "일시품절") return "#f5d0fe";
+    if ($type === "악성재고") return "#fee2e2";
     return "#eef2f7";
   }};
   color: ${({ $type }) => {
-    if ($type === "안전재고") return "#1ea95f";
-    if ($type === "발주권고") return "#f1a600";
-    if ($type === "일시품절") return "#c02bf4";
-    if ($type === "악성재고") return "#ff5a5a";
+    if ($type === "안전재고") return "#16a34a";
+    if ($type === "발주권고") return "#d97706";
+    if ($type === "일시품절") return "#c026d3";
+    if ($type === "악성재고") return "#dc2626";
     return "#667085";
   }};
 `;
 
 const SalesStatusSelect = styled.select`
-  height: 32px;
-  min-width: 96px;
-  border: 0;
-  border-radius: 7px;
-  padding: 0 30px 0 10px;
+  height: 30px;
+  min-width: 94px;
+  padding: 0 28px 0 10px;
+  border: none;
+  border-radius: 8px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   outline: none;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-
   background-color: ${({ $type }) => {
-    if ($type === "판매중") return "#dcf6e7";
-    if ($type === "일시품절") return "#f4d5ff";
-    if ($type === "판매중지") return "#fff2bf";
+    if ($type === "판매중") return "#dcfce7";
+    if ($type === "일시품절") return "#f5d0fe";
+    if ($type === "판매중지") return "#fef3c7";
     if ($type === "판매종료") return "#e5e7eb";
     return "#eef2f7";
   }};
-
   color: ${({ $type }) => {
-    if ($type === "판매중") return "#1ea95f";
-    if ($type === "일시품절") return "#c02bf4";
-    if ($type === "판매중지") return "#f1a600";
+    if ($type === "판매중") return "#16a34a";
+    if ($type === "일시품절") return "#c026d3";
+    if ($type === "판매중지") return "#d97706";
     if ($type === "판매종료") return "#6b7280";
     return "#667085";
   }};
-
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  background-position: right 9px center;
   background-size: 12px;
-
-  &:focus {
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
-  }
 `;
 
 const CodeLink = styled.button`
   border: 0;
   background: transparent;
   padding: 0;
-  font: inherit;
-  font-weight: 800;
-  color: inherit;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
 
   &:hover {
@@ -820,8 +809,9 @@ const CodeLink = styled.button`
 `;
 
 const ProductNameLink = styled.a`
-  color: inherit;
-  font: inherit;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 500;
   text-decoration: none;
 
   &:hover {
