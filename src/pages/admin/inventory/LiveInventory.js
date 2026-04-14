@@ -476,6 +476,8 @@ export default function LiveInventory() {
       <TableComponent
         columns={columns}
         data={filteredData}
+        headerAlign="center"
+        cellAlign="center"
         rowKey="id"
         searchValue={keyword}
         onSearchChange={(value) => {

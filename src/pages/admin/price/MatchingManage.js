@@ -422,6 +422,8 @@ export default function MatchingManage() {
         columns={columns}
         data={filteredData}
         rowKey="id"
+        headerAlign="center"
+        cellAlign="center"
         searchValue={searchValue}
         onSearchChange={(value) => {
           setSearchValue(value);

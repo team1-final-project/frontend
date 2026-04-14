@@ -14,6 +14,8 @@ export default function TableComponent({
   data = [],
   rowKey = "id",
   variant = "default",
+  headerAlign = "left",
+  cellAlign = "left",
   searchValue = "",
   onSearchChange,
   searchPlaceholder = "Search...",
@@ -237,14 +239,23 @@ export default function TableComponent({
                   key={column.key}
                   style={{
                     width: column.width || "auto",
-                    textAlign: column.align || "left",
+                    textAlign:
+                      column.headerAlign ||
+                      headerAlign ||
+                      column.align ||
+                      "left",
                   }}
                 >
                   <HeaderButton
                     type="button"
                     $variant={variant}
                     $sortable={column.sortable !== false}
-                    $align={column.align || "left"}
+                    $align={
+                      column.headerAlign ||
+                      headerAlign ||
+                      column.align ||
+                      "left"
+                    }
                     onClick={() => handleSort(column)}
                   >
                     <span>{column.title}</span>
@@ -266,7 +277,7 @@ export default function TableComponent({
                       <td
                         key={column.key}
                         style={{
-                          textAlign: column.align || "left",
+                          textAlign: column.align || cellAlign || "left",
                         }}
                       >
                         {column.render ? column.render(value, row) : value}

@@ -485,6 +485,8 @@ export default function ProductList() {
       <TableComponent
         columns={columns}
         data={filteredData}
+        headerAlign="center"
+        cellAlign="center"
         rowKey="id"
         searchValue={searchValue}
         onSearchChange={(value) => {

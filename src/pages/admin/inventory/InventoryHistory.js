@@ -273,24 +273,9 @@ export default function InventoryHistory() {
 
   const columns = [
     {
-      key: "date",
-      title: "일자",
-      width: "140px",
-      sortType: "date",
-      render: (value) => <SubText>{value}</SubText>,
-    },
-    {
-      key: "type",
-      title: "구분",
-      width: "90px",
-      sortable: false,
-      align: "center",
-      render: (value) => <TypeBadge $type={value}>{value}</TypeBadge>,
-    },
-    {
       key: "productCode",
       title: "상품코드",
-      width: "130px",
+      width: "100px",
       render: (value, row) => (
         <CodeLink
           type="button"
@@ -303,6 +288,14 @@ export default function InventoryHistory() {
           {value}
         </CodeLink>
       ),
+    },
+    {
+      key: "type",
+      title: "구분",
+      width: "90px",
+      sortable: false,
+      align: "center",
+      render: (value) => <TypeBadge $type={value}>{value}</TypeBadge>,
     },
     {
       key: "productName",
@@ -342,6 +335,13 @@ export default function InventoryHistory() {
       width: "110px",
       sortType: "number",
       render: (value) => formatCount(value),
+    },
+    {
+      key: "date",
+      title: "일자",
+      width: "140px",
+      sortType: "date",
+      render: (value) => <SubText>{value}</SubText>,
     },
     {
       key: "note",
@@ -431,9 +431,10 @@ export default function InventoryHistory() {
       </SummaryGrid>
 
       <TableComponent
-        variant="inventory"
         columns={columns}
         data={filteredData}
+        headerAlign="center"
+        cellAlign="center"
         rowKey="id"
         page={page}
         pageSize={pageSize}
@@ -496,7 +497,7 @@ export default function InventoryHistory() {
 
 const PageWrap = styled.div`
   padding: 24px;
-  background: #f5f7fb;
+  background: #f8fafc;
   min-height: 100%;
 `;
 
@@ -504,8 +505,7 @@ const HeaderRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
-  margin-top: 5px;
+  margin-bottom: 18px;
 `;
 
 const Title = styled.h2`
@@ -545,13 +545,13 @@ const CardTitle = styled.div`
   color: #111827;
   font-size: 14px;
   font-weight: 700;
-  margin-bottom: 10px;
 `;
 
 const BigLine = styled.div`
   display: flex;
   align-items: flex-end;
   gap: 6px;
+  margin-top: 14px;
   min-height: 38px;
 `;
 
@@ -559,14 +559,14 @@ const BigNumber = styled.div`
   font-size: 38px;
   line-height: 1;
   font-weight: 800;
-  color: #1f2937;
+  color: #111827;
 `;
 
 const Unit = styled.div`
   font-size: 14px;
   line-height: 1;
   font-weight: 700;
-  color: #1f2937;
+  color: #111827;
   margin-bottom: 4px;
 `;
 
@@ -581,12 +581,12 @@ const SubNumber = styled.div`
   font-size: 14px;
   line-height: 1;
   font-weight: 700;
-  color: #1f2937;
+  color: #111827;
   margin-bottom: 4px;
 `;
 
 const ChangeRow = styled.div`
-  margin-top: 10px;
+  margin-top: 12px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -605,7 +605,6 @@ const TrendHeader = styled.div`
   color: #111827;
   font-size: 14px;
   font-weight: 700;
-  margin-bottom: 10px;
 `;
 
 const TrendInner = styled.div`
@@ -613,13 +612,14 @@ const TrendInner = styled.div`
   grid-template-columns: 60px 1fr;
   gap: 6px;
   align-items: stretch;
+  margin-top: 12px;
   height: 100%;
 `;
 
 const LegendArea = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   padding-top: 6px;
 `;
 
@@ -677,10 +677,10 @@ const CustomToolbar = styled.div`
 `;
 
 const DateInput = styled.input`
-  height: 44px;
-  min-width: 124px;
+  height: 38px;
+  min-width: 122px;
   padding: 0 12px;
-  border: 1px solid #e6eaf2;
+  border: 1px solid #edf0f4;
   border-radius: 10px;
   background: #ffffff;
   color: #374151;
@@ -688,7 +688,7 @@ const DateInput = styled.input`
   outline: none;
 
   &:focus {
-    border-color: #c9d6ff;
+    border-color: #cfd8e3;
   }
 `;
 
@@ -699,10 +699,10 @@ const DateDivider = styled.span`
 `;
 
 const KeywordInput = styled.input`
-  height: 44px;
-  min-width: 260px;
+  height: 38px;
+  min-width: 240px;
   padding: 0 12px;
-  border: 1px solid #e6eaf2;
+  border: 1px solid #edf0f4;
   border-radius: 10px;
   background: #ffffff;
   color: #374151;
@@ -710,24 +710,28 @@ const KeywordInput = styled.input`
   outline: none;
 
   &:focus {
-    border-color: #c9d6ff;
+    border-color: #cfd8e3;
+  }
+
+  &::placeholder {
+    color: #9ca3af;
   }
 `;
 
 const FilterSelect = styled.select`
-  height: 44px;
-  min-width: 126px;
-  padding: 0 14px;
-  border: 1px solid #e6eaf2;
+  height: 38px;
+  min-width: 120px;
+  padding: 0 12px;
+  border: 1px solid #edf0f4;
   border-radius: 10px;
   background: #ffffff;
-  color: #7b8494;
+  color: #6b7280;
   font-size: 13px;
   outline: none;
   cursor: pointer;
 
   &:focus {
-    border-color: #c9d6ff;
+    border-color: #cfd8e3;
   }
 `;
 
@@ -743,9 +747,9 @@ const TypeBadge = styled.span`
   min-width: 52px;
   height: 28px;
   padding: 0 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   background: ${({ $type }) => ($type === "입고" ? "#dbeafe" : "#fee2e2")};
   color: ${({ $type }) => ($type === "입고" ? "#2563eb" : "#ef4444")};
 `;
@@ -760,9 +764,9 @@ const CodeLink = styled.button`
   border: 0;
   background: transparent;
   padding: 0;
-  font: inherit;
-  font-weight: 800;
-  color: inherit;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
 
   &:hover {
@@ -772,8 +776,9 @@ const CodeLink = styled.button`
 `;
 
 const ProductNameLink = styled.a`
-  color: inherit;
-  font: inherit;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 500;
   text-decoration: none;
 
   &:hover {

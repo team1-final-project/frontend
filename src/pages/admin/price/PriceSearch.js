@@ -290,9 +290,7 @@ export default function PriceSearch() {
 
   const handleChangeSaleStatus = (id, value) => {
     setRows((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, status: value } : item,
-      ),
+      prev.map((item) => (item.id === id ? { ...item, status: value } : item)),
     );
   };
 
@@ -505,6 +503,8 @@ export default function PriceSearch() {
         variant="price"
         columns={columns}
         data={filteredData}
+        headerAlign="center"
+        cellAlign="center"
         rowKey="id"
         customToolbar={
           <CustomToolbar>
