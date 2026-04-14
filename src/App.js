@@ -22,7 +22,6 @@ import OrderCompletePage from "./pages/consumer/OrderCompletePage";
 import Dashboard from "./pages/admin/Dashboard";
 import ProductList from "./pages/admin/products/ProductList";
 import ProductRegist from "./pages/admin/products/ProductRegist";
-import ProductManage from "./pages/admin/products/ProductManage";
 import ProductUpdate from "./pages/admin/products/ProductUpdate";
 import PriceSearch from "./pages/admin/price/PriceSearch";
 import MatchingManage from "./pages/admin/price/MatchingManage";
@@ -64,7 +63,6 @@ function App() {
               path="/admin/product-update/:productCode"
               element={<ProductUpdate />}
             />
-            <Route path="/admin/product-manage" element={<ProductManage />} />
             <Route path="/admin/price-search" element={<PriceSearch />} />
             <Route path="/admin/matching-manage" element={<MatchingManage />} />
             <Route path="/admin/ai-history" element={<AIHistory />} />
