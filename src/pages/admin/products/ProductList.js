@@ -369,7 +369,15 @@ export default function ProductList() {
       key: "productName",
       title: "상품명",
       width: "250px",
-      render: (value) => <ProductName>{value}</ProductName>,
+      render: (value, row) => (
+        <ProductNameLink
+          href={`/product-detail?productCode=${row.productCode}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {value}
+        </ProductNameLink>
+      ),
     },
     {
       key: "category",
@@ -618,12 +626,20 @@ const DateDivider = styled.span`
   font-weight: 600;
 `;
 
-const ProductName = styled.div`
+const ProductNameLink = styled.a`
+  display: block;
   min-width: 0;
   color: #111827;
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
 `;
 
 const SubText = styled.span`

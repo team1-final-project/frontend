@@ -46,10 +46,10 @@ export default function ProductRegist() {
     supplierName: "",
     sellPrice: "",
     costPrice: "",
-    useAiMinPrice: false,
+    useAiPrice: false,
     minPrice: "",
     maxPrice: "",
-    useAiMaxPrice: false,
+
     aiMinPrice: "",
     aiMaxPrice: "",
     stockQty: "",
@@ -394,9 +394,9 @@ export default function ProductRegist() {
               <FormLabel>Ai 가격 변경</FormLabel>
               <FormField>
                 <ToggleSwitch
-                  checked={form.useAiMinPrice}
+                  checked={form.useAiPrice}
                   onChange={(nextChecked) =>
-                    handleChange("useAiMinPrice", nextChecked)
+                    handleChange("useAiPrice", nextChecked)
                   }
                 />
               </FormField>
@@ -410,7 +410,7 @@ export default function ProductRegist() {
                     value={form.aiMinPrice}
                     onChange={(e) => handleChange("aiMinPrice", e.target.value)}
                     placeholder="최소가 제한"
-                    disabled={!form.useAiMaxPrice}
+                    disabled={!form.useAiPrice}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
@@ -425,7 +425,7 @@ export default function ProductRegist() {
                     value={form.aiMaxPrice}
                     onChange={(e) => handleChange("aiMaxPrice", e.target.value)}
                     placeholder="최대가 제한"
-                    disabled={!form.useAiMaxPrice}
+                    disabled={!form.useAiPrice}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>

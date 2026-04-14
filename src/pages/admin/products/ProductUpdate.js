@@ -525,7 +525,7 @@ export default function ProductUpdate() {
                   <Input
                     value={form.minPrice}
                     onChange={(e) => handleChange("minPrice", e.target.value)}
-                    disabled={!form.useAiPrice}
+                    disabled={form.useAiPrice}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
