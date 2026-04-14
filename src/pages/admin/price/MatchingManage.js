@@ -632,7 +632,7 @@ const CatalogLinkButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    color: #03c75a;
+    color: #2563eb;
     text-decoration: underline;
   }
 `;
