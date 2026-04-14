@@ -18,6 +18,7 @@ import {
   Settings,
   PanelLeftClose,
   CirclePlus,
+  SquarePlus,
 } from "lucide-react";
 
 export default function AdminSidebar() {
@@ -35,7 +36,7 @@ export default function AdminSidebar() {
         defaultOpen: true,
         items: [
           { label: "상품 목록", to: "/admin/product-list", icon: Box },
-          { label: "상품 등록", to: "/admin/product-regist", icon: CirclePlus },
+          { label: "상품 등록", to: "/admin/product-regist", icon: SquarePlus },
         ],
       },
       {

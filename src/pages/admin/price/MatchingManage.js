@@ -22,7 +22,7 @@ const initialRows = [
   },
   {
     id: 2,
-    matchStatus: "매칭",
+    matchStatus: "미매칭",
     matchYn: "N",
     catalogNo: "-",
     productCode: "12277997925",
@@ -163,7 +163,7 @@ const saleStatusStyleMap = {
 
 const matchingStyleMap = {
   매칭: { label: "매칭", variant: "success" },
-  미매칭: { label: "미매칭", variant: "danger" },
+  미매칭: { label: "매칭", variant: "danger" },
 };
 
 function formatNumber(value) {
@@ -245,7 +245,7 @@ export default function MatchingManage() {
       sortable: false,
       render: (value) => {
         const status = matchingStyleMap[value] || {
-          label: value,
+          label: "매칭",
           variant: "info",
         };
 
