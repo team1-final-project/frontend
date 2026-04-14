@@ -1,36 +1,36 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
-import {
-  Search,
-  Plus,
-  Calendar,
-  Bold,
-  Italic,
-  Underline,
-  List,
-  ListOrdered,
-  Image as ImageIcon,
-  Link as LinkIcon,
-} from "lucide-react";
+import { Search, Plus, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import ReactQuill, { Quill } from "react-quill";
+import BlotFormatter from "quill-blot-formatter";
+import "react-quill/dist/quill.snow.css";
+
 import { getCategories } from "../../../api/category";
+import {
+  createAdminProduct,
+  uploadAdminDetailImage,
+  uploadAdminThumbnailImage,
+} from "../../../api/adminProduct";
 import ToggleSwitch from "../../../components/ToggleSwitch";
 
-const saleStatusOptions = ["판매중", "판매대기", "일시품절", "품절"];
 
-const editorTools = [
-  { icon: <Bold size={14} />, label: "bold" },
-  { icon: <Italic size={14} />, label: "italic" },
-  { icon: <Underline size={14} />, label: "underline" },
-  { icon: <List size={14} />, label: "list" },
-  { icon: <ListOrdered size={14} />, label: "ordered-list" },
-  { icon: <ImageIcon size={14} />, label: "image" },
-  { icon: <LinkIcon size={14} />, label: "link" },
+Quill.register("modules/blotFormatter", BlotFormatter);
+const saleStatusOptions = [
+  { value: "ON_SALE", label: "판매중" },
+  { value: "READY", label: "판매예정" },
+  { value: "STOPPED", label: "판매중지" },
+  { value: "SOLD_OUT", label: "품절" },
+  { value: "ENDED", label: "판매종료" },
 ];
+
+const FIXED_SHIPPING_FROM = "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
+const FIXED_RETURN_ADDRESS = "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
 
 export default function ProductRegist() {
   const nav = useNavigate();
-  const fileInputRef = useRef(null);
+  const thumbnailInputRef = useRef(null);
+  const quillRef = useRef(null);
 
   const [categories, setCategories] = useState([]);
   const [categoryTab, setCategoryTab] = useState("select");
@@ -38,34 +38,45 @@ export default function ProductRegist() {
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
   const [categoryKeyword, setCategoryKeyword] = useState("");
 
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [detailImageUrls, setDetailImageUrls] = useState([]);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isThumbnailUploading, setIsThumbnailUploading] = useState(false);
+  const [isDetailImageUploading, setIsDetailImageUploading] = useState(false);
+
   const [form, setForm] = useState({
-    productCode: "자동생성",
+    productCode: "자동 생성",
     productName: "",
-    saleStatus: "판매중",
-    categoryKeyword: "",
-    supplierName: "",
-    sellPrice: "",
+    saleStatus: "ON_SALE",
+
+    catalogExternalId: "",
+    catalogName: "",
+
+    salePrice: "",
     costPrice: "",
+
     useAiPrice: false,
     minPrice: "",
     maxPrice: "",
 
-    aiMinPrice: "",
-    aiMaxPrice: "",
     stockQty: "",
     safetyStock: "",
     expiryDate: "",
+
     description: "",
+
     brandName: "",
     origin: "",
-    shippingFrom: "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)",
+
+    shippingFrom: FIXED_SHIPPING_FROM,
     shippingFee: "",
-    returnAddress: "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)",
+
+    returnAddress: FIXED_RETURN_ADDRESS,
     returnFee: "",
     exchangeFee: "",
   });
-
-  const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -75,14 +86,14 @@ export default function ProductRegist() {
 
         if (data.length > 0) {
           setSelectedMainCategoryId(data[0].id);
-
           const firstSubCategory = data[0].subCategories?.[0];
           if (firstSubCategory) {
             setSelectedSubCategoryId(firstSubCategory.id);
           }
         }
       } catch (error) {
-        console.error("카테고리 조회 실패:", error);
+        console.error(error);
+        alert("카테고리 조회에 실패했습니다.");
       }
     };
 
@@ -90,16 +101,13 @@ export default function ProductRegist() {
   }, []);
 
   const activeMainCategory = useMemo(() => {
-    return categories.find(
-      (category) => category.id === selectedMainCategoryId,
-    );
+    return categories.find((category) => category.id === selectedMainCategoryId);
   }, [categories, selectedMainCategoryId]);
 
   const activeSubCategory = useMemo(() => {
     if (!activeMainCategory) return null;
-
     return activeMainCategory.subCategories?.find(
-      (subCategory) => subCategory.id === selectedSubCategoryId,
+      (subCategory) => subCategory.id === selectedSubCategoryId
     );
   }, [activeMainCategory, selectedSubCategoryId]);
 
@@ -121,7 +129,7 @@ export default function ProductRegist() {
           category.subCategories?.filter((subCategory) =>
             `${category.name} ${subCategory.name}`
               .toLowerCase()
-              .includes(keyword),
+              .includes(keyword)
           ) || [];
 
         if (mainMatched) return category;
@@ -131,7 +139,6 @@ export default function ProductRegist() {
             subCategories: matchedSubCategories,
           };
         }
-
         return null;
       })
       .filter(Boolean);
@@ -144,27 +151,178 @@ export default function ProductRegist() {
     }));
   };
 
-  const handleImageUpload = (event) => {
+  const handleThumbnailUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const imageUrl = URL.createObjectURL(file);
-    setPreviewImage(imageUrl);
+    try {
+      setIsThumbnailUploading(true);
+      const localPreview = URL.createObjectURL(file);
+      setThumbnailPreview(localPreview);
+
+      const result = await uploadAdminThumbnailImage(file);
+      setThumbnailUrl(result.image_url);
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.detail || "대표이미지 업로드에 실패했습니다.");
+      setThumbnailPreview(null);
+      setThumbnailUrl("");
+    } finally {
+      setIsThumbnailUploading(false);
+    }
   };
 
-  const handleSubmit = (event) => {
+  const handleEditorImageUpload = async () => {
+    const input = document.createElement("input");
+    input.setAttribute("type", "file");
+    input.setAttribute("accept", "image/*");
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+
+      try {
+        setIsDetailImageUploading(true);
+
+        const result = await uploadAdminDetailImage(file);
+        const editor = quillRef.current?.getEditor();
+        const range = editor?.getSelection(true);
+
+        if (editor) {
+          editor.insertEmbed(
+            range ? range.index : editor.getLength(),
+            "image",
+            result.image_url
+          );
+          editor.setSelection((range ? range.index : editor.getLength()) + 1);
+        }
+
+        setDetailImageUrls((prev) => {
+          if (prev.includes(result.image_url)) return prev;
+          return [...prev, result.image_url];
+        });
+      } catch (error) {
+        console.error(error);
+        alert(error?.response?.data?.detail || "상세 이미지 업로드에 실패했습니다.");
+      } finally {
+        setIsDetailImageUploading(false);
+      }
+    };
+  };
+
+  const quillModules = useMemo(
+    () => ({
+      toolbar: {
+        container: [
+          [{ header: [1, 2, false] }],
+          [{ size: ["small", false, "large", "huge"] }],
+          ["bold", "italic", "underline", "strike"],
+          ["blockquote", "code-block"],
+          [{ list: "ordered" }, { list: "bullet" }],
+          [{ align: [] }],
+          ["link", "image"],
+          ["clean"],
+        ],
+        handlers: {
+          image: handleEditorImageUpload,
+        },
+      },
+      blotFormatter: {},
+    }),
+    []
+  );
+
+  const quillFormats = [
+    "header",
+    "size",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "blockquote",
+    "code-block",
+    "list",
+    "bullet",
+    "align",
+    "link",
+    "image",
+  ];
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const payload = {
-      ...form,
-      mainCategoryId: selectedMainCategoryId,
-      subCategoryId: selectedSubCategoryId,
-      mainCategoryName: activeMainCategory?.name ?? "",
-      subCategoryName: activeSubCategory?.name ?? "",
-      previewImage,
-    };
+    if (!selectedSubCategoryId) {
+      alert("소분류 카테고리를 선택해주세요.");
+      return;
+    }
 
-    console.log("상품등록 payload:", payload);
+    if (!form.productName.trim()) {
+      alert("상품명을 입력해주세요.");
+      return;
+    }
+
+    if (!form.salePrice) {
+      alert("판매가를 입력해주세요.");
+      return;
+    }
+
+    if (!form.stockQty) {
+      alert("재고수량을 입력해주세요.");
+      return;
+    }
+
+    if (!thumbnailUrl) {
+      alert("대표이미지를 업로드해주세요.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const payload = {
+        category_id: selectedSubCategoryId,
+        product_name: form.productName.trim(),
+        sale_status: form.saleStatus,
+
+        catalog_external_id: form.catalogExternalId.trim() || null,
+        catalog_name: form.catalogName.trim() || null,
+
+        sale_price: Number(form.salePrice || 0),
+        cost_price: Number(form.costPrice || 0),
+
+        ai_pricing_enabled: form.useAiPrice,
+        min_price_limit: form.useAiPrice && form.minPrice ? Number(form.minPrice) : null,
+        max_price_limit: form.useAiPrice && form.maxPrice ? Number(form.maxPrice) : null,
+
+        stock_qty: Number(form.stockQty || 0),
+        safety_stock_qty: Number(form.safetyStock || 0),
+        expiration_date: form.expiryDate || null,
+
+        description_html: form.description || "",
+
+        brand_name: form.brandName.trim() || null,
+        origin_country: form.origin.trim() || null,
+
+        shipping_fee: Number(form.shippingFee || 0),
+
+        thumbnail_image_url: thumbnailUrl,
+        detail_image_urls: detailImageUrls,
+      };
+
+      const result = await createAdminProduct(payload);
+
+      alert("상품이 등록되었습니다.");
+        nav("/admin/product-list", {
+          replace: true,
+          state: { createdProductCode: result.product_code },
+        });
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.detail || "상품 등록에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -202,9 +360,7 @@ export default function ProductRegist() {
                     $active={selectedMainCategoryId === category.id}
                     onClick={() => {
                       setSelectedMainCategoryId(category.id);
-                      setSelectedSubCategoryId(
-                        category.subCategories?.[0]?.id ?? null,
-                      );
+                      setSelectedSubCategoryId(category.subCategories?.[0]?.id ?? null);
                     }}
                   >
                     <span>{category.name}</span>
@@ -260,14 +416,14 @@ export default function ProductRegist() {
                         {fullName}
                       </SearchResultButton>
                     );
-                  }),
+                  })
                 )}
               </SearchResultList>
             </SearchCategoryPanel>
           )}
 
           <SelectedCategoryRow>
-            <MiniLabel>카테고리 선택</MiniLabel>
+            <MiniLabel>선택된 카테고리</MiniLabel>
             <SelectedCategoryValue>
               {selectedCategoryLabel || "카테고리를 선택하세요"}
             </SelectedCategoryValue>
@@ -281,12 +437,7 @@ export default function ProductRegist() {
             <FormRow>
               <FormLabel>상품코드</FormLabel>
               <FormField>
-                <Input
-                  value={form.productCode}
-                  onChange={(e) => handleChange("productCode", e.target.value)}
-                  placeholder="자동생성"
-                  readOnly
-                />
+                <Input value={form.productCode} readOnly />
               </FormField>
             </FormRow>
 
@@ -317,8 +468,8 @@ export default function ProductRegist() {
                   onChange={(e) => handleChange("saleStatus", e.target.value)}
                 >
                   {saleStatusOptions.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
+                    <option key={item.value} value={item.value}>
+                      {item.label}
                     </option>
                   ))}
                 </Select>
@@ -332,27 +483,24 @@ export default function ProductRegist() {
 
           <FormGrid>
             <FormRow>
-              <FormLabel>카테고리 ID</FormLabel>
+              <FormLabel>카탈로그 ID</FormLabel>
               <FormField>
-                <SearchInputWrap>
-                  <Input
-                    value={form.categoryKeyword}
-                    onChange={(e) =>
-                      handleChange("categoryKeyword", e.target.value)
-                    }
-                    placeholder="카테고리 ID 입력"
-                  />
-                  <InlineSearchButton type="button">
-                    <Search size={14} />
-                  </InlineSearchButton>
-                </SearchInputWrap>
+                <Input
+                  value={form.catalogExternalId}
+                  onChange={(e) => handleChange("catalogExternalId", e.target.value)}
+                  placeholder="예: 53390091166"
+                />
               </FormField>
             </FormRow>
 
             <FormRow>
-              <FormLabel>카테고리명</FormLabel>
+              <FormLabel>카탈로그명</FormLabel>
               <FormField>
-                <ReadOnlyBox>{selectedCategoryLabel}</ReadOnlyBox>
+                <Input
+                  value={form.catalogName}
+                  onChange={(e) => handleChange("catalogName", e.target.value)}
+                  placeholder="가격비교용 상품명"
+                />
               </FormField>
             </FormRow>
           </FormGrid>
@@ -367,8 +515,8 @@ export default function ProductRegist() {
               <FormField>
                 <UnitInputWrap>
                   <Input
-                    value={form.sellPrice}
-                    onChange={(e) => handleChange("sellPrice", e.target.value)}
+                    value={form.salePrice}
+                    onChange={(e) => handleChange("salePrice", e.target.value)}
                     placeholder="판매가"
                   />
                   <UnitText>원</UnitText>
@@ -391,13 +539,11 @@ export default function ProductRegist() {
             </FormRow>
 
             <FormRow>
-              <FormLabel>Ai 가격 변경</FormLabel>
+              <FormLabel>AI 가격 변경</FormLabel>
               <FormField>
                 <ToggleSwitch
                   checked={form.useAiPrice}
-                  onChange={(nextChecked) =>
-                    handleChange("useAiPrice", nextChecked)
-                  }
+                  onChange={(nextChecked) => handleChange("useAiPrice", nextChecked)}
                 />
               </FormField>
             </FormRow>
@@ -407,8 +553,8 @@ export default function ProductRegist() {
               <FormField>
                 <UnitInputWrap>
                   <Input
-                    value={form.aiMinPrice}
-                    onChange={(e) => handleChange("aiMinPrice", e.target.value)}
+                    value={form.minPrice}
+                    onChange={(e) => handleChange("minPrice", e.target.value)}
                     placeholder="최소가 제한"
                     disabled={!form.useAiPrice}
                   />
@@ -422,8 +568,8 @@ export default function ProductRegist() {
               <FormField>
                 <UnitInputWrap>
                   <Input
-                    value={form.aiMaxPrice}
-                    onChange={(e) => handleChange("aiMaxPrice", e.target.value)}
+                    value={form.maxPrice}
+                    onChange={(e) => handleChange("maxPrice", e.target.value)}
                     placeholder="최대가 제한"
                     disabled={!form.useAiPrice}
                   />
@@ -458,9 +604,7 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.safetyStock}
-                    onChange={(e) =>
-                      handleChange("safetyStock", e.target.value)
-                    }
+                    onChange={(e) => handleChange("safetyStock", e.target.value)}
                     placeholder="안전재고"
                   />
                   <UnitText>개</UnitText>
@@ -491,18 +635,18 @@ export default function ProductRegist() {
 
           <ImageUploadArea>
             <HiddenFileInput
-              ref={fileInputRef}
+              ref={thumbnailInputRef}
               type="file"
               accept="image/*"
-              onChange={handleImageUpload}
+              onChange={handleThumbnailUpload}
             />
 
             <ImagePreviewButton
               type="button"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => thumbnailInputRef.current?.click()}
             >
-              {previewImage ? (
-                <PreviewImage src={previewImage} alt="preview" />
+              {thumbnailPreview ? (
+                <PreviewImage src={thumbnailPreview} alt="thumbnail preview" />
               ) : (
                 <UploadPlaceholder>
                   <Plus size={28} />
@@ -511,9 +655,9 @@ export default function ProductRegist() {
             </ImagePreviewButton>
 
             <ImageGuide>
-              권장크기 : 1000×1000
-              <br />
-              jpg, jpeg, png, bmp 형식의 정사 이미지 파일을 등록하세요.
+              {isThumbnailUploading
+                ? "대표이미지 업로드 중..."
+                : "권장크기 : 1000×1000 / jpg, jpeg, png, bmp"}
             </ImageGuide>
           </ImageUploadArea>
         </Section>
@@ -522,43 +666,21 @@ export default function ProductRegist() {
           <SectionTitle>상세설명</SectionTitle>
 
           <EditorWrap>
-            <EditorToolbar>
-              <EditorSelect defaultValue="Normal">
-                <option>Normal</option>
-                <option>Heading 1</option>
-                <option>Heading 2</option>
-              </EditorSelect>
-
-              <EditorSelect defaultValue="Normal">
-                <option>Normal</option>
-                <option>Small</option>
-                <option>Large</option>
-              </EditorSelect>
-
-              <ToolbarDivider />
-
-              {editorTools.map((tool) => (
-                <EditorToolButton key={tool.label} type="button">
-                  {tool.icon}
-                </EditorToolButton>
-              ))}
-            </EditorToolbar>
-
-            <EditorTextArea
+            <ReactQuill
+              ref={quillRef}
+              theme="snow"
               value={form.description}
-              onChange={(e) => handleChange("description", e.target.value)}
-              placeholder="상세설명을 입력하세요"
+              onChange={(value) => handleChange("description", value)}
+              modules={quillModules}
+              formats={quillFormats}
+              placeholder="상품 상세설명을 입력하세요."
             />
           </EditorWrap>
 
           <EditorNotice>
-            상세설명 작성 유의 : 기본 800byte
-            <br />
-            일부 상품은 판매 제한카테고리에만 진열, 이외엔 즉시 노출되지
-            않습니다.
-            <br />
-            상품명과 재고 관련 심사, 상세설명 기입 등에 따라 실사 시 관리자에
-            의해 제한될 수 있습니다.
+            {isDetailImageUploading
+              ? "상세설명 이미지 업로드 중..."
+              : "이미지 버튼을 누르면 상세 이미지를 업로드할 수 있습니다."}
           </EditorNotice>
         </Section>
 
@@ -569,16 +691,11 @@ export default function ProductRegist() {
             <FormRow>
               <FormLabel>브랜드명</FormLabel>
               <FormField>
-                <SearchInputWrap>
-                  <Input
-                    value={form.brandName}
-                    onChange={(e) => handleChange("brandName", e.target.value)}
-                    placeholder="브랜드명"
-                  />
-                  <InlineSearchButton type="button">
-                    <Search size={14} />
-                  </InlineSearchButton>
-                </SearchInputWrap>
+                <Input
+                  value={form.brandName}
+                  onChange={(e) => handleChange("brandName", e.target.value)}
+                  placeholder="브랜드명"
+                />
               </FormField>
             </FormRow>
 
@@ -602,10 +719,7 @@ export default function ProductRegist() {
             <FormRow>
               <FormLabel>출하지</FormLabel>
               <FormField>
-                <Input
-                  value={form.shippingFrom}
-                  onChange={(e) => handleChange("shippingFrom", e.target.value)}
-                />
+                <Input value={form.shippingFrom} readOnly />
               </FormField>
             </FormRow>
 
@@ -615,9 +729,7 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.shippingFee}
-                    onChange={(e) =>
-                      handleChange("shippingFee", e.target.value)
-                    }
+                    onChange={(e) => handleChange("shippingFee", e.target.value)}
                     placeholder="배송비"
                   />
                   <UnitText>원</UnitText>
@@ -634,12 +746,7 @@ export default function ProductRegist() {
             <FormRow>
               <FormLabel>반품/교환지</FormLabel>
               <FormField>
-                <Input
-                  value={form.returnAddress}
-                  onChange={(e) =>
-                    handleChange("returnAddress", e.target.value)
-                  }
-                />
+                <Input value={form.returnAddress} readOnly />
               </FormField>
             </FormRow>
 
@@ -663,9 +770,7 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.exchangeFee}
-                    onChange={(e) =>
-                      handleChange("exchangeFee", e.target.value)
-                    }
+                    onChange={(e) => handleChange("exchangeFee", e.target.value)}
                     placeholder="교환배송비"
                   />
                   <UnitText>원</UnitText>
@@ -679,7 +784,9 @@ export default function ProductRegist() {
           <CancelButton type="button" onClick={() => nav(-1)}>
             취소
           </CancelButton>
-          <SubmitButton type="submit">상품등록</SubmitButton>
+          <SubmitButton type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "등록 중..." : "상품등록"}
+          </SubmitButton>
         </BottomButtonRow>
       </Form>
     </PageWrap>
@@ -919,10 +1026,6 @@ const Select = styled.select`
   color: #111827;
   font-size: 13px;
   outline: none;
-
-  &:focus {
-    border-color: #cfd8e3;
-  }
 `;
 
 const HelperText = styled.div`
@@ -930,39 +1033,6 @@ const HelperText = styled.div`
   color: #9ca3af;
   font-size: 12px;
   text-align: right;
-`;
-
-const SearchInputWrap = styled.div`
-  position: relative;
-  max-width: 340px;
-`;
-
-const InlineSearchButton = styled.button`
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: transparent;
-  color: #9ca3af;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-`;
-
-const ReadOnlyBox = styled.div`
-  min-height: 40px;
-  padding: 0 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #fafbfc;
-  color: #374151;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
 `;
 
 const UnitInputWrap = styled.div`
@@ -995,36 +1065,6 @@ const DateIconWrap = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-`;
-
-const ToggleRow = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const ToggleButton = styled.button`
-  position: relative;
-  width: 34px;
-  height: 20px;
-  border: none;
-  border-radius: 999px;
-  background: ${({ $checked }) => ($checked ? "#2563eb" : "#d1d5db")};
-  cursor: pointer;
-  padding: 0;
-  box-sizing: border-box;
-  transition: background 0.15s ease;
-`;
-
-const ToggleThumb = styled.span`
-  position: absolute;
-  top: 50%;
-  left: ${({ $checked }) => ($checked ? "16px" : "2px")};
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  background: #ffffff;
-  transition: left 0.15s ease;
 `;
 
 const ImageUploadArea = styled.div`
@@ -1070,67 +1110,27 @@ const ImageGuide = styled.div`
 `;
 
 const EditorWrap = styled.div`
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  overflow: hidden;
-`;
-
-const EditorToolbar = styled.div`
-  min-height: 44px;
-  padding: 0 10px;
-  border-bottom: 1px solid #eef2f7;
-  background: #fafbfc;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-`;
-
-const EditorSelect = styled.select`
-  height: 30px;
-  padding: 0 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #374151;
-  font-size: 12px;
-`;
-
-const ToolbarDivider = styled.div`
-  width: 1px;
-  height: 18px;
-  background: #e5e7eb;
-  margin: 0 4px;
-`;
-
-const EditorToolButton = styled.button`
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: #4b5563;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  &:hover {
-    background: #eef2f7;
+  .ql-toolbar.ql-snow {
+    border: 1px solid #e5e7eb;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
   }
-`;
 
-const EditorTextArea = styled.textarea`
-  width: 100%;
-  min-height: 260px;
-  border: none;
-  outline: none;
-  resize: vertical;
-  padding: 16px;
-  box-sizing: border-box;
-  color: #111827;
-  font-size: 14px;
-  line-height: 1.6;
+  .ql-container.ql-snow {
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
+    min-height: 280px;
+    background: #ffffff;
+  }
+
+  .ql-editor {
+    min-height: 280px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #111827;
+  }
 `;
 
 const EditorNotice = styled.div`
@@ -1171,7 +1171,12 @@ const SubmitButton = styled.button`
   font-weight: 700;
   cursor: pointer;
 
-  &:hover {
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:hover:enabled {
     background: #1d4ed8;
   }
 `;

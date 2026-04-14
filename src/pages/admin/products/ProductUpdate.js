@@ -451,7 +451,7 @@ export default function ProductUpdate() {
 
           <FormGrid>
             <FormRow>
-              <FormLabel>카테고리 ID</FormLabel>
+              <FormLabel>카탈로그 ID</FormLabel>
               <FormField>
                 <SearchInputWrap>
                   <Input
@@ -466,7 +466,7 @@ export default function ProductUpdate() {
             </FormRow>
 
             <FormRow>
-              <FormLabel>카테고리명</FormLabel>
+              <FormLabel>카탈로그명</FormLabel>
               <FormField>
                 <ReadOnlyBox>{form.categoryName}</ReadOnlyBox>
               </FormField>
