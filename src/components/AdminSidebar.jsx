@@ -81,13 +81,8 @@ export default function AdminSidebar() {
             icon: BarChart3,
           },
           {
-            label: "수요 히트 맵",
-            to: "/admin/heatmap-stat",
-            icon: Map,
-          },
-          {
-            label: "최저가 추이",
-            to: "/admin/price-trend-stat",
+            label: "AI 가격변경 성과",
+            to: "/admin/ai-price-stat",
             icon: FileText,
           },
         ],

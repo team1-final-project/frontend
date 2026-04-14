@@ -1,5 +1,3 @@
 export default function SalesStat() {
-  <>
-    <p>SalesStat</p>
-  </>;
+  return <p>SalesStat</p>;
 }

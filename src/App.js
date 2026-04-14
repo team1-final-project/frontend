@@ -29,8 +29,7 @@ import AIHistory from "./pages/admin/price/AIHistory";
 import LiveInventory from "./pages/admin/inventory/LiveInventory";
 import InventoryHistory from "./pages/admin/inventory/InventoryHistory";
 import SalesStat from "./pages/admin/statistics/SalesStat";
-import HeatmapStat from "./pages/admin/statistics/HeatmapStat";
-import PriceTrendStat from "./pages/admin/statistics/PriceTrendStat";
+import AIPriceStat from "./pages/admin/statistics/AIPriceStat";
 import AdminManage from "./pages/admin/management/AdminManage";
 import Settings from "./pages/admin/management/Settings";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -57,12 +56,14 @@ function App() {
 
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="/admin" element={<Dashboard />} />
+
             <Route path="/admin/product-list" element={<ProductList />} />
             <Route path="/admin/product-regist" element={<ProductRegist />} />
             <Route
               path="/admin/product-update/:productCode"
               element={<ProductUpdate />}
             />
+
             <Route path="/admin/price-search" element={<PriceSearch />} />
             <Route path="/admin/matching-manage" element={<MatchingManage />} />
             <Route path="/admin/ai-history" element={<AIHistory />} />
@@ -72,11 +73,8 @@ function App() {
               element={<InventoryHistory />}
             />
             <Route path="/admin/sales-stat" element={<SalesStat />} />
-            <Route path="/admin/heatmap-stat" element={<HeatmapStat />} />
-            <Route
-              path="/admin/price-trend-stat"
-              element={<PriceTrendStat />}
-            />
+            <Route path="/admin/ai-price-stat" element={<AIPriceStat />} />
+
             <Route path="/admin/manage-admins" element={<AdminManage />} />
             <Route path="/admin/settings" element={<Settings />} />
           </Route>
