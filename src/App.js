@@ -7,6 +7,7 @@ import { AuthProvider } from "./context/AuthContext";
 
 import MainLayout from "./layout/MainLayout";
 import AdminLayout from "./layout/AdminLayout";
+// import AdminRoute from "./routes/AdminRoute";
 
 import Home from "./pages/consumer/Home";
 import Login from "./pages/consumer/Login";
@@ -54,32 +55,37 @@ function App() {
           <Route path="/payment/success" element={<PaymentSuccessPage />} />
           <Route path="/payment/fail" element={<PaymentFailPage />} />
 
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route path="/admin" element={<Dashboard />} />
-
-            <Route path="/admin/product-list" element={<ProductList />} />
-            <Route path="/admin/product-regist" element={<ProductRegist />} />
-            <Route
-              path="/admin/product-update/:productCode"
-              element={<ProductUpdate />}
-            />
-
-            <Route path="/admin/price-search" element={<PriceSearch />} />
-            <Route path="/admin/matching-manage" element={<MatchingManage />} />
-            <Route path="/admin/ai-history" element={<AIHistory />} />
-            <Route path="/admin/live-inventory" element={<LiveInventory />} />
-            <Route
-              path="/admin/inventory-history"
-              element={<InventoryHistory />}
-            />
-            <Route path="/admin/sales-stat" element={<SalesStat />} />
-            <Route path="/admin/ai-price-stat" element={<AIPriceStat />} />
-
-            <Route path="/admin/manage-admins" element={<AdminManage />} />
-            <Route path="/admin/settings" element={<Settings />} />
-          </Route>
-
           <Route path="/admin/login" element={<AdminLogin />} />
+
+          {/* 나중에 권한 분기 필요할 때 주석 풀기 ㄱㄱ혓 */}
+          {/* <Route element={<AdminRoute />}> */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+
+              <Route path="product-list" element={<ProductList />} />
+              <Route path="product-regist" element={<ProductRegist />} />
+              <Route
+                path="product-update/:productCode"
+                element={<ProductUpdate />}
+              />
+
+              <Route path="price-search" element={<PriceSearch />} />
+              <Route path="matching-manage" element={<MatchingManage />} />
+              <Route path="ai-history" element={<AIHistory />} />
+
+              <Route path="live-inventory" element={<LiveInventory />} />
+              <Route
+                path="inventory-history"
+                element={<InventoryHistory />}
+              />
+
+              <Route path="sales-stat" element={<SalesStat />} />
+              <Route path="ai-price-stat" element={<AIPriceStat />} />
+
+              <Route path="manage-admins" element={<AdminManage />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+          {/* </Route> */}
 
           <Route
             path="/auth/google/callback"
