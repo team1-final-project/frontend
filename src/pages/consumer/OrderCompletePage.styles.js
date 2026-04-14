@@ -124,12 +124,12 @@ export const BaseButton = styled.button`
   gap: 8px;
 `;
 
-const PrimaryButton = styled(BaseButton)`
+export const PrimaryButton = styled(BaseButton)`
   background: #111111;
   color: #ffffff;
 `;
 
-const SecondaryButton = styled(BaseButton)`
+export const SecondaryButton = styled(BaseButton)`
   background: #e9e2d7;
   color: #111111;
 `;

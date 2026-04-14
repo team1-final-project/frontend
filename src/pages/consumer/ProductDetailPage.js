@@ -9,7 +9,7 @@ import {
   MoreHorizontal,
   Plus,
 } from "lucide-react";
-
+import * as S from "./ProductDetailPage.styles.js";
 import shinramyunImg from "../../assets/shinramyeon.jpg";
 
 const PRODUCT_IMAGE = shinramyunImg;
@@ -68,7 +68,6 @@ const RETURN_DENIED_RULES = [
   "슈팅셀러 상품의 배송 받은 아이스박스, 냉매제, 상품을 임의로 폐기한 경우",
   "슈팅배송 상품의 교환을 요청하는 경우",
 ];
-import * as S from "./ProductDetailPage.styles.js";
 
 export default function ProductDetailPage() {
   useEffect(() => {

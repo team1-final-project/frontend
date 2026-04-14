@@ -91,10 +91,7 @@ export default function AdminSidebar() {
         key: "admin",
         title: "ADMIN",
         defaultOpen: true,
-        items: [
-          { label: "Manage Admins", to: "/admin/manage-admins", icon: Users },
-          { label: "설정", to: "/admin/settings", icon: Settings },
-        ],
+        items: [{ label: "설정", to: "/admin/settings", icon: Settings }],
       },
     ],
     [],

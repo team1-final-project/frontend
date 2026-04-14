@@ -92,12 +92,12 @@ export const BaseButton = styled.button`
   font-weight: 700;
 `;
 
-const PrimaryButton = styled(BaseButton)`
+export const PrimaryButton = styled(BaseButton)`
   background: #111;
   color: #fff;
 `;
 
-const SecondaryButton = styled(BaseButton)`
+export const SecondaryButton = styled(BaseButton)`
   background: #ece6dc;
   color: #111;
 `;

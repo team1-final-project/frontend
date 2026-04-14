@@ -120,7 +120,7 @@ export const ZipcodeRow = styled.div`
   }
 `;
 
-const ZipcodeInput = styled(Input)`
+export const ZipcodeInput = styled(Input)`
   flex: 1;
 `;
 

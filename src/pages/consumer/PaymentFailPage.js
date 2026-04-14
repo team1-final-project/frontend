@@ -36,12 +36,12 @@ export default function PaymentFailPage() {
         </S.InfoBox>
 
         <S.ButtonRow>
-          <SecondaryButton type="button" onClick={() => navigate("/cart")}>
+          <S.SecondaryButton type="button" onClick={() => navigate("/cart")}>
             장바구니로 이동
-          </SecondaryButton>
-          <PrimaryButton type="button" onClick={() => navigate(-1)}>
+          </S.SecondaryButton>
+          <S.PrimaryButton type="button" onClick={() => navigate(-1)}>
             다시 시도하기
-          </PrimaryButton>
+          </S.PrimaryButton>
         </S.ButtonRow>
       </S.Card>
     </S.Page>

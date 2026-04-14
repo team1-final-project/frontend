@@ -30,20 +30,20 @@ export default function PaymentSuccessPage() {
         });
 
         navigate("/order-complete", {
-            replace: true,
-            state: {
-                orderNo: result.order_no,
-                paymentStatus: result.payment_status,
-                paidAt: result.paid_at,
-                amount,
-                orderName: result.order_name || "주문 상품",
-            },
-            });
+          replace: true,
+          state: {
+            orderNo: result.order_no,
+            paymentStatus: result.payment_status,
+            paidAt: result.paid_at,
+            amount,
+            orderName: result.order_name || "주문 상품",
+          },
+        });
       } catch (error) {
         console.error(error);
         setIsError(true);
         setMessage(
-          error?.response?.data?.detail || "결제 승인 처리에 실패했습니다."
+          error?.response?.data?.detail || "결제 승인 처리에 실패했습니다.",
         );
       }
     };
@@ -59,12 +59,12 @@ export default function PaymentSuccessPage() {
 
         {isError && (
           <S.ButtonRow>
-            <SecondaryButton type="button" onClick={() => navigate("/cart")}>
+            <S.SecondaryButton type="button" onClick={() => navigate("/cart")}>
               장바구니로 이동
-            </SecondaryButton>
-            <PrimaryButton type="button" onClick={() => navigate("/")}>
+            </S.SecondaryButton>
+            <S.PrimaryButton type="button" onClick={() => navigate("/")}>
               홈으로 가기
-            </PrimaryButton>
+            </S.PrimaryButton>
           </S.ButtonRow>
         )}
       </S.Card>

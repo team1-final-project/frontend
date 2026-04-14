@@ -69,14 +69,14 @@ export default function OrderCompletePage() {
         </S.InfoCard>
 
         <S.ButtonRow>
-          <SecondaryButton type="button" onClick={() => navigate("/cart")}>
+          <S.SecondaryButton type="button" onClick={() => navigate("/cart")}>
             <ShoppingBag size={18} />
             장바구니 보기
-          </SecondaryButton>
+          </S.SecondaryButton>
 
-          <PrimaryButton type="button" onClick={() => navigate("/")}>
+          <S.PrimaryButton type="button" onClick={() => navigate("/")}>
             홈으로 가기
-          </PrimaryButton>
+          </S.PrimaryButton>
         </S.ButtonRow>
       </S.Inner>
     </S.Page>

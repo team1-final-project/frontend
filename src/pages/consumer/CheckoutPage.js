@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createOrder } from "../../api/order";
+import * as S from "./CheckoutPage.styles.js";
 
 const TOSS_CLIENT_KEY = process.env.REACT_APP_TOSS_CLIENT_KEY;
 
@@ -21,13 +22,13 @@ const loadKakaoPostcodeScript = () => {
 
   kakaoPostcodeScriptPromise = new Promise((resolve, reject) => {
     const existingScript = document.querySelector(
-      'script[src="//t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"]'
+      'script[src="//t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"]',
     );
 
     if (existingScript) {
       existingScript.addEventListener("load", () => resolve());
       existingScript.addEventListener("error", () =>
-        reject(new Error("카카오 우편번호 스크립트 로드에 실패했습니다."))
+        reject(new Error("카카오 우편번호 스크립트 로드에 실패했습니다.")),
       );
       return;
     }
@@ -56,7 +57,6 @@ const formatPhoneNumber = (value) => {
   }
   return `${onlyNumber.slice(0, 3)}-${onlyNumber.slice(3, 7)}-${onlyNumber.slice(7)}`;
 };
-import * as S from "./CheckoutPage.styles.js";
 
 export default function CheckoutPage() {
   const location = useLocation();
@@ -212,7 +212,8 @@ export default function CheckoutPage() {
       console.error(error);
 
       const detail =
-        error?.response?.data?.detail || "주문 생성 또는 결제창 호출에 실패했습니다.";
+        error?.response?.data?.detail ||
+        "주문 생성 또는 결제창 호출에 실패했습니다.";
 
       alert(detail);
       setIsSubmitting(false);
@@ -296,7 +297,7 @@ export default function CheckoutPage() {
               <S.Label>주소</S.Label>
 
               <S.ZipcodeRow>
-                <ZipcodeInput
+                <S.ZipcodeInput
                   id="zipCode"
                   type="text"
                   name="zipCode"
