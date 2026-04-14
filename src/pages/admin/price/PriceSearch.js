@@ -1,14 +1,12 @@
 import React, { useMemo, useState } from "react";
-import styled, { css } from "styled-components";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import SummaryCard from "../../../components/SummaryCard";
+import TableComponent from "../../../components/TableComponent";
+import StatusBadge from "../../../components/StatusBadge";
+import ToggleSwitch from "../../../components/ToggleSwitch";
 
-const SUMMARY_CARDS = [
-  { id: 1, title: "전체 상품 수", value: "66 SKU", diff: "6 SKU", positive: true },
-  { id: 2, title: "AI 가격변경 상품", value: "60 SKU", diff: "0 SKU", positive: false },
-  { id: 3, title: "최저가 유지 상품", value: "55 SKU", diff: "6 SKU", positive: true },
-  { id: 4, title: "최저가 아닌 상품", value: "10 SKU", diff: "6 SKU", positive: true },
-];
-
-const MOCK_ROWS = [
+const initialRows = [
   {
     id: 1,
     catalogId: "53390091166",
@@ -220,474 +218,490 @@ const MOCK_ROWS = [
   },
 ];
 
-export default function PriceSearch() {
-  const [filters, setFilters] = useState({
-    startDate: "",
-    endDate: "",
-    keyword: "",
-    category: "",
-    lowestYn: "",
-  });
+const categoryOptions = [
+  ...new Set(initialRows.map((item) => item.category)),
+].map((value) => ({
+  label: value,
+  value,
+}));
 
+const saleStatusOptions = ["판매중", "판매중지", "품절", "판매종료"];
+
+const lowestStyleMap = {
+  Y: { label: "Y", variant: "success" },
+  N: { label: "N", variant: "danger" },
+};
+
+export default function PriceSearch() {
+  const nav = useNavigate();
+
+  const [rows, setRows] = useState(initialRows);
+  const [searchValue, setSearchValue] = useState("");
+  const [categoryValue, setCategoryValue] = useState("");
+  const [lowestYn, setLowestYn] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const filteredRows = useMemo(() => {
-    return MOCK_ROWS.filter((item) => {
-      const keyword = filters.keyword.trim();
+  const summary = useMemo(() => {
+    return {
+      totalCount: rows.length,
+      aiChangedCount: rows.filter((item) => item.aiPriceChanged).length,
+      lowestCount: rows.filter((item) => item.isLowest === "Y").length,
+      notLowestCount: rows.filter((item) => item.isLowest === "N").length,
+    };
+  }, [rows]);
 
-      const matchKeyword =
+  const filteredData = useMemo(() => {
+    const keyword = searchValue.trim().toLowerCase();
+
+    return rows.filter((item) => {
+      const matchesSearch =
         !keyword ||
-        item.productName.includes(keyword) ||
-        item.productCode.includes(keyword);
+        item.productName.toLowerCase().includes(keyword) ||
+        item.productCode.toLowerCase().includes(keyword);
 
-      const matchCategory =
-        !filters.category || item.category.includes(filters.category);
+      const matchesCategory = categoryValue
+        ? item.category === categoryValue
+        : true;
 
-      const matchLowest =
-        !filters.lowestYn || item.isLowest === filters.lowestYn;
-
-      const matchStartDate =
-        !filters.startDate || item.updatedDate >= filters.startDate;
-
-      const matchEndDate =
-        !filters.endDate || item.updatedDate <= filters.endDate;
+      const matchesLowest = lowestYn ? item.isLowest === lowestYn : true;
+      const matchesStartDate = startDate ? item.updatedDate >= startDate : true;
+      const matchesEndDate = endDate ? item.updatedDate <= endDate : true;
 
       return (
-        matchKeyword &&
-        matchCategory &&
-        matchLowest &&
-        matchStartDate &&
-        matchEndDate
+        matchesSearch &&
+        matchesCategory &&
+        matchesLowest &&
+        matchesStartDate &&
+        matchesEndDate
       );
     });
-  }, [filters]);
+  }, [rows, searchValue, categoryValue, lowestYn, startDate, endDate]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
-
-  const pagedRows = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredRows.slice(start, start + pageSize);
-  }, [filteredRows, page, pageSize]);
-
-  const handleChangeFilter = (e) => {
-    const { name, value } = e.target;
-    setFilters((prev) => ({ ...prev, [name]: value }));
+  const handleToggleAiPriceChanged = (id, checked) => {
+    setRows((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, aiPriceChanged: checked } : item,
+      ),
+    );
   };
 
-  const handleSearch = () => {
-    setPage(1);
+  const handleChangeSaleStatus = (id, value) => {
+    setRows((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, status: value } : item,
+      ),
+    );
   };
 
   const handleReset = () => {
-    setFilters({
-      startDate: "",
-      endDate: "",
-      keyword: "",
-      category: "",
-      lowestYn: "",
-    });
+    setSearchValue("");
+    setCategoryValue("");
+    setLowestYn("");
+    setStartDate("");
+    setEndDate("");
     setPage(1);
   };
 
-  const handlePageChange = (nextPage) => {
-    if (nextPage < 1 || nextPage > totalPages) return;
-    setPage(nextPage);
-  };
+  const columns = [
+    {
+      key: "catalogId",
+      title: "카탈로그 ID",
+      width: "130px",
+      render: (value) => (
+        <CatalogLink
+          href={`https://search.shopping.naver.com/catalog/${value}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {value}
+        </CatalogLink>
+      ),
+    },
+    {
+      key: "productCode",
+      title: "상품코드",
+      width: "120px",
+      render: (value, row) => (
+        <CodeLink
+          type="button"
+          onClick={() =>
+            nav(`/admin/product-update/${row.productCode}`, {
+              state: { product: row },
+            })
+          }
+        >
+          {value}
+        </CodeLink>
+      ),
+    },
+    {
+      key: "productName",
+      title: "상품명",
+      width: "250px",
+      render: (value, row) => (
+        <ProductNameLink
+          href={`/product-detail?productCode=${row.productCode}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {value}
+        </ProductNameLink>
+      ),
+    },
+    {
+      key: "salePrice",
+      title: "판매가",
+      width: "100px",
+    },
+    {
+      key: "lowestPrice",
+      title: "최저가",
+      width: "100px",
+    },
+    {
+      key: "isLowest",
+      title: "최저가여부",
+      width: "90px",
+      sortable: false,
+      render: (value) => {
+        const status = lowestStyleMap[value] || {
+          label: value,
+          variant: "info",
+        };
 
-  const handlePageSizeChange = (e) => {
-    setPageSize(Number(e.target.value));
-    setPage(1);
-  };
-
-  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+        return (
+          <StatusBadge
+            value={status.label}
+            variant={status.variant}
+            width="54px"
+          />
+        );
+      },
+    },
+    {
+      key: "priceGap",
+      title: "최저가대비",
+      width: "110px",
+      sortable: false,
+      render: (value, row) => (
+        <PriceGapWrap>
+          <div>{value}</div>
+          <RateBadge $negative={row.priceRate.startsWith("-")}>
+            {row.priceRate}
+          </RateBadge>
+        </PriceGapWrap>
+      ),
+    },
+    {
+      key: "aiPriceChanged",
+      title: "AI 가격변경",
+      width: "96px",
+      align: "center",
+      sortable: false,
+      render: (value, row) => (
+        <CenterCell>
+          <ToggleSwitch
+            checked={value}
+            onChange={(checked) => handleToggleAiPriceChanged(row.id, checked)}
+            width={42}
+            height={24}
+          />
+        </CenterCell>
+      ),
+    },
+    {
+      key: "minPrice",
+      title: "최저가제한",
+      width: "100px",
+    },
+    {
+      key: "maxPrice",
+      title: "최고가제한",
+      width: "100px",
+    },
+    {
+      key: "stock",
+      title: "재고",
+      width: "90px",
+    },
+    {
+      key: "status",
+      title: "판매상태",
+      width: "120px",
+      sortable: false,
+      render: (value, row) => (
+        <CenterCell>
+          <SaleStatusSelect
+            $status={value}
+            value={value}
+            onChange={(e) => handleChangeSaleStatus(row.id, e.target.value)}
+          >
+            {saleStatusOptions.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </SaleStatusSelect>
+        </CenterCell>
+      ),
+    },
+    {
+      key: "category",
+      title: "카테고리",
+      width: "190px",
+      sortable: false,
+      render: (value) => <SubText>{value}</SubText>,
+    },
+    {
+      key: "updatedAt",
+      title: "최근변경일",
+      width: "120px",
+      sortable: false,
+      render: (value) => <SubText>{value}</SubText>,
+    },
+  ];
 
   return (
-    <>
-     
-      <PageSection>
-        <PageInner>
-          <Title>가격 조회</Title>
-          <SummaryGrid>
-            {SUMMARY_CARDS.map((card) => (
-              <SummaryCard key={card.id}>
-                <SummaryTitle>{card.title}</SummaryTitle>
-                <SummaryValue>{card.value}</SummaryValue>
-                <SummaryDiff positive={card.positive}>
-                  <span>{card.positive ? "↑" : "–"}</span> {card.diff}
-                  <SummarySub>vs Yesterday</SummarySub>
-                </SummaryDiff>
-              </SummaryCard>
-            ))}
-          </SummaryGrid>
+    <PageWrap>
+      <HeaderRow>
+        <Title>가격 조회</Title>
+      </HeaderRow>
 
-          <FilterBar>
-            <FilterInput
+      <SummaryGrid>
+        <SummaryCard
+          title="전체 상품 수"
+          subText="가격 조회 대상"
+          value={`${summary.totalCount} SKU`}
+          change="0 SKU"
+          up
+        />
+        <SummaryCard
+          title="AI 가격변경 상품"
+          subText="자동 조정 대상"
+          value={`${summary.aiChangedCount} SKU`}
+          change="0 SKU"
+          up
+        />
+        <SummaryCard
+          title="최저가 유지 상품"
+          subText="현재 최저가 일치"
+          value={`${summary.lowestCount} SKU`}
+          change="0 SKU"
+          up
+        />
+        <SummaryCard
+          title="최저가 아닌 상품"
+          subText="재조정 필요"
+          value={`${summary.notLowestCount} SKU`}
+          change="0 SKU"
+          up={false}
+        />
+      </SummaryGrid>
+
+      <TableComponent
+        variant="price"
+        columns={columns}
+        data={filteredData}
+        rowKey="id"
+        customToolbar={
+          <CustomToolbar>
+            <DateInput
               type="date"
-              name="startDate"
-              value={filters.startDate}
-              onChange={handleChangeFilter}
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setPage(1);
+              }}
             />
-            <Tilde>~</Tilde>
-            <FilterInput
+
+            <DateDivider>~</DateDivider>
+
+            <DateInput
               type="date"
-              name="endDate"
-              value={filters.endDate}
-              onChange={handleChangeFilter}
+              value={endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setPage(1);
+              }}
             />
 
             <KeywordInput
               type="text"
-              name="keyword"
               placeholder="상품명, 상품코드로 검색"
-              value={filters.keyword}
-              onChange={handleChangeFilter}
+              value={searchValue}
+              onChange={(e) => {
+                setSearchValue(e.target.value);
+                setPage(1);
+              }}
             />
 
             <FilterSelect
-              name="category"
-              value={filters.category}
-              onChange={handleChangeFilter}
+              value={categoryValue}
+              onChange={(e) => {
+                setCategoryValue(e.target.value);
+                setPage(1);
+              }}
             >
               <option value="">카테고리</option>
-              <option value="라면">라면</option>
-              <option value="스낵과자">스낵과자</option>
-              <option value="즉석식품">즉석식품</option>
-              <option value="탄산음료">탄산음료</option>
+              {categoryOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </FilterSelect>
 
             <FilterSelect
-              name="lowestYn"
-              value={filters.lowestYn}
-              onChange={handleChangeFilter}
+              value={lowestYn}
+              onChange={(e) => {
+                setLowestYn(e.target.value);
+                setPage(1);
+              }}
             >
               <option value="">최저가여부</option>
               <option value="Y">Y</option>
               <option value="N">N</option>
             </FilterSelect>
 
-            <PrimaryButton type="button" onClick={handleSearch}>
-              검색
-            </PrimaryButton>
             <SecondaryButton type="button" onClick={handleReset}>
               초기화
             </SecondaryButton>
-          </FilterBar>
-
-          <TableCard>
-            <TableScroll>
-              <StyledTable>
-                <thead>
-                  <tr>
-                    <th>카탈로그 ID</th>
-                    <th>상품코드</th>
-                    <th>상품명</th>
-                    <th>판매가</th>
-                    <th>최저가</th>
-                    <th>최저가여부</th>
-                    <th>최저가대비</th>
-                    <th>AI 가격변경</th>
-                    <th>최저가제한</th>
-                    <th>최고가제한</th>
-                    <th>재고</th>
-                    <th>판매상태</th>
-                    <th>카테고리</th>
-                    <th>최근변경일</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {pagedRows.map((item) => (
-                    <tr key={item.id}>
-                      <td>{item.catalogId}</td>
-                      <BoldCell>{item.productCode}</BoldCell>
-                      <ProductNameCell>{item.productName}</ProductNameCell>
-                      <td>{item.salePrice}</td>
-                      <td>{item.lowestPrice}</td>
-                      <LowestCell isLowest={item.isLowest}>
-                        {item.isLowest}
-                      </LowestCell>
-                      <td>
-                        <PriceGapWrap>
-                          <div>{item.priceGap}</div>
-                          <RateBadge negative={item.priceRate.startsWith("-")}>
-                            {item.priceRate}
-                          </RateBadge>
-                        </PriceGapWrap>
-                      </td>
-                      <td>
-                        <Switch checked={item.aiPriceChanged}>
-                          <SwitchThumb checked={item.aiPriceChanged} />
-                        </Switch>
-                      </td>
-                      <td>{item.minPrice}</td>
-                      <td>{item.maxPrice}</td>
-                      <td>{item.stock}</td>
-                      <td>
-                        <StatusBadge status={item.status}>{item.status}</StatusBadge>
-                      </td>
-                      <td>{item.category}</td>
-                      <td>{item.updatedAt}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </StyledTable>
-            </TableScroll>
-          </TableCard>
-
-          <PaginationRow>
-            <PageSizeBox>
-              <span>Showing</span>
-              <PageSizeSelect value={pageSize} onChange={handlePageSizeChange}>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </PageSizeSelect>
-              <span>of {filteredRows.length}</span>
-            </PageSizeBox>
-
-            <Pagination>
-              <PageButton
-                type="button"
-                disabled={page === 1}
-                onClick={() => handlePageChange(1)}
-              >
-                «
-              </PageButton>
-              <PageButton
-                type="button"
-                disabled={page === 1}
-                onClick={() => handlePageChange(page - 1)}
-              >
-                ‹
-              </PageButton>
-
-              {pageNumbers.map((num) => (
-                <PageButton
-                  key={num}
-                  type="button"
-                  active={page === num}
-                  onClick={() => handlePageChange(num)}
-                >
-                  {num}
-                </PageButton>
-              ))}
-
-              <PageButton
-                type="button"
-                disabled={page === totalPages}
-                onClick={() => handlePageChange(page + 1)}
-              >
-                ›
-              </PageButton>
-              <PageButton
-                type="button"
-                disabled={page === totalPages}
-                onClick={() => handlePageChange(totalPages)}
-              >
-                »
-              </PageButton>
-            </Pagination>
-          </PaginationRow>
-        </PageInner>
-      </PageSection>
-      
-    </>
+          </CustomToolbar>
+        }
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+      />
+    </PageWrap>
   );
 }
 
-/* styled-components */
-
-const PageSection = styled.main`
-  min-height: calc(100vh - 160px);
-  background: #f5f7fb;
-  padding: 32px;
+const PageWrap = styled.div`
+  padding: 24px;
+  background: #f8fafc;
+  min-height: 100%;
 `;
 
-const PageInner = styled.div`
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
+const HeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  margin-top: 5px;
 `;
 
 const Title = styled.h2`
-  margin: 0 0 24px;
-  font-size: 30px;
-  font-weight: 700;
-  color: #1f2430;
+  margin: 0;
+  color: #111827;
+  font-size: 22px;
+  font-weight: 800;
 `;
 
 const SummaryGrid = styled.div`
+  margin-bottom: 18px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
+  gap: 14px;
 
   @media (max-width: 1200px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 700px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const SummaryCard = styled.div`
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 24px;
-  box-shadow: 0 2px 12px rgba(17, 24, 39, 0.04);
-`;
-
-const SummaryTitle = styled.p`
-  margin: 0 0 12px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #5f6876;
-`;
-
-const SummaryValue = styled.h3`
-  margin: 0 0 10px;
-  font-size: 42px;
-  line-height: 1;
-  font-weight: 700;
-  color: #1e2430;
-`;
-
-const SummaryDiff = styled.p`
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: ${({ positive }) => (positive ? "#19b45b" : "#9aa3b2")};
-
-  span {
-    margin-right: 2px;
-  }
-`;
-
-const SummarySub = styled.span`
-  margin-left: 6px;
-  color: #9aa3b2;
-  font-weight: 500;
-`;
-
-const FilterBar = styled.div`
+const CustomToolbar = styled.div`
+  width: 100%;
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
   align-items: center;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
 `;
 
-const sharedInputStyle = css`
-  height: 44px;
-  padding: 0 14px;
-  border: 1px solid #e5e9f0;
+const DateInput = styled.input`
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #edf0f4;
   border-radius: 10px;
   background: #ffffff;
-  font-size: 14px;
-  color: #1f2430;
+  color: #374151;
+  font-size: 13px;
   outline: none;
 
   &:focus {
-    border-color: #4a7cff;
+    border-color: #cfd8e3;
   }
 `;
 
-const FilterInput = styled.input`
-  ${sharedInputStyle}
+const DateDivider = styled.span`
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 600;
 `;
 
 const KeywordInput = styled.input`
-  ${sharedInputStyle};
+  height: 38px;
   min-width: 260px;
+  padding: 0 12px;
+  border: 1px solid #edf0f4;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  outline: none;
+
+  &:focus {
+    border-color: #cfd8e3;
+  }
 `;
 
 const FilterSelect = styled.select`
-  ${sharedInputStyle};
+  height: 38px;
   min-width: 130px;
-  cursor: pointer;
-`;
-
-const Tilde = styled.span`
-  color: #8c95a3;
-  font-size: 14px;
-`;
-
-const PrimaryButton = styled.button`
-  height: 44px;
-  padding: 0 18px;
-  border: none;
+  padding: 0 12px;
+  border: 1px solid #edf0f4;
   border-radius: 10px;
-  background: #2563eb;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  outline: none;
   cursor: pointer;
+
+  &:focus {
+    border-color: #cfd8e3;
+  }
 `;
 
 const SecondaryButton = styled.button`
-  height: 44px;
-  padding: 0 18px;
+  height: 38px;
+  padding: 0 14px;
   border: none;
   border-radius: 10px;
   background: #e8edf5;
   color: #1f2430;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
 `;
 
-const TableCard = styled.div`
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 2px 12px rgba(17, 24, 39, 0.04);
-  overflow: hidden;
+const SubText = styled.span`
+  color: #6b7280;
+  font-size: 12px;
 `;
 
-const TableScroll = styled.div`
-  overflow-x: auto;
-`;
-
-const StyledTable = styled.table`
-  width: 100%;
-  min-width: 1460px;
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding: 16px 14px;
-    text-align: center;
-    border-bottom: 1px solid #eef1f5;
-    font-size: 14px;
-    white-space: nowrap;
-    color: #2a3240;
-  }
-
-  th {
-    background: #f9fafc;
-    font-weight: 700;
-    color: #7b8492;
-  }
-
-  tbody tr:hover {
-    background: #fafcff;
-  }
-`;
-
-const BoldCell = styled.td`
-  font-weight: 700;
-`;
-
-const ProductNameCell = styled.td`
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const LowestCell = styled.td`
-  font-weight: 700;
-  color: ${({ isLowest }) => (isLowest === "Y" ? "#18b663" : "#ef5350")};
+const CenterCell = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const PriceGapWrap = styled.div`
@@ -707,118 +721,85 @@ const RateBadge = styled.span`
   border-radius: 8px;
   font-size: 12px;
   font-weight: 700;
-  background: ${({ negative }) => (negative ? "#dcf7e8" : "#ffe7e7")};
-  color: ${({ negative }) => (negative ? "#18b663" : "#ef5350")};
+  background: ${({ $negative }) => ($negative ? "#dcf7e8" : "#ffe7e7")};
+  color: ${({ $negative }) => ($negative ? "#18b663" : "#ef5350")};
 `;
 
-const Switch = styled.div`
-  position: relative;
-  width: 42px;
-  height: 24px;
-  margin: 0 auto;
-  border-radius: 999px;
-  background: ${({ checked }) => (checked ? "#707784" : "#d7dbe3")};
-`;
-
-const SwitchThumb = styled.div`
-  position: absolute;
-  top: 3px;
-  left: ${({ checked }) => (checked ? "21px" : "3px")};
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #ffffff;
-  transition: left 0.2s ease;
-`;
-
-const StatusBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 74px;
-  height: 30px;
-  padding: 0 12px;
-  border-radius: 8px;
+const CodeLink = styled.button`
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #111827;
   font-size: 13px;
   font-weight: 700;
+  cursor: pointer;
 
-  ${({ status }) => {
-    switch (status) {
-      case "판매중":
-        return css`
-          background: #dcf7e8;
-          color: #19b45b;
-        `;
-      case "판매중지":
-        return css`
-          background: #fff4cf;
-          color: #d79b0c;
-        `;
-      case "품절":
-        return css`
-          background: #f4dfff;
-          color: #9b45db;
-        `;
-      case "판매종료":
-        return css`
-          background: #ebe7ff;
-          color: #6b5ae0;
-        `;
-      default:
-        return css`
-          background: #eef1f5;
-          color: #6c7480;
-        `;
-    }
-  }}
-`;
-
-const PaginationRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 18px;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
+  &:hover {
+    color: #2563eb;
+    text-decoration: underline;
   }
 `;
 
-const PageSizeBox = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #6f7785;
-  font-size: 14px;
+const CatalogLink = styled.a`
+  color: #111827;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
 `;
 
-const PageSizeSelect = styled.select`
-  ${sharedInputStyle};
-  height: 38px;
-  padding: 0 10px;
-  min-width: 64px;
+const ProductNameLink = styled.a`
+  color: #111827;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
 `;
 
-const Pagination = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-`;
-
-const PageButton = styled.button`
-  width: 34px;
-  height: 34px;
-  border: 1px solid #e5e9f0;
+const SaleStatusSelect = styled.select`
+  height: 30px;
+  min-width: 96px;
+  padding: 0 30px 0 10px;
+  border: 0;
   border-radius: 8px;
-  background: ${({ active }) => (active ? "#2563eb" : "#ffffff")};
-  color: ${({ active }) => (active ? "#ffffff" : "#4b5563")};
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  outline: none;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
+  background-color: ${({ $status }) => {
+    if ($status === "판매중") return "#dcf7e8";
+    if ($status === "판매중지") return "#fff4cf";
+    if ($status === "품절") return "#f4dfff";
+    if ($status === "판매종료") return "#ebe7ff";
+    return "#eef1f5";
+  }};
+
+  color: ${({ $status }) => {
+    if ($status === "판매중") return "#19b45b";
+    if ($status === "판매중지") return "#d79b0c";
+    if ($status === "품절") return "#9b45db";
+    if ($status === "판매종료") return "#6b5ae0";
+    return "#6c7480";
+  }};
+
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
   }
 `;

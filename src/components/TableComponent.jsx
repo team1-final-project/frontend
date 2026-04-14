@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import {
   Search,
   MoreHorizontal,
@@ -13,6 +13,7 @@ export default function TableComponent({
   columns = [],
   data = [],
   rowKey = "id",
+  variant = "default",
   searchValue = "",
   onSearchChange,
   searchPlaceholder = "Search...",
@@ -22,6 +23,7 @@ export default function TableComponent({
   filterPlaceholder = "Filter",
   extraToolbar = null,
   toolbarRight = null,
+  customToolbar = null,
   page = 1,
   pageSize = 10,
   onPageChange,
@@ -124,9 +126,7 @@ export default function TableComponent({
   const sortedData = useMemo(() => {
     if (!sortConfig.key) return data;
 
-    const targetColumn = columns.find(
-      (column) => column.key === sortConfig.key,
-    );
+    const targetColumn = columns.find((column) => column.key === sortConfig.key);
     if (!targetColumn) return data;
 
     const copied = [...data];
@@ -160,57 +160,74 @@ export default function TableComponent({
     if (column.sortable === false) return null;
 
     if (sortConfig.key !== column.key) {
-      return <ArrowUpDown size={14} />;
+      return <ArrowUpDown size={variant === "inventory" ? 13 : 14} />;
     }
 
     return sortConfig.direction === "asc" ? (
-      <ChevronUp size={14} />
+      <ChevronUp size={variant === "inventory" ? 13 : 14} />
     ) : (
-      <ChevronDown size={14} />
+      <ChevronDown size={variant === "inventory" ? 13 : 14} />
     );
   };
 
   return (
-    <Wrap>
-      <Toolbar>
-        <ToolbarLeft>
-          <SearchWrap>
-            <SearchIcon>
-              <Search size={15} />
-            </SearchIcon>
-            <SearchInput
-              value={searchValue}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-              placeholder={searchPlaceholder}
-            />
-          </SearchWrap>
+    <Wrap $variant={variant}>
+      <Toolbar $variant={variant}>
+        {customToolbar ? (
+          <CustomToolbarWrap $variant={variant}>
+            {customToolbar}
+          </CustomToolbarWrap>
+        ) : (
+          <>
+            <ToolbarLeft $variant={variant}>
+              {typeof onSearchChange === "function" && (
+                <SearchWrap $variant={variant}>
+                  <SearchIcon>
+                    <Search size={15} />
+                  </SearchIcon>
+                  <SearchInput
+                    $variant={variant}
+                    value={searchValue}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    placeholder={searchPlaceholder}
+                  />
+                </SearchWrap>
+              )}
 
-          <FilterSelectWrap>
-            <FilterSelect
-              value={filterValue}
-              onChange={(e) => onFilterChange?.(e.target.value)}
-            >
-              <option value="">{filterPlaceholder}</option>
-              {filterOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </FilterSelect>
+              {typeof onFilterChange === "function" && (
+                <FilterSelectWrap $variant={variant}>
+                  <FilterSelect
+                    $variant={variant}
+                    value={filterValue}
+                    onChange={(e) => onFilterChange(e.target.value)}
+                  >
+                    <option value="">{filterPlaceholder}</option>
+                    {filterOptions.map((option) => (
+                      <option
+                        key={option.value ?? option.label}
+                        value={option.value ?? option.label}
+                      >
+                        {option.label}
+                      </option>
+                    ))}
+                  </FilterSelect>
 
-            <FilterIcon>
-              <ChevronDown size={15} />
-            </FilterIcon>
-          </FilterSelectWrap>
+                  <FilterIcon>
+                    <ChevronDown size={15} />
+                  </FilterIcon>
+                </FilterSelectWrap>
+              )}
 
-          {extraToolbar}
-        </ToolbarLeft>
+              {extraToolbar}
+            </ToolbarLeft>
 
-        {toolbarRight && <ToolbarRight>{toolbarRight}</ToolbarRight>}
+            {toolbarRight && <ToolbarRight>{toolbarRight}</ToolbarRight>}
+          </>
+        )}
       </Toolbar>
 
       <TableScroll>
-        <StyledTable>
+        <StyledTable $variant={variant}>
           <thead>
             <tr>
               {columns.map((column) => (
@@ -223,6 +240,7 @@ export default function TableComponent({
                 >
                   <HeaderButton
                     type="button"
+                    $variant={variant}
                     $sortable={column.sortable !== false}
                     $align={column.align || "left"}
                     onClick={() => handleSort(column)}
@@ -290,9 +308,34 @@ export function RowActionButton({ onClick }) {
 const Wrap = styled.div`
   width: 100%;
   background: #ffffff;
-  border: 1px solid #eef0f4;
-  border-radius: 16px;
-  padding: 14px;
+  overflow: hidden;
+
+  ${({ $variant }) =>
+    $variant === "inventory" &&
+    css`
+      border: 1px solid #eef1f5;
+      border-radius: 18px;
+      padding: 0;
+      box-shadow: 0 1px 0 rgba(17, 24, 39, 0.02),
+        0 8px 20px rgba(31, 41, 55, 0.04);
+    `}
+
+  ${({ $variant }) =>
+    $variant === "price" &&
+    css`
+      border: 1px solid #eef0f4;
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 2px 12px rgba(17, 24, 39, 0.04);
+    `}
+
+  ${({ $variant }) =>
+    $variant === "default" &&
+    css`
+      border: 1px solid #eef0f4;
+      border-radius: 16px;
+      padding: 14px;
+    `}
 `;
 
 const Toolbar = styled.div`
@@ -300,15 +343,24 @@ const Toolbar = styled.div`
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
-  margin-bottom: 10px;
+
+  ${({ $variant }) =>
+    $variant === "inventory"
+      ? css`
+          padding: 14px 14px 12px;
+          margin-bottom: 0;
+        `
+      : css`
+          margin-bottom: 10px;
+        `}
 `;
 
 const ToolbarLeft = styled.div`
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
   flex: 1;
+  gap: ${({ $variant }) => ($variant === "inventory" ? "10px" : "12px")};
 `;
 
 const ToolbarRight = styled.div`
@@ -318,10 +370,18 @@ const ToolbarRight = styled.div`
   flex-shrink: 0;
 `;
 
+const CustomToolbarWrap = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: ${({ $variant }) => ($variant === "inventory" ? "10px" : "12px")};
+`;
+
 const SearchWrap = styled.div`
   position: relative;
   width: 100%;
-  max-width: 240px;
+  max-width: ${({ $variant }) => ($variant === "inventory" ? "224px" : "240px")};
 
   @media (max-width: 900px) {
     max-width: 100%;
@@ -341,9 +401,6 @@ const SearchIcon = styled.div`
 
 const SearchInput = styled.input`
   width: 100%;
-  height: 38px;
-  padding: 0 14px 0 34px;
-  border: 1px solid #edf0f4;
   border-radius: 10px;
   background: #ffffff;
   color: #374151;
@@ -351,17 +408,34 @@ const SearchInput = styled.input`
   outline: none;
 
   &::placeholder {
-    color: #9ca3af;
+    color: #98a2b3;
   }
 
-  &:focus {
-    border-color: #cfd8e3;
-  }
+  ${({ $variant }) =>
+    $variant === "inventory"
+      ? css`
+          height: 44px;
+          padding: 0 14px 0 36px;
+          border: 1px solid #e6eaf2;
+
+          &:focus {
+            border-color: #c9d6ff;
+          }
+        `
+      : css`
+          height: 38px;
+          padding: 0 14px 0 34px;
+          border: 1px solid #edf0f4;
+
+          &:focus {
+            border-color: #cfd8e3;
+          }
+        `}
 `;
 
 const FilterSelectWrap = styled.div`
   position: relative;
-  min-width: 180px;
+  min-width: ${({ $variant }) => ($variant === "inventory" ? "126px" : "180px")};
 
   @media (max-width: 900px) {
     width: 100%;
@@ -370,20 +444,35 @@ const FilterSelectWrap = styled.div`
 
 const FilterSelect = styled.select`
   width: 100%;
-  height: 38px;
-  padding: 0 34px 0 14px;
-  border: 1px solid #edf0f4;
   border-radius: 10px;
   background: #ffffff;
-  color: #6b7280;
   font-size: 13px;
   outline: none;
   appearance: none;
   cursor: pointer;
 
-  &:focus {
-    border-color: #cfd8e3;
-  }
+  ${({ $variant }) =>
+    $variant === "inventory"
+      ? css`
+          height: 44px;
+          padding: 0 34px 0 14px;
+          border: 1px solid #e6eaf2;
+          color: #7b8494;
+
+          &:focus {
+            border-color: #c9d6ff;
+          }
+        `
+      : css`
+          height: 38px;
+          padding: 0 34px 0 14px;
+          border: 1px solid #edf0f4;
+          color: #6b7280;
+
+          &:focus {
+            border-color: #cfd8e3;
+          }
+        `}
 `;
 
 const FilterIcon = styled.div`
@@ -405,33 +494,68 @@ const TableScroll = styled.div`
 
 const StyledTable = styled.table`
   width: 100%;
-  min-width: 1200px;
   border-collapse: collapse;
+  min-width: ${({ $variant }) => ($variant === "inventory" ? "1280px" : "1200px")};
 
   thead th {
-    padding: 14px 16px;
-    border-bottom: 1px solid #eef0f4;
-    color: #9ca3af;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
     white-space: nowrap;
-  }
-
-  tbody td {
-    position: relative;
-    padding: 16px;
-    border-bottom: 1px solid #f3f4f6;
-    color: #374151;
-    font-size: 13px;
-    white-space: nowrap;
-    vertical-align: middle;
+    background: #ffffff;
   }
 
   tbody tr:last-child td {
     border-bottom: none;
   }
+
+  ${({ $variant }) =>
+    $variant === "inventory"
+      ? css`
+          thead th {
+            padding: 16px 14px;
+            border-top: 1px solid #edf1f7;
+            border-bottom: 1px solid #edf1f7;
+            color: #98a2b3;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: normal;
+          }
+
+          tbody td {
+            position: relative;
+            padding: 16px 14px;
+            border-bottom: 1px solid #edf1f7;
+            color: #3b4352;
+            font-size: 13px;
+            white-space: nowrap;
+            vertical-align: middle;
+            background: #ffffff;
+          }
+
+          tbody tr:hover td {
+            background: #fafcff;
+          }
+        `
+      : css`
+          thead th {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eef0f4;
+            color: #9ca3af;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+          }
+
+          tbody td {
+            position: relative;
+            padding: 16px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #374151;
+            font-size: 13px;
+            white-space: nowrap;
+            vertical-align: middle;
+          }
+        `}
 `;
 
 const HeaderButton = styled.button`
@@ -447,7 +571,7 @@ const HeaderButton = styled.button`
       : $align === "right"
         ? "flex-end"
         : "flex-start"};
-  gap: 6px;
+  gap: ${({ $variant }) => ($variant === "inventory" ? "4px" : "6px")};
   color: inherit;
   font: inherit;
   cursor: ${({ $sortable }) => ($sortable ? "pointer" : "default")};
