@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { sendEmailCode, verifyEmailCode } from "../../api/auth";
 import { useAuth } from "../../context/AuthContext";
 import logo from "../../assets/stocker-logo.svg";
+import * as S from "./Signup.styles.js";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -412,20 +412,20 @@ export default function Signup() {
   };
 
   return (
-    <Page>
-      <Inner>
-        <FormSection>
-          <FormCard>
-            <LogoArea>
-              <LogoImage src={logo} alt="Stock+er" />
-            </LogoArea>
+    <S.Page>
+      <S.Inner>
+        <S.FormSection>
+          <S.FormCard>
+            <S.LogoArea>
+              <S.LogoImage src={logo} alt="Stock+er" />
+            </S.LogoArea>
 
-            <Form onSubmit={handleSignup}>
-              <InputGroup>
-                <Label>이메일</Label>
+            <S.Form onSubmit={handleSignup}>
+              <S.InputGroup>
+                <S.Label>이메일</S.Label>
 
                 {isEmailVerified ? (
-                  <Input
+                  <S.Input
                     $error={!!fieldErrors.email}
                     type="email"
                     name="email"
@@ -436,8 +436,8 @@ export default function Signup() {
                     onBlur={handleBlur}
                   />
                 ) : (
-                  <InlineRow>
-                    <Input
+                  <S.InlineRow>
+                    <S.Input
                       $error={!!fieldErrors.email}
                       type="email"
                       name="email"
@@ -446,29 +446,29 @@ export default function Signup() {
                       onBlur={handleBlur}
                       placeholder="example@email.com"
                     />
-                    <SmallButton
+                    <S.SmallButton
                       type="button"
                       onClick={handleSendCode}
                       disabled={isSendingCode}
                     >
                       {isSendingCode ? "발송 중..." : "인증 발송"}
-                    </SmallButton>
-                  </InlineRow>
+                    </S.SmallButton>
+                  </S.InlineRow>
                 )}
 
                 {fieldErrors.email && (
-                  <ErrorText>{fieldErrors.email}</ErrorText>
+                  <S.ErrorText>{fieldErrors.email}</S.ErrorText>
                 )}
                 {!fieldErrors.email && fieldMessages.email && (
-                  <SuccessText>{fieldMessages.email}</SuccessText>
+                  <S.SuccessText>{fieldMessages.email}</S.SuccessText>
                 )}
-              </InputGroup>
+              </S.InputGroup>
 
               {isCodeSent && !isEmailVerified && (
-                <InputGroup>
-                  <Label>이메일 인증번호</Label>
-                  <InlineRow>
-                    <Input
+                <S.InputGroup>
+                  <S.Label>이메일 인증번호</S.Label>
+                  <S.InlineRow>
+                    <S.Input
                       $error={!!fieldErrors.code}
                       type="text"
                       name="code"
@@ -477,19 +477,19 @@ export default function Signup() {
                       onBlur={handleBlur}
                       placeholder="인증번호 입력"
                     />
-                    <SmallButton type="button" onClick={handleVerifyCode}>
+                    <S.SmallButton type="button" onClick={handleVerifyCode}>
                       인증 확인
-                    </SmallButton>
-                  </InlineRow>
+                    </S.SmallButton>
+                  </S.InlineRow>
                   {fieldErrors.code && (
-                    <ErrorText>{fieldErrors.code}</ErrorText>
+                    <S.ErrorText>{fieldErrors.code}</S.ErrorText>
                   )}
-                </InputGroup>
+                </S.InputGroup>
               )}
 
-              <InputGroup>
-                <Label>비밀번호</Label>
-                <Input
+              <S.InputGroup>
+                <S.Label>비밀번호</S.Label>
+                <S.Input
                   $error={
                     !!fieldErrors.password ||
                     (isPasswordFilled && !isPasswordValid)
@@ -503,20 +503,20 @@ export default function Signup() {
                 />
 
                 {fieldErrors.password ? (
-                  <ErrorText>{fieldErrors.password}</ErrorText>
+                  <S.ErrorText>{fieldErrors.password}</S.ErrorText>
                 ) : isPasswordFilled && isPasswordValid ? (
-                  <SuccessText>사용 가능한 비밀번호 형식입니다.</SuccessText>
+                  <S.SuccessText>사용 가능한 비밀번호 형식입니다.</S.SuccessText>
                 ) : (
-                  <GuideText>
+                  <S.GuideText>
                     비밀번호 길이는 8~16자, 대문자, 특수문자를 1개 이상 포함해야
                     합니다.
-                  </GuideText>
+                  </S.GuideText>
                 )}
-              </InputGroup>
+              </S.InputGroup>
 
-              <InputGroup>
-                <Label>비밀번호 확인</Label>
-                <Input
+              <S.InputGroup>
+                <S.Label>비밀번호 확인</S.Label>
+                <S.Input
                   $error={
                     !!fieldErrors.confirmPassword ||
                     (isConfirmPasswordFilled && !isConfirmPasswordMatched)
@@ -529,19 +529,19 @@ export default function Signup() {
                   placeholder="비밀번호 확인"
                 />
                 {fieldErrors.confirmPassword ? (
-                  <ErrorText>{fieldErrors.confirmPassword}</ErrorText>
+                  <S.ErrorText>{fieldErrors.confirmPassword}</S.ErrorText>
                 ) : isConfirmPasswordFilled ? (
                   isConfirmPasswordMatched ? (
-                    <SuccessText>비밀번호가 일치합니다.</SuccessText>
+                    <S.SuccessText>비밀번호가 일치합니다.</S.SuccessText>
                   ) : (
-                    <ErrorText>비밀번호 확인이 일치하지 않습니다.</ErrorText>
+                    <S.ErrorText>비밀번호 확인이 일치하지 않습니다.</S.ErrorText>
                   )
                 ) : null}
-              </InputGroup>
+              </S.InputGroup>
 
-              <InputGroup>
-                <Label>이름</Label>
-                <Input
+              <S.InputGroup>
+                <S.Label>이름</S.Label>
+                <S.Input
                   $error={!!fieldErrors.name}
                   type="text"
                   name="name"
@@ -550,12 +550,12 @@ export default function Signup() {
                   onBlur={handleBlur}
                   placeholder="이름"
                 />
-                {fieldErrors.name && <ErrorText>{fieldErrors.name}</ErrorText>}
-              </InputGroup>
+                {fieldErrors.name && <S.ErrorText>{fieldErrors.name}</S.ErrorText>}
+              </S.InputGroup>
 
-              <InputGroup>
-                <Label>연락처</Label>
-                <Input
+              <S.InputGroup>
+                <S.Label>연락처</S.Label>
+                <S.Input
                   $error={!!fieldErrors.phone}
                   type="text"
                   name="phone"
@@ -565,183 +565,22 @@ export default function Signup() {
                   placeholder="01012345678"
                 />
                 {fieldErrors.phone && (
-                  <ErrorText>{fieldErrors.phone}</ErrorText>
+                  <S.ErrorText>{fieldErrors.phone}</S.ErrorText>
                 )}
-              </InputGroup>
+              </S.InputGroup>
 
-              <MainButton type="submit">회원가입</MainButton>
-            </Form>
+              <S.MainButton type="submit">회원가입</S.MainButton>
+            </S.Form>
 
-            <BottomRow>
-              <BottomText>이미 계정이 있나요?</BottomText>
-              <BottomLink type="button" onClick={() => navigate("/login")}>
+            <S.BottomRow>
+              <S.BottomText>이미 계정이 있나요?</S.BottomText>
+              <S.BottomLink type="button" onClick={() => navigate("/login")}>
                 로그인
-              </BottomLink>
-            </BottomRow>
-          </FormCard>
-        </FormSection>
-      </Inner>
-    </Page>
+              </S.BottomLink>
+            </S.BottomRow>
+          </S.FormCard>
+        </S.FormSection>
+      </S.Inner>
+    </S.Page>
   );
 }
-
-const GuideText = styled.p`
-  margin-top: -2px;
-  padding-left: 4px;
-  font-size: 13px;
-  color: #8f8477;
-`;
-
-const Page = styled.div`
-  min-height: 100vh;
-  background: #f4f1eb;
-  padding: 40px 24px;
-`;
-
-const Inner = styled.div`
-  max-width: 1280px;
-  min-height: calc(100vh - 80px);
-  margin: 0 auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const FormSection = styled.div`
-  width: 600px;
-  display: flex;
-  justify-content: center;
-`;
-
-const FormCard = styled.div`
-  width: 100%;
-  max-width: 560px;
-  background: #ffffff;
-  border-radius: 32px;
-  padding: 40px 32px;
-  box-shadow: 0 18px 50px rgba(25, 25, 25, 0.08);
-  border: 1px solid #eee7dd;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-`;
-
-const InputGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const Label = styled.label`
-  font-size: 14px;
-  font-weight: 700;
-  color: #222;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  height: 56px;
-  padding: 0 18px;
-  border-radius: 16px;
-  border: 1px solid ${({ $error }) => ($error ? "#e15b64" : "#e5ddd2")};
-  background: #fcfbf8;
-  font-size: 15px;
-  color: #111;
-
-  &::placeholder {
-    color: #a59a8d;
-  }
-
-  &:focus {
-    border-color: ${({ $error }) => ($error ? "#e15b64" : "#111")};
-    background: #fff;
-  }
-
-  &:disabled {
-    background: #f1ede6;
-    color: #8f8477;
-    cursor: not-allowed;
-  }
-`;
-
-const InlineRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 118px;
-  gap: 10px;
-`;
-
-const ErrorText = styled.p`
-  margin-top: -2px;
-  padding-left: 4px;
-  font-size: 13px;
-  color: #e15b64;
-`;
-
-const SuccessText = styled.p`
-  margin-top: -2px;
-  padding-left: 4px;
-  font-size: 13px;
-  color: #0f766e;
-`;
-
-const SmallButton = styled.button`
-  height: 56px;
-  border-radius: 16px;
-  background: #111;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 700;
-
-  &:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-  }
-`;
-
-const MainButton = styled.button`
-  width: 100%;
-  height: 58px;
-  border-radius: 18px;
-  background: #111;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 700;
-  margin-top: 6px;
-`;
-
-const BottomRow = styled.div`
-  margin-top: 22px;
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-`;
-
-const BottomText = styled.span`
-  font-size: 14px;
-  color: #6d655b;
-`;
-
-const BottomLink = styled.button`
-  font-size: 14px;
-  font-weight: 700;
-  color: #111;
-`;
-
-const LogoArea = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-  margin-bottom: 46px;
-`;
-
-const LogoImage = styled.img`
-  display: block;
-  width: 60%;
-  max-width: 420px;
-  height: auto;
-`;

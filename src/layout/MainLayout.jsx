@@ -1,27 +1,17 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import styled from "styled-components";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import * as S from "./MainLayout.styles.jsx";
 
 export default function MainLayout() {
   return (
-    <Wrap>
+    <S.Wrap>
       <Header />
-      <Content>
+      <S.Content>
         <Outlet />
-      </Content>
+      </S.Content>
       <Footer />
-    </Wrap>
+    </S.Wrap>
   );
 }
-
-const Wrap = styled.div`
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-`;
-
-const Content = styled.main`
-  flex: 1;
-`;
