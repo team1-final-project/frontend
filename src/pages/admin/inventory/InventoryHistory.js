@@ -357,76 +357,76 @@ export default function InventoryHistory() {
       </HeaderRow>
 
       <SummaryGrid>
-        <StatCard>
-          <CardTitle>입고</CardTitle>
-          <BigLine>
-            <BigNumber>{summary.inboundSkuCount}</BigNumber>
-            <Unit>SKU</Unit>
-            <Slash>/</Slash>
-            <SubNumber>{summary.inboundQty.toLocaleString()}개</SubNumber>
-          </BigLine>
-          <ChangeRow $up>
-            ↑ 6 SKU / 2,000개 <span>vs Yesterday</span>
-          </ChangeRow>
-        </StatCard>
+  <StatCard>
+    <CardTitle>입고</CardTitle>
+    <BigLine>
+      <BigNumber>{summary.inboundSkuCount}</BigNumber>
+      <Unit>SKU</Unit>
+      <Slash>/</Slash>
+      <SubNumber>{summary.inboundQty.toLocaleString()}개</SubNumber>
+    </BigLine>
+    <ChangeRow $up>
+      ↑ 6 SKU / 2,000개 <span>vs Yesterday</span>
+    </ChangeRow>
+  </StatCard>
 
-        <StatCard>
-          <CardTitle>출고</CardTitle>
-          <BigLine>
-            <BigNumber>{summary.outboundSkuCount}</BigNumber>
-            <Unit>SKU</Unit>
-            <Slash>/</Slash>
-            <SubNumber>{summary.outboundQty.toLocaleString()}개</SubNumber>
-          </BigLine>
-          <ChangeRow $up={false}>
-            ↓ 4 SKU / 3,000개 <span>vs Yesterday</span>
-          </ChangeRow>
-        </StatCard>
+  <StatCard>
+    <CardTitle>출고</CardTitle>
+    <BigLine>
+      <BigNumber>{summary.outboundSkuCount}</BigNumber>
+      <Unit>SKU</Unit>
+      <Slash>/</Slash>
+      <SubNumber>{summary.outboundQty.toLocaleString()}개</SubNumber>
+    </BigLine>
+    <ChangeRow $up={false}>
+      ↓ 4 SKU / 3,000개 <span>vs Yesterday</span>
+    </ChangeRow>
+  </StatCard>
 
-        <TrendCard>
-          <TrendHeader>입출고 추이</TrendHeader>
+  <TrendCard>
+    <TrendHeader>입출고 추이</TrendHeader>
 
-          <TrendInner>
-            <LegendArea>
-              <LegendItem>
-                <LegendDot $color="#2563eb" />
-                입고
-              </LegendItem>
-              <LegendItem>
-                <LegendDot $color="#ef4444" />
-                출고
-              </LegendItem>
-            </LegendArea>
+    <TrendInner>
+      <LegendArea>
+        <LegendItem>
+          <LegendDot $color="#2563eb" />
+          입고
+        </LegendItem>
+        <LegendItem>
+          <LegendDot $color="#ef4444" />
+          출고
+        </LegendItem>
+      </LegendArea>
 
-            <ChartArea>
-              <TrendSvg viewBox="0 0 260 96" preserveAspectRatio="none">
-                <polyline
-                  fill="none"
-                  stroke="#2563eb"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={buildPolylinePoints(inboundTrend, 260, 96, 10)}
-                />
-                <polyline
-                  fill="none"
-                  stroke="#ef4444"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={buildPolylinePoints(outboundTrend, 260, 96, 10)}
-                />
-              </TrendSvg>
+      <ChartArea>
+        <TrendSvg viewBox="0 0 260 96" preserveAspectRatio="none">
+          <polyline
+            fill="none"
+            stroke="#2563eb"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            points={buildPolylinePoints(inboundTrend, 260, 96, 10)}
+          />
+          <polyline
+            fill="none"
+            stroke="#ef4444"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            points={buildPolylinePoints(outboundTrend, 260, 96, 10)}
+          />
+        </TrendSvg>
 
-              <XAxis>
-                {weekLabels.map((label) => (
-                  <span key={label}>{label}</span>
-                ))}
-              </XAxis>
-            </ChartArea>
-          </TrendInner>
-        </TrendCard>
-      </SummaryGrid>
+        <XAxis>
+          {weekLabels.map((label) => (
+            <span key={label}>{label}</span>
+          ))}
+        </XAxis>
+      </ChartArea>
+    </TrendInner>
+  </TrendCard>
+</SummaryGrid>
 
       <TableComponent
         variant="inventory"
@@ -514,10 +514,10 @@ const Title = styled.h2`
 `;
 
 const SummaryGrid = styled.div`
-  margin-bottom: 18px;
+  margin-bottom: 12px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1.55fr;
-  gap: 18px;
+  grid-template-columns: 1fr 1fr 1.42fr;
+  gap: 14px;
 
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
@@ -527,60 +527,67 @@ const SummaryGrid = styled.div`
 const CardBase = styled.div`
   background: #ffffff;
   border-radius: 18px;
-  padding: 20px 18px;
+  padding: 14px 14px;
   box-shadow: 0 1px 0 rgba(17, 24, 39, 0.02),
     0 8px 20px rgba(31, 41, 55, 0.04);
-  min-height: 132px;
+  min-height: 104px;
+  box-sizing: border-box;
 `;
 
 const StatCard = styled(CardBase)``;
 
 const TrendCard = styled(CardBase)`
-  padding-bottom: 14px;
+  padding-bottom: 18px;
 `;
 
 const CardTitle = styled.div`
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #2f3645;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 `;
 
 const BigLine = styled.div`
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: flex-end;
+  gap: 6px;
+  min-height: 38px;
 `;
 
 const BigNumber = styled.div`
-  font-size: 48px;
+  font-size: 38px;
   line-height: 1;
   font-weight: 800;
   color: #1f2937;
 `;
 
 const Unit = styled.div`
-  font-size: 16px;
+  font-size: 14px;
+  line-height: 1;
   font-weight: 700;
   color: #1f2937;
+  margin-bottom: 4px;
 `;
 
 const Slash = styled.div`
-  font-size: 30px;
+  font-size: 20px;
   line-height: 1;
   color: #9ca3af;
-  margin: 0 2px;
+  margin: 0 1px 3px;
 `;
 
 const SubNumber = styled.div`
-  font-size: 16px;
+  font-size: 14px;
+  line-height: 1;
   font-weight: 700;
   color: #1f2937;
+  margin-bottom: 4px;
 `;
 
 const ChangeRow = styled.div`
-  margin-top: 12px;
-  font-size: 14px;
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.2;
   font-weight: 700;
   color: ${({ $up }) => ($up ? "#22c55e" : "#ef4444")};
 
@@ -600,8 +607,8 @@ const TrendHeader = styled.div`
 
 const TrendInner = styled.div`
   display: grid;
-  grid-template-columns: 72px 1fr;
-  gap: 8px;
+  grid-template-columns: 60px 1fr;
+  gap: 6px;
   align-items: stretch;
   height: 100%;
 `;
@@ -609,15 +616,15 @@ const TrendInner = styled.div`
 const LegendArea = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-top: 14px;
+  gap: 8px;
+  padding-top: 6px;
 `;
 
 const LegendItem = styled.div`
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 12px;
   font-weight: 600;
   color: #4b5563;
 `;
@@ -632,26 +639,29 @@ const LegendDot = styled.span`
 const ChartArea = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 2px;
+  min-height: 0;
 `;
 
 const TrendSvg = styled.svg`
   width: 100%;
-  height: 96px;
+  height: 72px;
   display: block;
 `;
 
 const XAxis = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-top: 2px;
+  gap: 2px;
+  margin-top: -2px;
 
   span {
-    font-size: 11px;
+    font-size: 10px;
     color: #9ca3af;
     text-align: center;
     font-weight: 600;
+    line-height: 1;
   }
 `;
 

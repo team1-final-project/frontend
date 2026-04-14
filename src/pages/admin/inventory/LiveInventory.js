@@ -573,24 +573,25 @@ const CardGrid = styled.div`
 const SummaryCardBox = styled.div`
   background: #ffffff;
   border-radius: 18px;
-  padding: 22px 18px;
+  padding: 16px 16px;
   box-shadow: 0 1px 0 rgba(17, 24, 39, 0.02),
     0 8px 20px rgba(31, 41, 55, 0.04);
-  min-height: 168px;
+  height: 156px;
+  box-sizing: border-box;
 `;
 
 const CardTitle = styled.div`
   font-size: 16px;
   font-weight: 700;
   color: #323a49;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 `;
 
 const BigValueRow = styled.div`
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 `;
 
 const BigValue = styled.div`
@@ -615,7 +616,7 @@ const GrowthText = styled.div`
 const StatusList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 6px;
 `;
 
 const StatusRow = styled.div`
@@ -658,7 +659,7 @@ const CardHeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 `;
 
 const CardRightValue = styled.div`
@@ -678,7 +679,7 @@ const WarningHeader = styled.div`
 const WarningList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 `;
 
 const WarningItem = styled.div`
