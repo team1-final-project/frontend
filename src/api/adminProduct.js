@@ -47,3 +47,15 @@ export const resolveCatalogName = async (externalCatalogId) => {
   });
   return response.data;
 }
+
+export const getAdminProductList = async (params = {}) => {
+  const response = await api.get(`/admin/products`, { params });
+  return response.data;
+}
+
+export const updateAdminProductVisibility = async (productId, isVisible) => {
+  const response = await api.patch(`/admin/products/${productId}/visibility`, {
+    is_visible: isVisible,
+  });
+  return response.data;
+};
