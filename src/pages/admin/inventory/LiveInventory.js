@@ -7,7 +7,7 @@ import {
   patchAdminLiveInventoryRow,
 } from "../../../api/adminInventory";
 
-const inventoryStatusOptions = ["안전재고", "발주권고", "일시품절", "악성재고"];
+const inventoryStatusOptions = ["안전재고", "발주권고", "일시품절"];
 const salesStatusOptions = ["판매중", "판매중지", "품절", "판매종료", "판매예정"];
 
 const salesStatusList = [
@@ -140,8 +140,6 @@ export default function LiveInventory() {
         발주권고: rows.filter((item) => item.inventoryStatus === "발주권고")
           .length,
         일시품절: rows.filter((item) => item.inventoryStatus === "일시품절")
-          .length,
-        악성재고: rows.filter((item) => item.inventoryStatus === "악성재고")
           .length,
       },
       warningItems: rows
@@ -352,13 +350,6 @@ export default function LiveInventory() {
                 일시품절
               </SummaryLabel>
               <SummaryValue>{summary.inventorySummary["일시품절"]} SKU</SummaryValue>
-            </SummaryRow>
-            <SummaryRow>
-              <SummaryLabel>
-                <Dot $color="red" />
-                악성재고
-              </SummaryLabel>
-              <SummaryValue>{summary.inventorySummary["악성재고"]} SKU</SummaryValue>
             </SummaryRow>
           </SummaryList>
         </SummaryCardBox>
@@ -676,14 +667,12 @@ const InventoryStatusBadge = styled.span`
     if ($type === "안전재고") return "#dcfce7";
     if ($type === "발주권고") return "#fef3c7";
     if ($type === "일시품절") return "#f5d0fe";
-    if ($type === "악성재고") return "#fee2e2";
     return "#eef2f7";
   }};
   color: ${({ $type }) => {
     if ($type === "안전재고") return "#16a34a";
     if ($type === "발주권고") return "#d97706";
     if ($type === "일시품절") return "#c026d3";
-    if ($type === "악성재고") return "#dc2626";
     return "#667085";
   }};
 `;
