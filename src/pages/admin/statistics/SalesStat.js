@@ -948,6 +948,7 @@ const LargeCardTitle = styled.div`
   color: #111827;
   font-size: 14px;
   font-weight: 700;
+  padding-left: 10px;
 `;
 
 const RightFilters = styled.div`

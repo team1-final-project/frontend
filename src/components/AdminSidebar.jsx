@@ -87,12 +87,6 @@ export default function AdminSidebar() {
           },
         ],
       },
-      {
-        key: "admin",
-        title: "ADMIN",
-        defaultOpen: true,
-        items: [{ label: "설정", to: "/admin/settings", icon: Settings }],
-      },
     ],
     [],
   );
