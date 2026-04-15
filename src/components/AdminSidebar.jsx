@@ -25,12 +25,6 @@ export default function AdminSidebar() {
   const menuSections = useMemo(
     () => [
       {
-        key: "favorite",
-        title: "FAVORITE",
-        defaultOpen: true,
-        items: [],
-      },
-      {
         key: "products",
         title: "PRODUCTS",
         defaultOpen: true,
