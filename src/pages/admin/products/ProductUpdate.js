@@ -9,6 +9,7 @@ import "react-quill/dist/quill.snow.css";
 import { getCategories } from "../../../api/category";
 import {
   getAdminProductDetail,
+  resolveCatalogName,
   updateAdminProduct,
   uploadAdminDetailImage,
   uploadAdminThumbnailImage,
@@ -49,6 +50,9 @@ export default function ProductUpdate() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isThumbnailUploading, setIsThumbnailUploading] = useState(false);
   const [isDetailImageUploading, setIsDetailImageUploading] = useState(false);
+
+  const [isCatalogLoading, setIsCatalogLoading] = useState(false);
+  const [catalogError, setCatalogError] = useState("");
 
   const [form, setForm] = useState({
     productCode: "",
@@ -207,6 +211,39 @@ export default function ProductUpdate() {
       ...prev,
       [key]: value,
     }));
+  };
+
+  const handleResolveCatalogName = async () => {
+    const catalogId = form.catalogExternalId.trim();
+
+    if (!catalogId) {
+      setCatalogError("");
+      handleChange("catalogName", "");
+      return;
+    }
+
+    try {
+      setIsCatalogLoading(true);
+      setCatalogError("");
+
+      const data = await resolveCatalogName(catalogId);
+
+      handleChange("catalogName", data?.catalog_name ?? "");
+    } catch (error) {
+      console.error(error);
+
+      if (error.code === "ECONNABORTED") {
+        setCatalogError("카탈로그 조회 시간이 초과되었습니다. 다시 시도해주세요.");
+      } else {
+        setCatalogError(
+          error?.response?.data?.detail || "카탈로그 이름 조회에 실패했습니다."
+        );
+      }
+
+      handleChange("catalogName", "");
+    } finally {
+      setIsCatalogLoading(false);
+    }
   };
 
   const handleThumbnailUpload = async (event) => {
@@ -551,6 +588,7 @@ export default function ProductUpdate() {
                 <Input
                   value={form.catalogExternalId}
                   onChange={(e) => handleChange("catalogExternalId", e.target.value)}
+                  onBlur={handleResolveCatalogName}
                   placeholder="예: 53390091166"
                 />
               </FormField>
@@ -561,9 +599,14 @@ export default function ProductUpdate() {
               <FormField>
                 <Input
                   value={form.catalogName}
-                  onChange={(e) => handleChange("catalogName", e.target.value)}
-                  placeholder="가격비교용 상품명"
+                  readOnly
+                  placeholder={isCatalogLoading ? "카탈로그 조회 중..." : "자동으로 입력됩니다."}
                 />
+                {catalogError ? (
+                  <HelperText style={{ color: "#dc2626", textAlign: "left" }}>
+                    {catalogError}
+                  </HelperText>
+                ) : null}
               </FormField>
             </FormRow>
           </FormGrid>
