@@ -1,146 +1,126 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import SummaryCard from "../../../components/SummaryCard";
 import TableComponent from "../../../components/TableComponent";
 import StatusBadge from "../../../components/StatusBadge";
 import ToggleSwitch from "../../../components/ToggleSwitch";
+import {
+  getAdminPriceSearchList,
+  patchAdminPriceSearchRow,
+} from "../../../api/adminPrice.js";
 
-const initialRows = [
-  {
-    id: 1,
-    catalogId: "53390091166",
-    productCode: "9744302255",
-    productName: "농심 신라면 114g, 1개",
-    salePrice: "1,250원",
-    lowestPrice: "1,110원",
-    isLowest: "N",
-    priceGap: "140원",
-    priceRate: "+12.6%",
-    aiPriceChanged: true,
-    minPrice: "900원",
-    maxPrice: "1,500원",
-    stock: "11,111개",
-    status: "판매중",
-    category: "가공 / 간편식품 > 라면",
-    updatedDate: "2026-04-07",
-    updatedAt: "26/04/07 09:07",
-  },
-  {
-    id: 2,
-    catalogId: "59386488490",
-    productCode: "12279799725",
-    productName: "농심 포테토칩 오리지널 390g, 1개",
-    salePrice: "5,970원",
-    lowestPrice: "7,380원",
-    isLowest: "Y",
-    priceGap: "1,410원",
-    priceRate: "-19.1%",
-    aiPriceChanged: false,
-    minPrice: "-",
-    maxPrice: "-",
-    stock: "30개",
-    status: "판매중지",
-    category: "간식 / 음료 > 스낵과자",
-    updatedDate: "2026-04-07",
-    updatedAt: "26/04/07 09:07",
-  },
-  {
-    id: 3,
-    catalogId: "51929484460",
-    productCode: "6156192012",
-    productName: "CJ 비비고 사골곰탕 500g, 18개",
-    salePrice: "21,400원",
-    lowestPrice: "20,290원",
-    isLowest: "N",
-    priceGap: "1,110원",
-    priceRate: "+5.4%",
-    aiPriceChanged: true,
-    minPrice: "19,000원",
-    maxPrice: "24,900원",
-    stock: "0개",
-    status: "품절",
-    category: "가공 / 간편식품 > 즉석식품",
-    updatedDate: "2026-04-07",
-    updatedAt: "26/04/07 09:07",
-  },
-  {
-    id: 4,
-    catalogId: "58572119865",
-    productCode: "5909188198",
-    productName: "코카콜라 큰라 1.5L, 12개",
-    salePrice: "34,080원",
-    lowestPrice: "34,180원",
-    isLowest: "Y",
-    priceGap: "100원",
-    priceRate: "-0.3%",
-    aiPriceChanged: true,
-    minPrice: "29,000원",
-    maxPrice: "39,000원",
-    stock: "1,234개",
-    status: "판매종료",
-    category: "간식 / 음료 > 탄산음료",
-    updatedDate: "2026-04-07",
-    updatedAt: "26/04/07 09:07",
-  },
-  {
-    id: 5,
-    catalogId: "58572119866",
-    productCode: "5909188199",
-    productName: "코카콜라 제로 1.5L, 12개",
-    salePrice: "33,080원",
-    lowestPrice: "33,180원",
-    isLowest: "Y",
-    priceGap: "100원",
-    priceRate: "-0.3%",
-    aiPriceChanged: false,
-    minPrice: "28,000원",
-    maxPrice: "38,000원",
-    stock: "220개",
-    status: "판매중",
-    category: "간식 / 음료 > 탄산음료",
-    updatedDate: "2026-04-07",
-    updatedAt: "26/04/07 09:07",
-  },
-  {
-    id: 6,
-    catalogId: "58572119867",
-    productCode: "5909188200",
-    productName: "칠성사이다 1.5L, 12개",
-    salePrice: "31,500원",
-    lowestPrice: "31,000원",
-    isLowest: "N",
-    priceGap: "500원",
-    priceRate: "+1.6%",
-    aiPriceChanged: true,
-    minPrice: "27,000원",
-    maxPrice: "36,000원",
-    stock: "940개",
-    status: "판매중",
-    category: "간식 / 음료 > 탄산음료",
-    updatedDate: "2026-04-07",
-    updatedAt: "26/04/07 09:07",
-  },
+const saleStatusOptions = [
+  { value: "ON_SALE", label: "판매중" },
+  { value: "READY", label: "판매예정" },
+  { value: "STOPPED", label: "판매중지" },
+  { value: "SOLD_OUT", label: "품절" },
+  { value: "ENDED", label: "판매종료" },
 ];
 
-const categoryOptions = [
-  ...new Set(initialRows.map((item) => item.category)),
-].map((value) => ({
-  label: value,
-  value,
-}));
-
-const saleStatusOptions = ["판매중", "판매중지", "품절", "판매종료"];
+const saleStatusLabelMap = {
+  ON_SALE: "판매중",
+  READY: "판매예정",
+  STOPPED: "판매중지",
+  SOLD_OUT: "품절",
+  ENDED: "판매종료",
+};
 
 const lowestStyleMap = {
   Y: { label: "Y", variant: "success" },
   N: { label: "N", variant: "danger" },
+  "-": { label: "-", variant: "info" },
 };
+
+const formatCurrency = (value) => {
+  if (value === null || value === undefined || value === "") return "-";
+
+  const numberValue = Number(value);
+  if (Number.isNaN(numberValue)) return "-";
+
+  return `${numberValue.toLocaleString()}원`;
+};
+
+const formatCount = (value) => {
+  if (value === null || value === undefined || value === "") return "-";
+
+  const numberValue = Number(value);
+  if (Number.isNaN(numberValue)) return "-";
+
+  return `${numberValue.toLocaleString()}개`;
+};
+
+const formatRate = (value) => {
+  if (value === null || value === undefined || value === "") return "-";
+
+  const numberValue = Number(value);
+  if (Number.isNaN(numberValue)) return "-";
+
+  return `${numberValue > 0 ? "+" : ""}${numberValue.toFixed(1)}%`;
+};
+
+const formatDateOnly = (value) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const formatDateTimeDisplay = (value) => {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  const year = String(date.getFullYear()).slice(-2);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${year}/${month}/${day} ${hours}:${minutes}`;
+};
+
+const mapPriceRow = (item) => ({
+  id: item.id,
+  catalogId: item.catalog_external_id ?? "-",
+  productCode: item.product_code,
+  productName: item.product_name ?? "-",
+  salePrice: formatCurrency(item.sale_price),
+  lowestPrice: formatCurrency(item.market_lowest_price),
+  isLowest:
+    item.is_lowest_price === null || item.is_lowest_price === undefined
+      ? "-"
+      : item.is_lowest_price
+        ? "Y"
+        : "N",
+  priceGap: formatCurrency(item.price_gap),
+  priceRate: formatRate(item.price_gap_rate),
+  aiPriceChanged: Boolean(item.ai_pricing_enabled),
+  minPrice: formatCurrency(item.min_price_limit),
+  maxPrice: formatCurrency(item.max_price_limit),
+  stock: formatCount(item.stock_qty),
+  statusCode: item.sale_status ?? "ON_SALE",
+  status: saleStatusLabelMap[item.sale_status] ?? item.sale_status ?? "-",
+  category: item.category_path ?? "-",
+  updatedDate: formatDateOnly(item.updated_at),
+  updatedAt: formatDateTimeDisplay(item.updated_at),
+});
 
 export default function PriceSearch() {
   const nav = useNavigate();
 
-  const [rows, setRows] = useState(initialRows);
+  const [rows, setRows] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [pendingActionKey, setPendingActionKey] = useState("");
+
   const [searchValue, setSearchValue] = useState("");
   const [categoryValue, setCategoryValue] = useState("");
   const [lowestYn, setLowestYn] = useState("");
@@ -148,6 +128,39 @@ export default function PriceSearch() {
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  const fetchRows = async () => {
+    try {
+      setIsLoading(true);
+      setErrorMessage("");
+
+      const response = await getAdminPriceSearchList();
+      const items = Array.isArray(response) ? response : response?.items ?? [];
+      setRows(items.map(mapPriceRow));
+    } catch (error) {
+      console.error(error);
+      setRows([]);
+      setErrorMessage(
+        error?.response?.data?.detail ||
+          "가격 조회 목록을 불러오지 못했습니다.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRows();
+  }, []);
+
+  const categoryOptions = useMemo(() => {
+    return [...new Set(rows.map((item) => item.category).filter(Boolean))].map(
+      (value) => ({
+        label: value,
+        value,
+      }),
+    );
+  }, [rows]);
 
   const summary = useMemo(() => {
     return {
@@ -185,18 +198,66 @@ export default function PriceSearch() {
     });
   }, [rows, searchValue, categoryValue, lowestYn, startDate, endDate]);
 
-  const handleToggleAiPriceChanged = (id, checked) => {
-    setRows((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, aiPriceChanged: checked } : item,
-      ),
-    );
+  const handleToggleAiPriceChanged = async (productCode, checked) => {
+    const actionKey = `${productCode}:ai`;
+    const previousRows = rows;
+
+    try {
+      setPendingActionKey(actionKey);
+      setRows((prev) =>
+        prev.map((item) =>
+          item.productCode === productCode
+            ? { ...item, aiPriceChanged: checked }
+            : item,
+        ),
+      );
+
+      await patchAdminPriceSearchRow(productCode, {
+        ai_pricing_enabled: checked,
+      });
+    } catch (error) {
+      console.error(error);
+      setRows(previousRows);
+      alert(
+        error?.response?.data?.detail ||
+          "AI 가격 설정 변경에 실패했습니다.",
+      );
+    } finally {
+      setPendingActionKey("");
+    }
   };
 
-  const handleChangeSaleStatus = (id, value) => {
-    setRows((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: value } : item)),
-    );
+  const handleChangeSaleStatus = async (productCode, nextStatusCode) => {
+    const actionKey = `${productCode}:status`;
+    const previousRows = rows;
+
+    try {
+      setPendingActionKey(actionKey);
+      setRows((prev) =>
+        prev.map((item) =>
+          item.productCode === productCode
+            ? {
+                ...item,
+                statusCode: nextStatusCode,
+                status: saleStatusLabelMap[nextStatusCode] ?? nextStatusCode,
+              }
+            : item,
+        ),
+      );
+
+      await patchAdminPriceSearchRow(productCode, {
+        sale_status: nextStatusCode,
+      });
+    } catch (error) {
+      console.error(error);
+      setRows(previousRows);
+      alert(
+        error?.response?.data?.detail ||
+          "판매상태 변경에 실패했습니다.",
+      );
+    } finally {
+      setPendingActionKey("");
+    }
   };
 
   const handleReset = () => {
@@ -213,15 +274,18 @@ export default function PriceSearch() {
       key: "catalogId",
       title: "카탈로그 ID",
       width: "130px",
-      render: (value) => (
-        <CatalogLink
-          href={`https://search.shopping.naver.com/catalog/${value}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {value}
-        </CatalogLink>
-      ),
+      render: (value) =>
+        value && value !== "-" ? (
+          <CatalogLink
+            href={`https://search.shopping.naver.com/catalog/${value}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {value}
+          </CatalogLink>
+        ) : (
+          <SubText>-</SubText>
+        ),
     },
     {
       key: "productCode",
@@ -246,7 +310,9 @@ export default function PriceSearch() {
       width: "250px",
       render: (value, row) => (
         <ProductNameLink
-          href={`/product-detail?productCode=${row.productCode}`}
+          href={`/product-detail?productCode=${encodeURIComponent(
+            row.productCode,
+          )}`}
           target="_blank"
           rel="noreferrer"
         >
@@ -270,10 +336,7 @@ export default function PriceSearch() {
       width: "90px",
       sortable: false,
       render: (value) => {
-        const status = lowestStyleMap[value] || {
-          label: value,
-          variant: "info",
-        };
+        const status = lowestStyleMap[value] || lowestStyleMap["-"];
 
         return (
           <StatusBadge
@@ -292,7 +355,7 @@ export default function PriceSearch() {
       render: (value, row) => (
         <PriceGapWrap>
           <div>{value}</div>
-          <RateBadge $negative={row.priceRate.startsWith("-")}>
+          <RateBadge $negative={String(row.priceRate).startsWith("-")}>
             {row.priceRate}
           </RateBadge>
         </PriceGapWrap>
@@ -308,7 +371,10 @@ export default function PriceSearch() {
         <CenterCell>
           <ToggleSwitch
             checked={value}
-            onChange={(checked) => handleToggleAiPriceChanged(row.id, checked)}
+            disabled={pendingActionKey === `${row.productCode}:ai`}
+            onChange={(checked) =>
+              handleToggleAiPriceChanged(row.productCode, checked)
+            }
             width={42}
             height={24}
           />
@@ -339,12 +405,15 @@ export default function PriceSearch() {
         <CenterCell>
           <SaleStatusSelect
             $status={value}
-            value={value}
-            onChange={(e) => handleChangeSaleStatus(row.id, e.target.value)}
+            value={row.statusCode}
+            disabled={pendingActionKey === `${row.productCode}:status`}
+            onChange={(e) =>
+              handleChangeSaleStatus(row.productCode, e.target.value)
+            }
           >
-            {saleStatusOptions.map((status) => (
-              <option key={status} value={status}>
-                {status}
+            {saleStatusOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </SaleStatusSelect>
@@ -372,6 +441,11 @@ export default function PriceSearch() {
       <HeaderRow>
         <Title>가격 조회</Title>
       </HeaderRow>
+
+      {isLoading && <PageStatusText>가격 조회 목록을 불러오는 중입니다.</PageStatusText>}
+      {!isLoading && errorMessage && (
+        <PageStatusText $error>{errorMessage}</PageStatusText>
+      )}
 
       <SummaryGrid>
         <SummaryCard
@@ -473,6 +547,14 @@ export default function PriceSearch() {
             <SecondaryButton type="button" onClick={handleReset}>
               초기화
             </SecondaryButton>
+
+            <RefreshButton
+              type="button"
+              onClick={fetchRows}
+              disabled={isLoading}
+            >
+              새로고침
+            </RefreshButton>
           </CustomToolbar>
         }
         page={page}
@@ -498,7 +580,7 @@ const HeaderRow = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   margin-top: 5px;
 `;
 
@@ -507,6 +589,13 @@ const Title = styled.h2`
   color: #111827;
   font-size: 22px;
   font-weight: 800;
+`;
+
+const PageStatusText = styled.div`
+  margin-bottom: 14px;
+  color: ${({ $error }) => ($error ? "#dc2626" : "#475569")};
+  font-size: 13px;
+  font-weight: 600;
 `;
 
 const SummaryGrid = styled.div`
@@ -602,6 +691,23 @@ const SecondaryButton = styled.button`
   cursor: pointer;
 `;
 
+const RefreshButton = styled.button`
+  height: 38px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+`;
+
 const SubText = styled.span`
   color: #6b7280;
   font-size: 12px;
@@ -692,6 +798,7 @@ const SaleStatusSelect = styled.select`
     if ($status === "판매중지") return "#fff4cf";
     if ($status === "품절") return "#f4dfff";
     if ($status === "판매종료") return "#ebe7ff";
+    if ($status === "판매예정") return "#e8f0ff";
     return "#eef1f5";
   }};
 
@@ -700,6 +807,7 @@ const SaleStatusSelect = styled.select`
     if ($status === "판매중지") return "#d79b0c";
     if ($status === "품절") return "#9b45db";
     if ($status === "판매종료") return "#6b5ae0";
+    if ($status === "판매예정") return "#2563eb";
     return "#6c7480";
   }};
 
@@ -710,5 +818,10 @@ const SaleStatusSelect = styled.select`
 
   &:focus {
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
   }
 `;
