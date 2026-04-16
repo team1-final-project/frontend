@@ -36,6 +36,8 @@ const GlobalStyle = createGlobalStyle`
 
     --border : #EAEAEA;
 
+    --hover-gray : #F3F4F8;
+
     --font : #000000;
     --font2 : #828282;
 

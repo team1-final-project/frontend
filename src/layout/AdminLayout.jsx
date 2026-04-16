@@ -17,7 +17,7 @@ export default function AdminLayout() {
 const Wrap = styled.div`
   display: flex;
   min-height: 100vh;
-  background: #f5f6f8;
+  background: var(--background);
 `;
 
 const Content = styled.main`

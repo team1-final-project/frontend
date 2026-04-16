@@ -112,7 +112,7 @@ export default function AdminSidebar() {
         </TopIconButton>
       </TopArea>
 
-      <DashboardButton to="/admin">
+      <DashboardButton to="/admin" end>
         <LayoutDashboard size={18} />
         <span>대시보드</span>
       </DashboardButton>
@@ -160,12 +160,12 @@ export default function AdminSidebar() {
 }
 
 const SidebarWrap = styled.aside`
-  width: 280px;
-  min-width: 280px;
-  height: 100vh;
+  width: 250px;
+  min-width: 250px;
+  min-height: 100vh;
   padding: 22px 14px 28px;
-  background: #f7f7f8;
-  border-right: 1px solid #ececef;
+  background: white;
+  border-right: 1px solid var(--border);
   overflow-y: visible;
 
   scrollbar-width: thin;
@@ -207,8 +207,8 @@ const BrandMark = styled.div`
   width: 30px;
   height: 30px;
   border-radius: 9px;
-  background: #2563eb;
-  color: #fff;
+  background: var(--blue);
+  color: white;
   font-size: 20px;
   font-weight: 800;
   display: flex;
@@ -217,7 +217,7 @@ const BrandMark = styled.div`
 `;
 
 const BrandText = styled.div`
-  color: #111;
+  color: black;
   font-size: 20px;
   font-weight: 800;
   font-style: italic;
@@ -229,7 +229,7 @@ const TopIconButton = styled.button`
   height: 32px;
   border: none;
   background: transparent;
-  color: #9ca3af;
+  color: var(--placeholder);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -237,7 +237,7 @@ const TopIconButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background: #efeff3;
+    background: var(--hover-gray);
   }
 `;
 
@@ -245,10 +245,11 @@ const DashboardButton = styled(NavLink)`
   width: 100%;
   height: 40px;
   border-radius: 10px;
-  background: #ececf1;
-  color: #22262f;
+  color: var(--placeholder);
   text-decoration: none;
-  font-size: 15px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -257,8 +258,23 @@ const DashboardButton = styled(NavLink)`
   margin-bottom: 22px;
 
   svg {
-    color: #4b5563;
+    color: var(--placeholder);
     flex-shrink: 0;
+  }
+
+  &:hover {
+    background: var(--hover-gray);
+    color: black;
+  }
+
+  &.active {
+    background: var(--hover-gray);
+    color: black;
+    font-weight: 700;
+  }
+
+  &.active svg {
+    color: #4b5563;
   }
 `;
 
@@ -279,7 +295,7 @@ const SectionHeader = styled.button`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #9aa0ac;
+  color: var(--placeholder);
   cursor: pointer;
 `;
 
@@ -288,7 +304,7 @@ const SectionTitle = styled.span`
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.04em;
 `;
 
@@ -307,24 +323,24 @@ const MenuItem = styled(NavLink)`
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #7e8594;
+  color: var(--placeholder);
   text-decoration: none;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
 
   svg {
-    color: #8e95a3;
+    color: var(--placeholder);
     flex-shrink: 0;
   }
 
   &:hover {
-    background: #f0f1f5;
-    color: #2a2f38;
+    background: var(--hover-gray);
+    color: black;
   }
 
   &.active {
-    background: #ececf1;
-    color: #22262f;
+    background: var(--hover-gray);
+    color: black;
     font-weight: 700;
   }
 
