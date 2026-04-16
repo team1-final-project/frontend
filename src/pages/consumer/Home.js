@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import herosectionImg from "../../assets/herosection.png";
 import * as S from "./HomeStyles";
+import { getHomeAiRanking } from "../../api/stats";
 
 import { bestItems, hotDealItems, brandLogos } from "./HomeData";
 
@@ -19,6 +20,291 @@ function StarRating({ rating }) {
       <S.StarsBase>★★★★★</S.StarsBase>
       <S.StarsFill $width={percentage}>★★★★★</S.StarsFill>
     </S.StarsWrap>
+  );
+}
+
+function AIRankingSection({ data }) {
+  const [selectedDropCategoryId, setSelectedDropCategoryId] = useState(
+    data.priceDropTop5ByCategory?.[0]?.categoryId || "",
+  );
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState(
+    data.categories?.[0]?.id || "",
+  );
+
+  const [selectedProductId, setSelectedProductId] = useState(
+    data.categories?.[0]?.products?.[0]?.id || "",
+  );
+
+  const [selectedPeriod, setSelectedPeriod] = useState("weekly");
+
+  const selectedDropCategory =
+    data.priceDropTop5ByCategory?.find(
+      (category) => category.categoryId === selectedDropCategoryId,
+    ) || data.priceDropTop5ByCategory?.[0];
+
+  const maxDropAmount = Math.max(
+    ...(selectedDropCategory?.items?.map((item) => item.dropAmount) || []),
+    1,
+  );
+
+  useEffect(() => {
+    if (!data.categories?.length) return;
+
+    const currentCategory = data.categories.find(
+      (category) => category.id === selectedCategoryId,
+    );
+
+    if (!currentCategory) {
+      setSelectedCategoryId(data.categories[0].id);
+      setSelectedProductId(data.categories[0].products?.[0]?.id || "");
+      return;
+    }
+
+    const hasSelectedProduct = currentCategory.products?.some(
+      (product) => product.id === selectedProductId,
+    );
+
+    if (!hasSelectedProduct) {
+      setSelectedProductId(currentCategory.products?.[0]?.id || "");
+    }
+  }, [data, selectedCategoryId, selectedProductId]);
+
+  const selectedCategory =
+    data.categories?.find((category) => category.id === selectedCategoryId) ||
+    data.categories?.[0];
+
+  const selectedProduct =
+    selectedCategory?.products?.find(
+      (product) => product.id === selectedProductId,
+    ) || selectedCategory?.products?.[0];
+
+  const graphData =
+    selectedPeriod === "weekly"
+      ? selectedProduct?.weekly
+      : selectedProduct?.monthly;
+
+  return (
+    <S.AIRankingSection>
+      <S.AIRankingTitle>AI Ranking</S.AIRankingTitle>
+
+      <S.AIRankingGrid>
+        <S.AIRankingCard>
+          <S.CardTop>
+            <S.CardTitle>가격 하락폭 TOP 5</S.CardTitle>
+
+            <S.SelectWrap>
+              <S.SelectBox
+                value={selectedDropCategoryId}
+                onChange={(e) => setSelectedDropCategoryId(e.target.value)}
+              >
+                {data.priceDropTop5ByCategory?.map((category) => (
+                  <option key={category.categoryId} value={category.categoryId}>
+                    {category.categoryName}
+                  </option>
+                ))}
+              </S.SelectBox>
+              <S.SelectArrowText>▾</S.SelectArrowText>
+            </S.SelectWrap>
+          </S.CardTop>
+
+          <S.BarList>
+            {selectedDropCategory?.items?.map((item, index) => (
+              <S.BarItem key={item.name}>
+                <S.BarItemTop>
+                  <S.RankBadge>{index + 1}</S.RankBadge>
+
+                  <S.BarMain>
+                    <S.BarHeader>
+                      <S.BarLabel>{item.name}</S.BarLabel>
+
+                      <S.BarValueWrap>
+                        <S.BarValue>
+                          -{item.dropAmount.toLocaleString()}원
+                        </S.BarValue>
+                        <S.BarSubValue>-{item.dropRate}%</S.BarSubValue>
+                      </S.BarValueWrap>
+                    </S.BarHeader>
+
+                    <S.BarTrack>
+                      <S.BarFill
+                        style={{
+                          width: `${(item.dropAmount / maxDropAmount) * 100}%`,
+                          background:
+                            index === 0
+                              ? "#f06464"
+                              : index === 1
+                                ? "#f27474"
+                                : index === 2
+                                  ? "#f48787"
+                                  : index === 3
+                                    ? "#f4a0a0"
+                                    : "#f6b3b3",
+                        }}
+                      />
+                    </S.BarTrack>
+                  </S.BarMain>
+                </S.BarItemTop>
+
+                {index !== selectedDropCategory.items.length - 1 && (
+                  <S.BarDivider />
+                )}
+              </S.BarItem>
+            ))}
+          </S.BarList>
+        </S.AIRankingCard>
+
+        <S.AIRankingCard>
+          <S.CardTop>
+            <S.CardTitle>AI 분석 주간 정보</S.CardTitle>
+
+            <S.TopActions>
+              <S.SelectWrap>
+                <S.SelectBox
+                  value={selectedCategoryId}
+                  onChange={(e) => setSelectedCategoryId(e.target.value)}
+                >
+                  {data.categories?.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </S.SelectBox>
+                <S.SelectArrow />
+              </S.SelectWrap>
+
+              <S.MoreLink type="button">더보기</S.MoreLink>
+            </S.TopActions>
+          </S.CardTop>
+
+          <S.MiniTable>
+            <thead>
+              <tr>
+                <th>SN</th>
+                <th>
+                  <S.InnerSelectWrap>
+                    <S.InnerSelect
+                      value={selectedProductId}
+                      onChange={(e) => setSelectedProductId(e.target.value)}
+                    >
+                      {selectedCategory?.products?.map((product) => (
+                        <option key={product.id} value={product.id}>
+                          {product.name}
+                        </option>
+                      ))}
+                    </S.InnerSelect>
+                    <S.InnerSelectArrow />
+                  </S.InnerSelectWrap>
+                </th>
+                <th>금주</th>
+                <th>7일전 대비</th>
+                <th>2주전 대비</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedProduct && (
+                <tr>
+                  <td>5</td>
+                  <td>{selectedProduct.name}</td>
+                  <td>{selectedProduct.currentPrice.toLocaleString()}</td>
+                  <td>
+                    <S.NegativeValue>
+                      {selectedProduct.weekCompare > 0 ? "+" : ""}
+                      {selectedProduct.weekCompare}
+                    </S.NegativeValue>
+                  </td>
+                  <td>
+                    <S.PositiveValue>
+                      {selectedProduct.twoWeekCompare > 0 ? "+" : ""}
+                      {selectedProduct.twoWeekCompare}
+                    </S.PositiveValue>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </S.MiniTable>
+
+          <S.TabRow>
+            <S.PeriodTab
+              type="button"
+              $active={selectedPeriod === "monthly"}
+              onClick={() => setSelectedPeriod("monthly")}
+            >
+              월간
+            </S.PeriodTab>
+            <S.PeriodTab
+              type="button"
+              $active={selectedPeriod === "weekly"}
+              onClick={() => setSelectedPeriod("weekly")}
+            >
+              주간
+            </S.PeriodTab>
+          </S.TabRow>
+
+          <S.TrendChartWrap>
+            <S.CustomChartArea>
+              <S.YAxisColumn>
+                {[60, 50, 40, 30, 20, 10].map((value) => (
+                  <S.YAxisLabel key={value}>{value}</S.YAxisLabel>
+                ))}
+              </S.YAxisColumn>
+
+              <S.ChartMain>
+                <S.ChartGridLines>
+                  {[...Array(6)].map((_, index) => (
+                    <S.GridLine key={index} />
+                  ))}
+                </S.ChartGridLines>
+
+                <S.PlotArea>
+                  {graphData?.series?.map((series, index) => (
+                    <S.LineSvg
+                      key={index}
+                      viewBox="0 0 100 100"
+                      preserveAspectRatio="none"
+                    >
+                      <polyline
+                        fill="none"
+                        stroke={series.color}
+                        strokeWidth="1.8"
+                        points={series.values
+                          .map((value, valueIndex) => {
+                            const total = series.values.length;
+                            const x =
+                              total === 1
+                                ? 0
+                                : (valueIndex / (total - 1)) * 100;
+                            const y = 100 - (value / 60) * 100;
+                            return `${x},${y}`;
+                          })
+                          .join(" ")}
+                      />
+                    </S.LineSvg>
+                  ))}
+                </S.PlotArea>
+
+                <S.XAxisRow>
+                  {graphData?.labels?.map((label) => (
+                    <S.XAxisLabel key={label}>{label}</S.XAxisLabel>
+                  ))}
+                </S.XAxisRow>
+              </S.ChartMain>
+
+              <S.ChartLegendSide>
+                {graphData?.series?.map((series, index) => (
+                  <S.SideLegendItem key={index}>
+                    <S.SideLegendLine style={{ background: series.color }} />
+                    <S.SideLegendText>Value</S.SideLegendText>
+                  </S.SideLegendItem>
+                ))}
+              </S.ChartLegendSide>
+            </S.CustomChartArea>
+          </S.TrendChartWrap>
+        </S.AIRankingCard>
+      </S.AIRankingGrid>
+
+      <S.ViewAllButton type="button">더보기</S.ViewAllButton>
+    </S.AIRankingSection>
   );
 }
 
@@ -55,6 +341,24 @@ function ProductCard({ item }) {
 
 export default function Home() {
   const navigate = useNavigate();
+
+  const [aiRanking, setAiRanking] = useState({
+    priceDropTop5ByCategory: [],
+    categories: [],
+  });
+
+  useEffect(() => {
+    const fetchAiRanking = async () => {
+      try {
+        const data = await getHomeAiRanking();
+        setAiRanking(data);
+      } catch (error) {
+        console.error("AI Ranking 조회 실패:", error);
+      }
+    };
+
+    fetchAiRanking();
+  }, []);
 
   return (
     <S.Page>
@@ -116,7 +420,7 @@ export default function Home() {
 
             <S.BrandGroup aria-hidden="true">
               {brandLogos.map((logo) => (
-                <S.BrandLogoItem key={`clone-${logo.id} `}>
+                <S.BrandLogoItem key={`clone-${logo.id}`}>
                   <S.BrandLogo
                     src={logo.src}
                     alt={logo.alt}
@@ -130,6 +434,10 @@ export default function Home() {
       </S.BrandBar>
 
       <S.MainSection>
+        <AIRankingSection data={aiRanking} />
+
+        <S.SectionDivider />
+
         <S.MainSectionTitle>Best</S.MainSectionTitle>
 
         <S.CardGrid>
@@ -158,6 +466,7 @@ export default function Home() {
       <S.SalesSection>
         <S.SalesPanel>
           <S.SectionTitle>Sales Item</S.SectionTitle>
+
           <S.SalesTopRow>
             <S.SalesImageCard $variant="shin">
               <S.SalesImage
