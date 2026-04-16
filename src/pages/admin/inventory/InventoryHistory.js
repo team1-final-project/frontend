@@ -1,205 +1,25 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import TableComponent from "../../../components/TableComponent";
-
-const historyData = [
-  {
-    id: 1,
-    date: "26/04/07 09:07",
-    type: "입고",
-    productCode: "9744302255",
-    productName: "농심 신라면건면 114g, 1개",
-    baseStock: 1000,
-    movementQty: 500,
-    resultStock: 1500,
-    note: "-",
-  },
-  {
-    id: 2,
-    date: "26/04/07 09:07",
-    type: "출고",
-    productCode: "12279799725",
-    productName: "농심 포테토칩 오리지널 390g, 1개",
-    baseStock: 230,
-    movementQty: -30,
-    resultStock: 200,
-    note: "-",
-  },
-  {
-    id: 3,
-    date: "26/04/07 09:07",
-    type: "출고",
-    productCode: "12279799725",
-    productName: "농심 포테토칩 오리지널 390g, 1개",
-    baseStock: 230,
-    movementQty: -30,
-    resultStock: 200,
-    note: "-",
-  },
-  {
-    id: 4,
-    date: "26/04/07 09:07",
-    type: "출고",
-    productCode: "12279799725",
-    productName: "농심 포테토칩 오리지널 390g, 1개",
-    baseStock: 230,
-    movementQty: -30,
-    resultStock: 200,
-    note: "-",
-  },
-  {
-    id: 5,
-    date: "26/04/07 09:07",
-    type: "출고",
-    productCode: "12279799725",
-    productName: "농심 포테토칩 오리지널 390g, 1개",
-    baseStock: 230,
-    movementQty: -30,
-    resultStock: 200,
-    note: "-",
-  },
-  {
-    id: 6,
-    date: "26/04/07 09:07",
-    type: "출고",
-    productCode: "12279799725",
-    productName: "농심 포테토칩 오리지널 390g, 1개",
-    baseStock: 230,
-    movementQty: -30,
-    resultStock: 200,
-    note: "-",
-  },
-  {
-    id: 7,
-    date: "26/04/07 09:07",
-    type: "입고",
-    productCode: "9744302255",
-    productName: "농심 신라면건면 114g, 1개",
-    baseStock: 1000,
-    movementQty: 500,
-    resultStock: 1500,
-    note: "-",
-  },
-  {
-    id: 8,
-    date: "26/04/07 09:07",
-    type: "입고",
-    productCode: "9744302255",
-    productName: "농심 신라면건면 114g, 1개",
-    baseStock: 1000,
-    movementQty: 500,
-    resultStock: 1500,
-    note: "-",
-  },
-  {
-    id: 9,
-    date: "26/04/07 09:07",
-    type: "입고",
-    productCode: "9744302255",
-    productName: "농심 신라면건면 114g, 1개",
-    baseStock: 1000,
-    movementQty: 500,
-    resultStock: 1500,
-    note: "-",
-  },
-  {
-    id: 10,
-    date: "26/04/07 09:07",
-    type: "입고",
-    productCode: "9744302255",
-    productName: "농심 신라면건면 114g, 1개",
-    baseStock: 1000,
-    movementQty: 500,
-    resultStock: 1500,
-    note: "-",
-  },
-  {
-    id: 11,
-    date: "26/04/07 09:07",
-    type: "입고",
-    productCode: "6156192012",
-    productName: "CJ 비비고 사골곰탕 500g, 18개",
-    baseStock: 120,
-    movementQty: 456,
-    resultStock: 576,
-    note: "긴급 입고",
-  },
-  {
-    id: 12,
-    date: "26/04/07 09:07",
-    type: "입고",
-    productCode: "5909188198",
-    productName: "코카콜라 콜라 1.5L, 12개",
-    baseStock: 800,
-    movementQty: 3000,
-    resultStock: 3800,
-    note: "-",
-  },
-  {
-    id: 13,
-    date: "26/04/07 09:07",
-    type: "입고",
-    productCode: "57954282217",
-    productName: "롯데 맛있는 비엔나 소시지 1kg, 1개",
-    baseStock: 600,
-    movementQty: 2000,
-    resultStock: 2600,
-    note: "-",
-  },
-  {
-    id: 14,
-    date: "26/04/07 09:07",
-    type: "출고",
-    productCode: "5909188198",
-    productName: "코카콜라 콜라 1.5L, 12개",
-    baseStock: 900,
-    movementQty: -1200,
-    resultStock: -300,
-    note: "대량 출고",
-  },
-  {
-    id: 15,
-    date: "26/04/07 09:07",
-    type: "출고",
-    productCode: "6156192012",
-    productName: "CJ 비비고 사골곰탕 500g, 18개",
-    baseStock: 700,
-    movementQty: -1500,
-    resultStock: -800,
-    note: "-",
-  },
-  {
-    id: 16,
-    date: "26/04/07 09:07",
-    type: "출고",
-    productCode: "57954282217",
-    productName: "롯데 맛있는 비엔나 소시지 1kg, 1개",
-    baseStock: 1000,
-    movementQty: -240,
-    resultStock: 760,
-    note: "-",
-  },
-];
+import { getAdminInventoryHistoryList } from "../../../api/adminInventory";
 
 const movementTypeOptions = [
   { label: "입출고 구분", value: "" },
-  { label: "입고", value: "입고" },
-  { label: "출고", value: "출고" },
+  { label: "입고", value: "INBOUND" },
+  { label: "출고", value: "ORDER_OUT" },
 ];
 
 const weekLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
-const inboundTrend = [48, 90, 82, 84, 86, 70, 78];
-const outboundTrend = [24, 42, 43, 48, 60, 74, 70];
 
-const formatCount = (value) => `${Math.abs(Number(value)).toLocaleString()}개`;
+const formatCount = (value) => `${Math.abs(Number(value || 0)).toLocaleString()}개`;
 
 const formatSignedCount = (value) =>
-  `${value > 0 ? "+" : ""}${Number(value).toLocaleString()}개`;
+  `${Number(value || 0) > 0 ? "+" : ""}${Number(value || 0).toLocaleString()}개`;
 
 const buildPolylinePoints = (values, width, height, padding = 12) => {
-  const max = Math.max(...values);
-  const min = Math.min(...values);
+  const max = Math.max(...values, 0);
+  const min = Math.min(...values, 0);
   const range = max - min || 1;
 
   return values
@@ -214,10 +34,53 @@ const buildPolylinePoints = (values, width, height, padding = 12) => {
     .join(" ");
 };
 
+const formatOccurredAt = (value) => {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  const year = String(date.getFullYear()).slice(2);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+
+  return `${year}/${month}/${day} ${hour}:${minute}`;
+};
+
+const buildDailyTrend = (rows, targetType) => {
+  const today = new Date();
+  const result = [];
+
+  for (let offset = 6; offset >= 0; offset -= 1) {
+    const current = new Date(today);
+    current.setHours(0, 0, 0, 0);
+    current.setDate(today.getDate() - offset);
+
+    const next = new Date(current);
+    next.setDate(current.getDate() + 1);
+
+    const total = rows
+      .filter((row) => row.changeType === targetType)
+      .filter((row) => {
+        const occurredAt = new Date(row.occurredAt);
+        return occurredAt >= current && occurredAt < next;
+      })
+      .reduce((acc, row) => acc + Math.abs(Number(row.movementQty || 0)), 0);
+
+    result.push(total);
+  }
+
+  return result;
+};
+
 export default function InventoryHistory() {
   const nav = useNavigate();
 
-  const [rows] = useState(historyData);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [movementType, setMovementType] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -225,22 +88,75 @@ export default function InventoryHistory() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const summary = useMemo(() => {
-    const inboundRows = rows.filter((row) => row.type === "입고");
-    const outboundRows = rows.filter((row) => row.type === "출고");
+  useEffect(() => {
+    let mounted = true;
 
-    const inboundSkuCount = new Set(inboundRows.map((row) => row.productCode))
-      .size;
-    const outboundSkuCount = new Set(outboundRows.map((row) => row.productCode))
-      .size;
+    const fetchInventoryHistory = async () => {
+      setLoading(true);
+      setErrorMessage("");
+
+      try {
+        const response = await getAdminInventoryHistoryList({
+          keyword: searchValue.trim() || undefined,
+          change_type: movementType || undefined,
+          start_date: startDate || undefined,
+          end_date: endDate || undefined,
+        });
+
+        if (!mounted) return;
+
+        const mappedRows = Array.isArray(response?.items)
+          ? response.items.map((item) => ({
+              id: item.id,
+              productId: item.product_id,
+              productCode: item.product_code,
+              productName: item.product_name,
+              type: item.change_type_label,
+              changeType: item.change_type,
+              baseStock: Number(item.qty_before ?? 0),
+              movementQty: Number(item.change_qty ?? 0),
+              resultStock: Number(item.qty_after ?? 0),
+              date: formatOccurredAt(item.occurred_at),
+              occurredAt: item.occurred_at,
+              note: item.note || "-",
+            }))
+          : [];
+
+        setRows(mappedRows);
+      } catch (error) {
+        if (!mounted) return;
+        console.error("재고 변동 이력 조회 실패", error);
+        setRows([]);
+        setErrorMessage("재고 변동 이력을 불러오지 못했습니다.");
+      } finally {
+        if (mounted) {
+          setLoading(false);
+          setPage(1);
+        }
+      }
+    };
+
+    fetchInventoryHistory();
+
+    return () => {
+      mounted = false;
+    };
+  }, [searchValue, movementType, startDate, endDate]);
+
+  const summary = useMemo(() => {
+    const inboundRows = rows.filter((row) => row.changeType === "INBOUND");
+    const outboundRows = rows.filter((row) => row.changeType === "ORDER_OUT");
+
+    const inboundSkuCount = new Set(inboundRows.map((row) => row.productCode)).size;
+    const outboundSkuCount = new Set(outboundRows.map((row) => row.productCode)).size;
 
     const inboundQty = inboundRows.reduce(
       (acc, row) => acc + Math.abs(row.movementQty),
-      0,
+      0
     );
     const outboundQty = outboundRows.reduce(
       (acc, row) => acc + Math.abs(row.movementQty),
-      0,
+      0
     );
 
     return {
@@ -251,25 +167,8 @@ export default function InventoryHistory() {
     };
   }, [rows]);
 
-  const filteredData = useMemo(() => {
-    const keyword = searchValue.trim().toLowerCase();
-
-    return rows.filter((item) => {
-      const matchKeyword =
-        !keyword ||
-        item.productName.toLowerCase().includes(keyword) ||
-        item.productCode.toLowerCase().includes(keyword);
-
-      const matchType = movementType ? item.type === movementType : true;
-
-      const normalizedDate = `20${item.date.slice(0, 8).replace(/\//g, "-")}`;
-
-      const matchStartDate = startDate ? normalizedDate >= startDate : true;
-      const matchEndDate = endDate ? normalizedDate <= endDate : true;
-
-      return matchKeyword && matchType && matchStartDate && matchEndDate;
-    });
-  }, [rows, searchValue, movementType, startDate, endDate]);
+  const inboundTrend = useMemo(() => buildDailyTrend(rows, "INBOUND"), [rows]);
+  const outboundTrend = useMemo(() => buildDailyTrend(rows, "ORDER_OUT"), [rows]);
 
   const columns = [
     {
@@ -340,13 +239,13 @@ export default function InventoryHistory() {
       key: "date",
       title: "일자",
       width: "140px",
-      sortType: "date",
+      sortValue: (row) => row.occurredAt,
       render: (value) => <SubText>{value}</SubText>,
     },
     {
       key: "note",
       title: "비고",
-      width: "100px",
+      width: "220px",
       sortable: false,
       render: (value) => <SubText>{value}</SubText>,
     },
@@ -368,7 +267,7 @@ export default function InventoryHistory() {
             <SubNumber>{summary.inboundQty.toLocaleString()}개</SubNumber>
           </BigLine>
           <ChangeRow $up>
-            ↑ 6 SKU / 2,000개 <span>vs Yesterday</span>
+            최근 조회 기준 입고 합계 <span>실데이터 반영</span>
           </ChangeRow>
         </StatCard>
 
@@ -381,7 +280,7 @@ export default function InventoryHistory() {
             <SubNumber>{summary.outboundQty.toLocaleString()}개</SubNumber>
           </BigLine>
           <ChangeRow $up={false}>
-            ↓ 4 SKU / 3,000개 <span>vs Yesterday</span>
+            최근 조회 기준 출고 합계 <span>실데이터 반영</span>
           </ChangeRow>
         </StatCard>
 
@@ -430,9 +329,11 @@ export default function InventoryHistory() {
         </TrendCard>
       </SummaryGrid>
 
+      {errorMessage ? <ErrorText>{errorMessage}</ErrorText> : null}
+
       <TableComponent
         columns={columns}
-        data={filteredData}
+        data={rows}
         headerAlign="center"
         cellAlign="center"
         rowKey="id"
@@ -448,10 +349,7 @@ export default function InventoryHistory() {
             <DateInput
               type="date"
               value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => setStartDate(e.target.value)}
             />
 
             <DateDivider>~</DateDivider>
@@ -459,28 +357,19 @@ export default function InventoryHistory() {
             <DateInput
               type="date"
               value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => setEndDate(e.target.value)}
             />
 
             <KeywordInput
               type="text"
-              placeholder="상품명, 상품코드로 검색"
+              placeholder="상품명, 상품코드, 비고로 검색"
               value={searchValue}
-              onChange={(e) => {
-                setSearchValue(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => setSearchValue(e.target.value)}
             />
 
             <FilterSelect
               value={movementType}
-              onChange={(e) => {
-                setMovementType(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => setMovementType(e.target.value)}
             >
               {movementTypeOptions.map((option) => (
                 <option key={option.value || "all"} value={option.value}>
@@ -491,6 +380,8 @@ export default function InventoryHistory() {
           </CustomToolbar>
         }
       />
+
+      {loading ? <LoadingText>불러오는 중...</LoadingText> : null}
     </PageWrap>
   );
 }
@@ -518,271 +409,250 @@ const Title = styled.h2`
 const SummaryGrid = styled.div`
   margin-bottom: 18px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1.42fr;
-  gap: 14px;
+  grid-template-columns: 1fr 1fr 1.3fr;
+  gap: 16px;
 
-  @media (max-width: 1200px) {
+  @media (max-width: 1100px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const CardBase = styled.div`
+const StatCard = styled.div`
   background: #ffffff;
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
-  min-height: 118px;
-  box-sizing: border-box;
+  border: 1px solid #edf0f4;
+  border-radius: 20px;
+  padding: 20px 22px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
 `;
 
-const StatCard = styled(CardBase)``;
-
-const TrendCard = styled(CardBase)`
-  padding-bottom: 18px;
-`;
-
-const CardTitle = styled.div`
+const CardTitle = styled.p`
+  margin: 0 0 14px;
   color: #111827;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
 `;
 
 const BigLine = styled.div`
   display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  margin-top: 14px;
-  min-height: 38px;
+  align-items: baseline;
+  gap: 8px;
 `;
 
-const BigNumber = styled.div`
-  font-size: 38px;
-  line-height: 1;
+const BigNumber = styled.span`
+  color: #111827;
+  font-size: 34px;
   font-weight: 800;
-  color: #111827;
+  line-height: 1;
 `;
 
-const Unit = styled.div`
-  font-size: 14px;
-  line-height: 1;
+const Unit = styled.span`
+  color: #111827;
+  font-size: 16px;
   font-weight: 700;
-  color: #111827;
-  margin-bottom: 4px;
 `;
 
-const Slash = styled.div`
-  font-size: 20px;
-  line-height: 1;
-  color: #9ca3af;
-  margin: 0 1px 3px;
-`;
-
-const SubNumber = styled.div`
-  font-size: 14px;
-  line-height: 1;
+const Slash = styled.span`
+  color: #d1d5db;
+  font-size: 18px;
   font-weight: 700;
-  color: #111827;
-  margin-bottom: 4px;
+`;
+
+const SubNumber = styled.span`
+  color: #4b5563;
+  font-size: 16px;
+  font-weight: 700;
 `;
 
 const ChangeRow = styled.div`
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: ${({ $up }) => ($up ? "#22c55e" : "#ef4444")};
-  font-size: 12px;
+  margin-top: 18px;
+  color: ${({ $up }) => ($up ? "#2563eb" : "#ef4444")};
+  font-size: 13px;
   font-weight: 700;
 
   span {
+    margin-left: 6px;
     color: #9ca3af;
     font-weight: 500;
-    margin-left: 2px;
   }
 `;
 
+const TrendCard = styled(StatCard)`
+  min-height: 180px;
+`;
+
 const TrendHeader = styled.div`
+  margin-bottom: 14px;
   color: #111827;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
 `;
 
 const TrendInner = styled.div`
   display: grid;
-  grid-template-columns: 60px 1fr;
-  gap: 6px;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
   align-items: stretch;
-  margin-top: 12px;
-  height: 100%;
 `;
 
 const LegendArea = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding-top: 6px;
+  justify-content: center;
 `;
 
 const LegendItem = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
+  gap: 8px;
   color: #4b5563;
+  font-size: 13px;
+  font-weight: 600;
 `;
 
 const LegendDot = styled.span`
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
   background: ${({ $color }) => $color};
 `;
 
 const ChartArea = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 2px;
-  min-height: 0;
+  justify-content: space-between;
 `;
 
 const TrendSvg = styled.svg`
   width: 100%;
-  height: 72px;
-  display: block;
+  height: 96px;
+  overflow: visible;
 `;
 
 const XAxis = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-  margin-top: -2px;
-
-  span {
-    font-size: 10px;
-    color: #9ca3af;
-    text-align: center;
-    font-weight: 600;
-    line-height: 1;
-  }
+  gap: 8px;
+  margin-top: 8px;
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
 `;
 
 const CustomToolbar = styled.div`
   width: 100%;
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
   gap: 10px;
+  align-items: center;
 `;
 
 const DateInput = styled.input`
-  height: 38px;
-  min-width: 122px;
+  height: 40px;
   padding: 0 12px;
-  border: 1px solid #edf0f4;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
   background: #ffffff;
-  color: #374151;
-  font-size: 13px;
+  color: #111827;
+  font-size: 14px;
   outline: none;
-
-  &:focus {
-    border-color: #cfd8e3;
-  }
 `;
 
 const DateDivider = styled.span`
   color: #9ca3af;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
 `;
 
 const KeywordInput = styled.input`
-  height: 38px;
-  min-width: 240px;
-  padding: 0 12px;
-  border: 1px solid #edf0f4;
+  flex: 1 1 280px;
+  min-width: 220px;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
   background: #ffffff;
-  color: #374151;
-  font-size: 13px;
+  color: #111827;
+  font-size: 14px;
   outline: none;
-
-  &:focus {
-    border-color: #cfd8e3;
-  }
-
-  &::placeholder {
-    color: #9ca3af;
-  }
 `;
 
 const FilterSelect = styled.select`
-  height: 38px;
-  min-width: 120px;
+  min-width: 140px;
+  height: 40px;
   padding: 0 12px;
-  border: 1px solid #edf0f4;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
   background: #ffffff;
-  color: #6b7280;
-  font-size: 13px;
+  color: #111827;
+  font-size: 14px;
   outline: none;
-  cursor: pointer;
-
-  &:focus {
-    border-color: #cfd8e3;
-  }
 `;
 
-const SubText = styled.span`
-  color: #4b5563;
+const CodeLink = styled.button`
+  border: 0;
+  padding: 0;
+  background: none;
+  color: #2563eb;
   font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+`;
+
+const ProductNameLink = styled.a`
+  color: #111827;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const TypeBadge = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 52px;
+  min-width: 58px;
   height: 28px;
   padding: 0 10px;
-  border-radius: 8px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
-  background: ${({ $type }) => ($type === "입고" ? "#dbeafe" : "#fee2e2")};
-  color: ${({ $type }) => ($type === "입고" ? "#2563eb" : "#ef4444")};
+  color: ${({ $type }) => {
+    if ($type === "입고") return "#1d4ed8";
+    if ($type === "출고") return "#b91c1c";
+    return "#92400e";
+  }};
+  background: ${({ $type }) => {
+    if ($type === "입고") return "#dbeafe";
+    if ($type === "출고") return "#fee2e2";
+    return "#fef3c7";
+  }};
 `;
 
 const QuantityText = styled.span`
-  font-size: 14px;
-  font-weight: 700;
   color: ${({ $positive }) => ($positive ? "#2563eb" : "#ef4444")};
-`;
-
-const CodeLink = styled.button`
-  border: 0;
-  background: transparent;
-  padding: 0;
-  color: #111827;
   font-size: 13px;
   font-weight: 700;
-  cursor: pointer;
-
-  &:hover {
-    color: #2563eb;
-    text-decoration: underline;
-  }
 `;
 
-const ProductNameLink = styled.a`
-  color: #111827;
+const SubText = styled.span`
+  color: #6b7280;
   font-size: 13px;
-  font-weight: 500;
-  text-decoration: none;
+`;
 
-  &:hover {
-    color: #2563eb;
-    text-decoration: underline;
-  }
+const ErrorText = styled.div`
+  margin-bottom: 12px;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 600;
+`;
+
+const LoadingText = styled.div`
+  margin-top: 12px;
+  color: #6b7280;
+  font-size: 13px;
 `;

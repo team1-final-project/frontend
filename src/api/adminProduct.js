@@ -47,3 +47,18 @@ export const resolveCatalogName = async (externalCatalogId) => {
   });
   return response.data;
 }
+
+export const getAdminProductList = async (params = {}) => {
+  const response = await api.get(`/admin/products`, { params });
+  return response.data;
+}
+
+export const updateAdminProductAiPricing = async (
+  productId,
+  aiPricingEnabled
+) => {
+  const response = await api.patch(`/admin/products/${productId}/ai-pricing`, {
+    ai_pricing_enabled: aiPricingEnabled,
+  });
+  return response.data;
+};

@@ -37,28 +37,30 @@ export default function TablePagination({
   return (
     <Footer>
       <FooterLeft>
-        <span>Showing</span>
+        <LeftGroup>
+          <span>Showing</span>
 
-        <PageSizeWrap>
-          <PageSizeSelect
-            value={pageSize}
-            onChange={(e) => onPageSizeChange?.(Number(e.target.value))}
-          >
-            {pageSizeOptions.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </PageSizeSelect>
+          <PageSizeWrap>
+            <PageSizeSelect
+              value={pageSize}
+              onChange={(e) => onPageSizeChange?.(Number(e.target.value))}
+            >
+              {pageSizeOptions.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </PageSizeSelect>
 
-          <SelectIcon>
-            <ChevronDown size={14} />
-          </SelectIcon>
-        </PageSizeWrap>
+            <SelectIcon>
+              <ChevronDown size={14} />
+            </SelectIcon>
+          </PageSizeWrap>
+        </LeftGroup>
 
-        <span>
+        <CountText>
           {startCount}-{endCount} of {totalCount}
-        </span>
+        </CountText>
       </FooterLeft>
 
       <Pagination>
@@ -86,23 +88,33 @@ export default function TablePagination({
 
 const Footer = styled.div`
   margin-top: 14px;
+  padding: 0 14px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-
-  @media (max-width: 900px) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  width: 100%;
 `;
 
 const FooterLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  flex-shrink: 0;
   color: #9ca3af;
   font-size: 13px;
+  white-space: nowrap;
+`;
+
+const LeftGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+`;
+
+const CountText = styled.span`
+  flex-shrink: 0;
 `;
 
 const PageSizeWrap = styled.div`
@@ -139,6 +151,7 @@ const Pagination = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 `;
 
 const ArrowButton = styled.button`

@@ -1,174 +1,48 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import TableComponent from "../../../components/TableComponent";
+import {
+  getAdminLiveInventoryList,
+  patchAdminLiveInventoryRow,
+} from "../../../api/adminInventory";
 
-const inventoryData = [
-  {
-    id: 1,
-    productCode: "9744302255",
-    productName: "농심 신라면건면 114g, 1개",
-    totalStock: 11111,
-    availableStock: 11000,
-    badStock: 11,
-    scheduledWork: 100,
-    safetyStock: 500,
-    inventoryStatus: "안전재고",
-    purchasePrice: 900,
-    assetAmount: 9999900,
-    salesStatus: "판매중",
-    category: "라면",
-  },
-  {
-    id: 2,
-    productCode: "12279799725",
-    productName: "농심 포테토칩 오리지널 390g, 1개",
-    totalStock: 500,
-    availableStock: 450,
-    badStock: 10,
-    scheduledWork: 40,
-    safetyStock: 200,
-    inventoryStatus: "안전재고",
-    purchasePrice: 3300,
-    assetAmount: 1650000,
-    salesStatus: "판매중",
-    category: "과자",
-  },
-  {
-    id: 3,
-    productCode: "6156192012",
-    productName: "CJ 비비고 사골곰탕 500g, 18개",
-    totalStock: 2,
-    availableStock: 0,
-    badStock: 2,
-    scheduledWork: 0,
-    safetyStock: 300,
-    inventoryStatus: "일시품절",
-    purchasePrice: 18000,
-    assetAmount: 0,
-    salesStatus: "일시품절",
-    category: "국/탕/찌개",
-  },
-  {
-    id: 4,
-    productCode: "5909188198",
-    productName: "코카콜라 콜라 1.5L, 12개",
-    totalStock: 500,
-    availableStock: 800,
-    badStock: 800,
-    scheduledWork: 800,
-    safetyStock: 800,
-    inventoryStatus: "발주권고",
-    purchasePrice: 30000,
-    assetAmount: 24000000,
-    salesStatus: "판매중",
-    category: "음료",
-  },
-  {
-    id: 5,
-    productCode: "57954282217",
-    productName: "롯데 맛있는 비엔나 소시지 1kg, 1개",
-    totalStock: 10000,
-    availableStock: 200,
-    badStock: 200,
-    scheduledWork: 200,
-    safetyStock: 200,
-    inventoryStatus: "악성재고",
-    purchasePrice: 7500,
-    assetAmount: 75000000,
-    salesStatus: "판매중",
-    category: "냉장식품",
-  },
-  {
-    id: 6,
-    productCode: "6156192013",
-    productName: "CJ 비비고 사골곰탕 500g, 18개",
-    totalStock: 0,
-    availableStock: 0,
-    badStock: 0,
-    scheduledWork: 50,
-    safetyStock: 300,
-    inventoryStatus: "일시품절",
-    purchasePrice: 18000,
-    assetAmount: 0,
-    salesStatus: "일시품절",
-    category: "국/탕/찌개",
-  },
-  {
-    id: 7,
-    productCode: "6156192014",
-    productName: "CJ 비비고 사골곰탕 500g, 18개",
-    totalStock: 3,
-    availableStock: 0,
-    badStock: 3,
-    scheduledWork: 0,
-    safetyStock: 300,
-    inventoryStatus: "일시품절",
-    purchasePrice: 18000,
-    assetAmount: 0,
-    salesStatus: "일시품절",
-    category: "국/탕/찌개",
-  },
-  {
-    id: 8,
-    productCode: "12279799726",
-    productName: "농심 포테토칩 오리지널 390g, 1개",
-    totalStock: 500,
-    availableStock: 450,
-    badStock: 10,
-    scheduledWork: 40,
-    safetyStock: 200,
-    inventoryStatus: "안전재고",
-    purchasePrice: 3300,
-    assetAmount: 1650000,
-    salesStatus: "판매중지",
-    category: "과자",
-  },
-  {
-    id: 9,
-    productCode: "12279799727",
-    productName: "농심 포테토칩 오리지널 390g, 1개",
-    totalStock: 500,
-    availableStock: 450,
-    badStock: 10,
-    scheduledWork: 40,
-    safetyStock: 200,
-    inventoryStatus: "안전재고",
-    purchasePrice: 3300,
-    assetAmount: 1650000,
-    salesStatus: "판매종료",
-    category: "과자",
-  },
-  {
-    id: 10,
-    productCode: "12279799728",
-    productName: "농심 포테토칩 오리지널 390g, 1개",
-    totalStock: 500,
-    availableStock: 450,
-    badStock: 10,
-    scheduledWork: 40,
-    safetyStock: 200,
-    inventoryStatus: "안전재고",
-    purchasePrice: 3300,
-    assetAmount: 1650000,
-    salesStatus: "판매중",
-    category: "과자",
-  },
+const inventoryStatusOptions = ["안전재고", "발주권고", "일시품절"];
+const salesStatusOptions = ["판매중", "판매중지", "품절", "판매종료", "판매예정"];
+
+const salesStatusList = [
+  { value: "ON_SALE", label: "판매중" },
+  { value: "STOPPED", label: "판매중지" },
+  { value: "SOLD_OUT", label: "품절" },
+  { value: "ENDED", label: "판매종료" },
+  { value: "READY", label: "판매예정" },
 ];
 
-const inventoryStatusOptions = ["안전재고", "발주권고", "일시품절", "악성재고"];
-const salesStatusOptions = ["판매중", "판매중지", "일시품절", "판매종료"];
-const salesStatusList = ["판매중", "판매중지", "일시품절", "판매종료"];
+const saleStatusLabelMap = {
+  ON_SALE: "판매중",
+  STOPPED: "판매중지",
+  SOLD_OUT: "품절",
+  ENDED: "판매종료",
+  READY: "판매예정",
+};
 
-const categoryOptions = [
-  ...new Set(inventoryData.map((item) => item.category)),
-].map((value) => ({
-  label: value,
-  value,
-}));
+const formatNumber = (value) => `${Number(value || 0).toLocaleString()}원`;
+const formatCount = (value) => `${Number(value || 0).toLocaleString()}개`;
 
-const formatNumber = (value) => `${Number(value).toLocaleString()}원`;
-const formatCount = (value) => `${Number(value).toLocaleString()}개`;
+const mapInventoryRow = (item) => ({
+  id: item.id,
+  productCode: item.product_code,
+  productName: item.product_name ?? "-",
+  totalStock: Number(item.total_stock ?? 0),
+  availableStock: Number(item.available_stock ?? 0),
+  safetyStock: Number(item.safety_stock_qty ?? 0),
+  inventoryStatus: item.inventory_status ?? "안전재고",
+  purchasePrice: Number(item.purchase_price ?? 0),
+  assetAmount: Number(item.asset_amount ?? 0),
+  salesStatusCode: item.sale_status ?? "ON_SALE",
+  salesStatus: saleStatusLabelMap[item.sale_status] ?? item.sale_status ?? "-",
+  category: item.category ?? "-",
+});
 
 export default function LiveInventory() {
   const nav = useNavigate();
@@ -179,14 +53,76 @@ export default function LiveInventory() {
   const [salesValue, setSalesValue] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [rows, setRows] = useState(inventoryData);
 
-  const handleSalesStatusChange = (id, value) => {
-    setRows((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, salesStatus: value } : item,
-      ),
+  const [rows, setRows] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [pendingActionKey, setPendingActionKey] = useState("");
+
+  const fetchRows = async () => {
+    try {
+      setIsLoading(true);
+      setErrorMessage("");
+
+      const response = await getAdminLiveInventoryList();
+      const items = Array.isArray(response) ? response : response?.items ?? [];
+      setRows(items.map(mapInventoryRow));
+    } catch (error) {
+      console.error(error);
+      setRows([]);
+      setErrorMessage(
+        error?.response?.data?.detail ||
+          "실시간 재고 목록을 불러오지 못했습니다.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRows();
+  }, []);
+
+  const categoryOptions = useMemo(() => {
+    return [...new Set(rows.map((item) => item.category).filter(Boolean))].map(
+      (value) => ({
+        label: value,
+        value,
+      }),
     );
+  }, [rows]);
+
+  const handleSalesStatusChange = async (productCode, nextStatusCode) => {
+    const actionKey = `${productCode}:status`;
+    const previousRows = rows;
+
+    try {
+      setPendingActionKey(actionKey);
+      setRows((prev) =>
+        prev.map((item) =>
+          item.productCode === productCode
+            ? {
+                ...item,
+                salesStatusCode: nextStatusCode,
+                salesStatus:
+                  saleStatusLabelMap[nextStatusCode] ?? nextStatusCode,
+              }
+            : item,
+        ),
+      );
+
+      await patchAdminLiveInventoryRow(productCode, {
+        sale_status: nextStatusCode,
+      });
+    } catch (error) {
+      console.error(error);
+      setRows(previousRows);
+      alert(
+        error?.response?.data?.detail || "판매상태 변경에 실패했습니다.",
+      );
+    } finally {
+      setPendingActionKey("");
+    }
   };
 
   const summary = useMemo(() => {
@@ -195,7 +131,7 @@ export default function LiveInventory() {
       salesSummary: {
         판매중: rows.filter((item) => item.salesStatus === "판매중").length,
         판매중지: rows.filter((item) => item.salesStatus === "판매중지").length,
-        일시품절: rows.filter((item) => item.salesStatus === "일시품절").length,
+        품절: rows.filter((item) => item.salesStatus === "품절").length,
         판매종료: rows.filter((item) => item.salesStatus === "판매종료").length,
       },
       inventorySummary: {
@@ -204,8 +140,6 @@ export default function LiveInventory() {
         발주권고: rows.filter((item) => item.inventoryStatus === "발주권고")
           .length,
         일시품절: rows.filter((item) => item.inventoryStatus === "일시품절")
-          .length,
-        악성재고: rows.filter((item) => item.inventoryStatus === "악성재고")
           .length,
       },
       warningItems: rows
@@ -282,20 +216,6 @@ export default function LiveInventory() {
       render: (value) => formatCount(value),
     },
     {
-      key: "badStock",
-      title: "불량재고",
-      width: "100px",
-      sortType: "number",
-      render: (value) => formatCount(value),
-    },
-    {
-      key: "scheduledWork",
-      title: "작업예정",
-      width: "100px",
-      sortType: "number",
-      render: (value) => formatCount(value),
-    },
-    {
       key: "safetyStock",
       title: "안전재고",
       width: "100px",
@@ -334,12 +254,15 @@ export default function LiveInventory() {
         <CenterCell>
           <SalesStatusSelect
             $type={value}
-            value={value}
-            onChange={(e) => handleSalesStatusChange(row.id, e.target.value)}
+            value={row.salesStatusCode}
+            disabled={pendingActionKey === `${row.productCode}:status`}
+            onChange={(e) =>
+              handleSalesStatusChange(row.productCode, e.target.value)
+            }
           >
             {salesStatusList.map((status) => (
-              <option key={status} value={status}>
-                {status}
+              <option key={status.value} value={status.value}>
+                {status.label}
               </option>
             ))}
           </SalesStatusSelect>
@@ -354,13 +277,20 @@ export default function LiveInventory() {
         <Title>실시간 재고 현황</Title>
       </HeaderRow>
 
+      {isLoading && (
+        <PageStatusText>실시간 재고 목록을 불러오는 중입니다.</PageStatusText>
+      )}
+      {!isLoading && errorMessage && (
+        <PageStatusText $error>{errorMessage}</PageStatusText>
+      )}
+
       <SummaryGrid>
         <SummaryCardBox>
           <CardTitle>전체 재고 수</CardTitle>
           <CardValueWrap>
             <CardValue>{summary.totalCount}개</CardValue>
           </CardValueWrap>
-          <CardMeta>↑ 6개 vs Yesterday</CardMeta>
+          <CardMeta>실시간 조회 기준</CardMeta>
         </SummaryCardBox>
 
         <SummaryCardBox>
@@ -378,27 +308,21 @@ export default function LiveInventory() {
                 <Dot $color="yellow" />
                 판매중지
               </SummaryLabel>
-              <SummaryValue>
-                {summary.salesSummary["판매중지"]} SKU
-              </SummaryValue>
+              <SummaryValue>{summary.salesSummary["판매중지"]} SKU</SummaryValue>
             </SummaryRow>
             <SummaryRow>
               <SummaryLabel>
                 <Dot $color="pink" />
-                일시품절
+                품절
               </SummaryLabel>
-              <SummaryValue>
-                {summary.salesSummary["일시품절"]} SKU
-              </SummaryValue>
+              <SummaryValue>{summary.salesSummary["품절"]} SKU</SummaryValue>
             </SummaryRow>
             <SummaryRow>
               <SummaryLabel>
                 <Dot $color="indigo" />
                 판매종료
               </SummaryLabel>
-              <SummaryValue>
-                {summary.salesSummary["판매종료"]} SKU
-              </SummaryValue>
+              <SummaryValue>{summary.salesSummary["판매종료"]} SKU</SummaryValue>
             </SummaryRow>
           </SummaryList>
         </SummaryCardBox>
@@ -411,36 +335,21 @@ export default function LiveInventory() {
                 <Dot $color="green" />
                 안전재고
               </SummaryLabel>
-              <SummaryValue>
-                {summary.inventorySummary["안전재고"]} SKU
-              </SummaryValue>
+              <SummaryValue>{summary.inventorySummary["안전재고"]} SKU</SummaryValue>
             </SummaryRow>
             <SummaryRow>
               <SummaryLabel>
                 <Dot $color="yellow" />
                 발주권고
               </SummaryLabel>
-              <SummaryValue>
-                {summary.inventorySummary["발주권고"]} SKU
-              </SummaryValue>
+              <SummaryValue>{summary.inventorySummary["발주권고"]} SKU</SummaryValue>
             </SummaryRow>
             <SummaryRow>
               <SummaryLabel>
                 <Dot $color="pink" />
                 일시품절
               </SummaryLabel>
-              <SummaryValue>
-                {summary.inventorySummary["일시품절"]} SKU
-              </SummaryValue>
-            </SummaryRow>
-            <SummaryRow>
-              <SummaryLabel>
-                <Dot $color="red" />
-                악성재고
-              </SummaryLabel>
-              <SummaryValue>
-                {summary.inventorySummary["악성재고"]} SKU
-              </SummaryValue>
+              <SummaryValue>{summary.inventorySummary["일시품절"]} SKU</SummaryValue>
             </SummaryRow>
           </SummaryList>
         </SummaryCardBox>
@@ -455,7 +364,7 @@ export default function LiveInventory() {
 
           <WarningHeader>
             <span>재고 부족 예상</span>
-            <span>현재고</span>
+            <span>현 재고</span>
           </WarningHeader>
 
           <WarningList>
@@ -474,6 +383,7 @@ export default function LiveInventory() {
       </SummaryGrid>
 
       <TableComponent
+        variant="inventory"
         columns={columns}
         data={filteredData}
         headerAlign="center"
@@ -555,6 +465,13 @@ const Title = styled.h2`
   color: #111827;
   font-size: 22px;
   font-weight: 800;
+`;
+
+const PageStatusText = styled.div`
+  margin-bottom: 14px;
+  color: ${({ $error }) => ($error ? "#dc2626" : "#475569")};
+  font-size: 13px;
+  font-weight: 600;
 `;
 
 const SummaryGrid = styled.div`
@@ -750,14 +667,12 @@ const InventoryStatusBadge = styled.span`
     if ($type === "안전재고") return "#dcfce7";
     if ($type === "발주권고") return "#fef3c7";
     if ($type === "일시품절") return "#f5d0fe";
-    if ($type === "악성재고") return "#fee2e2";
     return "#eef2f7";
   }};
   color: ${({ $type }) => {
     if ($type === "안전재고") return "#16a34a";
     if ($type === "발주권고") return "#d97706";
     if ($type === "일시품절") return "#c026d3";
-    if ($type === "악성재고") return "#dc2626";
     return "#667085";
   }};
 `;
@@ -777,22 +692,29 @@ const SalesStatusSelect = styled.select`
   -moz-appearance: none;
   background-color: ${({ $type }) => {
     if ($type === "판매중") return "#dcfce7";
-    if ($type === "일시품절") return "#f5d0fe";
+    if ($type === "품절") return "#f5d0fe";
     if ($type === "판매중지") return "#fef3c7";
     if ($type === "판매종료") return "#e5e7eb";
+    if ($type === "판매예정") return "#e0ecff";
     return "#eef2f7";
   }};
   color: ${({ $type }) => {
     if ($type === "판매중") return "#16a34a";
-    if ($type === "일시품절") return "#c026d3";
+    if ($type === "품절") return "#c026d3";
     if ($type === "판매중지") return "#d97706";
     if ($type === "판매종료") return "#6b7280";
+    if ($type === "판매예정") return "#2563eb";
     return "#667085";
   }};
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
   background-repeat: no-repeat;
   background-position: right 9px center;
   background-size: 12px;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
 `;
 
 const CodeLink = styled.button`

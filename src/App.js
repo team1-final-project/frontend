@@ -31,8 +31,6 @@ import LiveInventory from "./pages/admin/inventory/LiveInventory";
 import InventoryHistory from "./pages/admin/inventory/InventoryHistory";
 import SalesStat from "./pages/admin/statistics/SalesStat";
 import AIPriceStat from "./pages/admin/statistics/AIPriceStat";
-import AdminManage from "./pages/admin/management/AdminManage";
-import Settings from "./pages/admin/management/Settings";
 import AdminLogin from "./pages/admin/AdminLogin";
 
 function App() {
@@ -59,32 +57,26 @@ function App() {
 
           {/* 나중에 권한 분기 필요할 때 주석 풀기 ㄱㄱ혓 */}
           {/* <Route element={<AdminRoute />}> */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<Dashboard />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
 
-              <Route path="product-list" element={<ProductList />} />
-              <Route path="product-regist" element={<ProductRegist />} />
-              <Route
-                path="product-update/:productCode"
-                element={<ProductUpdate />}
-              />
+            <Route path="product-list" element={<ProductList />} />
+            <Route path="product-regist" element={<ProductRegist />} />
+            <Route
+              path="product-update/:productCode"
+              element={<ProductUpdate />}
+            />
 
-              <Route path="price-search" element={<PriceSearch />} />
-              <Route path="matching-manage" element={<MatchingManage />} />
-              <Route path="ai-history" element={<AIHistory />} />
+            <Route path="price-search" element={<PriceSearch />} />
+            <Route path="matching-manage" element={<MatchingManage />} />
+            <Route path="ai-history" element={<AIHistory />} />
 
-              <Route path="live-inventory" element={<LiveInventory />} />
-              <Route
-                path="inventory-history"
-                element={<InventoryHistory />}
-              />
+            <Route path="live-inventory" element={<LiveInventory />} />
+            <Route path="inventory-history" element={<InventoryHistory />} />
 
-              <Route path="sales-stat" element={<SalesStat />} />
-              <Route path="ai-price-stat" element={<AIPriceStat />} />
-
-              <Route path="manage-admins" element={<AdminManage />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
+            <Route path="sales-stat" element={<SalesStat />} />
+            <Route path="ai-price-stat" element={<AIPriceStat />} />
+          </Route>
           {/* </Route> */}
 
           <Route

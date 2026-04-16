@@ -369,7 +369,6 @@ export default function AIHistory() {
               <thead>
                 <tr>
                   <th>일자</th>
-                  <th>AI 가격변경</th>
                   <th>판매가</th>
                   <th>판매량</th>
                   <th>시간당판매량</th>
@@ -387,14 +386,6 @@ export default function AIHistory() {
                 {pagedRows.map((item) => (
                   <tr key={item.id}>
                     <td>{item.datetime}</td>
-                    <td>
-                      <ToggleSwitch
-                        checked={item.aiChanged}
-                        onChange={(nextChecked) => handleToggleAiChanged(item.id, nextChecked)}
-                        width={34}
-                        height={20}
-                      />
-                    </td>
                     <td>{item.salePrice}</td>
                     <td>{item.salesQty}</td>
                     <td>{item.salesPerHour}</td>

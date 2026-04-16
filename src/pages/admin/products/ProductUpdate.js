@@ -26,8 +26,10 @@ const saleStatusOptions = [
   { value: "ENDED", label: "판매종료" },
 ];
 
-const FIXED_SHIPPING_FROM = "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
-const FIXED_RETURN_ADDRESS = "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
+const FIXED_SHIPPING_FROM =
+  "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
+const FIXED_RETURN_ADDRESS =
+  "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
 
 export default function ProductUpdate() {
   const nav = useNavigate();
@@ -100,12 +102,12 @@ export default function ProductUpdate() {
 
         const targetMain = categoryData.find((mainCategory) =>
           mainCategory.subCategories?.some(
-            (subCategory) => subCategory.id === detail.category_id
-          )
+            (subCategory) => subCategory.id === detail.category_id,
+          ),
         );
 
         const targetSub = targetMain?.subCategories?.find(
-          (subCategory) => subCategory.id === detail.category_id
+          (subCategory) => subCategory.id === detail.category_id,
         );
 
         setSelectedMainCategoryId(targetMain?.id ?? null);
@@ -124,13 +126,19 @@ export default function ProductUpdate() {
 
           useAiPrice: Boolean(detail.ai_pricing_enabled),
           minPrice:
-            detail.min_price_limit != null ? String(detail.min_price_limit) : "",
+            detail.min_price_limit != null
+              ? String(detail.min_price_limit)
+              : "",
           maxPrice:
-            detail.max_price_limit != null ? String(detail.max_price_limit) : "",
+            detail.max_price_limit != null
+              ? String(detail.max_price_limit)
+              : "",
 
           stockQty: detail.stock_qty != null ? String(detail.stock_qty) : "",
           safetyStock:
-            detail.safety_stock_qty != null ? String(detail.safety_stock_qty) : "",
+            detail.safety_stock_qty != null
+              ? String(detail.safety_stock_qty)
+              : "",
           expiryDate: detail.expiration_date ?? "",
 
           description: detail.description_html ?? "",
@@ -152,7 +160,9 @@ export default function ProductUpdate() {
         setDetailImageUrls(detail.detail_image_urls ?? []);
       } catch (error) {
         console.error(error);
-        alert(error?.response?.data?.detail || "상품 정보를 불러오지 못했습니다.");
+        alert(
+          error?.response?.data?.detail || "상품 정보를 불러오지 못했습니다.",
+        );
         nav("/admin/product-list", { replace: true });
       } finally {
         setIsPageLoading(false);
@@ -163,13 +173,15 @@ export default function ProductUpdate() {
   }, [nav, productCode]);
 
   const activeMainCategory = useMemo(() => {
-    return categories.find((category) => category.id === selectedMainCategoryId);
+    return categories.find(
+      (category) => category.id === selectedMainCategoryId,
+    );
   }, [categories, selectedMainCategoryId]);
 
   const activeSubCategory = useMemo(() => {
     if (!activeMainCategory) return null;
     return activeMainCategory.subCategories?.find(
-      (subCategory) => subCategory.id === selectedSubCategoryId
+      (subCategory) => subCategory.id === selectedSubCategoryId,
     );
   }, [activeMainCategory, selectedSubCategoryId]);
 
@@ -191,7 +203,7 @@ export default function ProductUpdate() {
           category.subCategories?.filter((subCategory) =>
             `${category.name} ${subCategory.name}`
               .toLowerCase()
-              .includes(keyword)
+              .includes(keyword),
           ) || [];
 
         if (mainMatched) return category;
@@ -233,10 +245,12 @@ export default function ProductUpdate() {
       console.error(error);
 
       if (error.code === "ECONNABORTED") {
-        setCatalogError("카탈로그 조회 시간이 초과되었습니다. 다시 시도해주세요.");
+        setCatalogError(
+          "카탈로그 조회 시간이 초과되었습니다. 다시 시도해주세요.",
+        );
       } else {
         setCatalogError(
-          error?.response?.data?.detail || "카탈로그 이름 조회에 실패했습니다."
+          error?.response?.data?.detail || "카탈로그 이름 조회에 실패했습니다.",
         );
       }
 
@@ -260,7 +274,9 @@ export default function ProductUpdate() {
       setThumbnailUrl(result.image_url);
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.detail || "대표이미지 업로드에 실패했습니다.");
+      alert(
+        error?.response?.data?.detail || "대표이미지 업로드에 실패했습니다.",
+      );
     } finally {
       setIsThumbnailUploading(false);
     }
@@ -295,7 +311,9 @@ export default function ProductUpdate() {
         });
       } catch (error) {
         console.error(error);
-        alert(error?.response?.data?.detail || "상세 이미지 업로드에 실패했습니다.");
+        alert(
+          error?.response?.data?.detail || "상세 이미지 업로드에 실패했습니다.",
+        );
       } finally {
         setIsDetailImageUploading(false);
       }
@@ -321,7 +339,7 @@ export default function ProductUpdate() {
       },
       blotFormatter: {},
     }),
-    []
+    [],
   );
 
   const quillFormats = [
@@ -460,7 +478,7 @@ export default function ProductUpdate() {
                     onClick={() => {
                       setSelectedMainCategoryId(category.id);
                       setSelectedSubCategoryId(
-                        category.subCategories?.[0]?.id ?? null
+                        category.subCategories?.[0]?.id ?? null,
                       );
                     }}
                   >
@@ -517,7 +535,7 @@ export default function ProductUpdate() {
                         {fullName}
                       </SearchResultButton>
                     );
-                  })
+                  }),
                 )}
               </SearchResultList>
             </SearchCategoryPanel>
@@ -587,7 +605,9 @@ export default function ProductUpdate() {
               <FormField>
                 <Input
                   value={form.catalogExternalId}
-                  onChange={(e) => handleChange("catalogExternalId", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("catalogExternalId", e.target.value)
+                  }
                   onBlur={handleResolveCatalogName}
                   placeholder="예: 53390091166"
                 />
@@ -600,7 +620,11 @@ export default function ProductUpdate() {
                 <Input
                   value={form.catalogName}
                   readOnly
-                  placeholder={isCatalogLoading ? "카탈로그 조회 중..." : "자동으로 입력됩니다."}
+                  placeholder={
+                    isCatalogLoading
+                      ? "카탈로그 조회 중..."
+                      : "자동으로 입력됩니다."
+                  }
                 />
                 {catalogError ? (
                   <HelperText style={{ color: "#dc2626", textAlign: "left" }}>
@@ -647,7 +671,9 @@ export default function ProductUpdate() {
               <FormField>
                 <ToggleSwitch
                   checked={form.useAiPrice}
-                  onChange={(nextChecked) => handleChange("useAiPrice", nextChecked)}
+                  onChange={(nextChecked) =>
+                    handleChange("useAiPrice", nextChecked)
+                  }
                 />
               </FormField>
             </FormRow>
@@ -693,6 +719,7 @@ export default function ProductUpdate() {
                   <Input
                     value={form.stockQty}
                     onChange={(e) => handleChange("stockQty", e.target.value)}
+                    readOnly
                   />
                   <UnitText>개</UnitText>
                 </UnitInputWrap>
@@ -705,7 +732,9 @@ export default function ProductUpdate() {
                 <UnitInputWrap>
                   <Input
                     value={form.safetyStock}
-                    onChange={(e) => handleChange("safetyStock", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("safetyStock", e.target.value)
+                    }
                   />
                   <UnitText>개</UnitText>
                 </UnitInputWrap>
@@ -720,10 +749,8 @@ export default function ProductUpdate() {
                     type="date"
                     value={form.expiryDate}
                     onChange={(e) => handleChange("expiryDate", e.target.value)}
+                    readOnly
                   />
-                  <DateIconWrap>
-                    <Calendar size={14} />
-                  </DateIconWrap>
                 </DateInputWrap>
               </FormField>
             </FormRow>
@@ -826,7 +853,9 @@ export default function ProductUpdate() {
                 <UnitInputWrap>
                   <Input
                     value={form.shippingFee}
-                    onChange={(e) => handleChange("shippingFee", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("shippingFee", e.target.value)
+                    }
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
@@ -866,7 +895,9 @@ export default function ProductUpdate() {
                 <UnitInputWrap>
                   <Input
                     value={form.exchangeFee}
-                    onChange={(e) => handleChange("exchangeFee", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("exchangeFee", e.target.value)
+                    }
                     placeholder="교환배송비"
                   />
                   <UnitText>원</UnitText>
