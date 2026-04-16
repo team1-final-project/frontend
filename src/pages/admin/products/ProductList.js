@@ -18,7 +18,7 @@ const statusStyleMap = {
   품절: { label: "품절", variant: "danger" },
 };
 
-const salesStatusLabelMap =  {
+const salesStatusLabelMap = {
   ON_SALE: "판매중",
   READY: "판매예정",
   STOPPED: "판매중지",
@@ -57,12 +57,12 @@ export default function ProductList() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
- const [summary, setSummary] = useState({
-  totalCount: 0,
-  saleCount: 0,
-  soldOutCount: 0,
-  aiEnabledCount: 0,
-});
+  const [summary, setSummary] = useState({
+    totalCount: 0,
+    saleCount: 0,
+    soldOutCount: 0,
+    aiEnabledCount: 0,
+  });
 
   const nav = useNavigate();
 
@@ -71,79 +71,81 @@ export default function ProductList() {
       (mainCategory.subCategories || []).map((subCategory) => ({
         label: `${mainCategory.name} > ${subCategory.name}`,
         value: String(subCategory.id),
-      }))
+      })),
     );
   }, [categories]);
 
   useEffect(() => {
-  const fetchCategories = async () => {
-    try {
-      const data = await getCategories();
-      setCategories(data || []);
-    } catch (error) {
-      console.error(error);
-      alert("카테고리 목록 조회에 실패했습니다.");
-    }
-  };
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data || []);
+      } catch (error) {
+        console.error(error);
+        alert("카테고리 목록 조회에 실패했습니다.");
+      }
+    };
 
-  fetchCategories();
-}, []);
+    fetchCategories();
+  }, []);
 
-useEffect(() => {
-  const fetchProducts = async () => {
-    try {
-      setIsLoading(true);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
 
-      const data = await getAdminProductList({
-        keyword: searchValue.trim() || undefined,
-        category_id: categoryValue ? Number(categoryValue) : undefined,
-        start_date: startDate || undefined,
-        end_date: endDate || undefined,
-        page,
-        size: pageSize,
-      });
+        const data = await getAdminProductList({
+          keyword: searchValue.trim() || undefined,
+          category_id: categoryValue ? Number(categoryValue) : undefined,
+          start_date: startDate || undefined,
+          end_date: endDate || undefined,
+          page,
+          size: pageSize,
+        });
 
-      const mappedItems = (data.items || []).map((item) => ({
-        id: item.id,
-        productCode: item.product_code,
-        productName: item.product_name,
-        category: item.category_name,
-        price: item.sale_price,
-        aiPricingEnabled: item.ai_pricing_enabled,
-        stock: item.stock_qty,
-        saleStatus: mapSaleStatusLabel(item.sale_status),
-        updatedAt: formatUpdatedAt(item.updated_at),
-      }));
+        const mappedItems = (data.items || []).map((item) => ({
+          id: item.id,
+          productCode: item.product_code,
+          productName: item.product_name,
+          category: item.category_name,
+          price: item.sale_price,
+          aiPricingEnabled: item.ai_pricing_enabled,
+          stock: item.stock_qty,
+          saleStatus: mapSaleStatusLabel(item.sale_status),
+          updatedAt: formatUpdatedAt(item.updated_at),
+        }));
 
-      setProducts(mappedItems);
-      
-      setSummary({
-        totalCount: data.summary?.total_count || 0,
-        saleCount: data.summary?.sale_count || 0,
-        soldOutCount: data.summary?.sold_out_count || 0,
-        aiEnabledCount: data.summary?.ai_enabled_count || 0,
-      });
-      
-      setTotal(data.total || 0);
-      setTotalPages(data.total_pages || 1);
-    } catch (error) {
-      console.error(error);
-      alert(error?.response?.data?.detail || "상품 목록 조회에 실패했습니다.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        setProducts(mappedItems);
 
-  fetchProducts();
-}, [searchValue, categoryValue, startDate, endDate, page, pageSize]);
+        setSummary({
+          totalCount: data.summary?.total_count || 0,
+          saleCount: data.summary?.sale_count || 0,
+          soldOutCount: data.summary?.sold_out_count || 0,
+          aiEnabledCount: data.summary?.ai_enabled_count || 0,
+        });
+
+        setTotal(data.total || 0);
+        setTotalPages(data.total_pages || 1);
+      } catch (error) {
+        console.error(error);
+        alert(
+          error?.response?.data?.detail || "상품 목록 조회에 실패했습니다.",
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [searchValue, categoryValue, startDate, endDate, page, pageSize]);
 
   const handleToggleAiPricing = async (id, nextChecked) => {
     const previousProducts = products;
 
     setProducts((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, aiPricingEnabled: nextChecked } : item
-      )
+        item.id === id ? { ...item, aiPricingEnabled: nextChecked } : item,
+      ),
     );
 
     setSummary((prev) => ({
@@ -168,7 +170,8 @@ useEffect(() => {
       }));
 
       alert(
-        error?.response?.data?.detail || "AI 가격변경 상태 변경에 실패했습니다."
+        error?.response?.data?.detail ||
+          "AI 가격변경 상태 변경에 실패했습니다.",
       );
     }
   };
@@ -229,7 +232,9 @@ useEffect(() => {
         <CenterCell>
           <ToggleSwitch
             checked={value}
-            onChange={(nextChecked) => handleToggleAiPricing(row.id, nextChecked)}
+            onChange={(nextChecked) =>
+              handleToggleAiPricing(row.id, nextChecked)
+            }
           />
         </CenterCell>
       ),
