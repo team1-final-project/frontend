@@ -1,4 +1,3 @@
-import { getAdminProductDetail, updateAdminProduct } from "./adminProduct";
 import api from "./axios";
 
 export const getAdminLiveInventoryList = async () => {
@@ -6,12 +5,16 @@ export const getAdminLiveInventoryList = async () => {
   return response.data;
 };
 
-
 export const patchAdminLiveInventoryRow = async (productCode, payload) => {
   const response = await api.patch(
     `/admin/products/live-inventory/${productCode}`,
-    payload
+    payload,
   );
+  return response.data;
+};
+
+export const createAdminInbound = async (payload) => {
+  const response = await api.post("/admin/products/inbound", payload);
   return response.data;
 };
 
