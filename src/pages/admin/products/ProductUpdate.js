@@ -735,7 +735,6 @@ export default function ProductUpdate() {
                     onChange={(e) =>
                       handleChange("safetyStock", e.target.value)
                     }
-                    readOnly
                   />
                   <UnitText>개</UnitText>
                 </UnitInputWrap>
