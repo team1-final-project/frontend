@@ -752,9 +752,6 @@ export default function ProductUpdate() {
                     onChange={(e) => handleChange("expiryDate", e.target.value)}
                     readOnly
                   />
-                  <DateIconWrap>
-                    <Calendar size={14} />
-                  </DateIconWrap>
                 </DateInputWrap>
               </FormField>
             </FormRow>
