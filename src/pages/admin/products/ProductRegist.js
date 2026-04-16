@@ -51,7 +51,7 @@ export default function ProductRegist() {
   const [catalogError, setCatalogError] = useState("");
 
   const [form, setForm] = useState({
-    productCode: "자동 생성",
+    productCode: "",
     productName: "",
     saleStatus: "ON_SALE",
 
@@ -288,6 +288,11 @@ export default function ProductRegist() {
       return;
     }
 
+    if (!form.productCode.trim()) {
+      alert("상품코드를 입력해주세요.");
+      return;
+    }
+
     if (!form.productName.trim()) {
       alert("상품명을 입력해주세요.");
       return;
@@ -313,6 +318,7 @@ export default function ProductRegist() {
 
       const payload = {
         category_id: selectedSubCategoryId,
+        product_code: form.productCode.trim(),
         product_name: form.productName.trim(),
         sale_status: form.saleStatus,
 
@@ -468,7 +474,12 @@ export default function ProductRegist() {
             <FormRow>
               <FormLabel>상품코드</FormLabel>
               <FormField>
-                <Input value={form.productCode} readOnly />
+                <Input
+                  value={form.productCode}
+                  onChange={(e) => handleChange("productCode", e.target.value)}
+                  placeholder="상품코드를 입력하세요"
+                  maxLength={50}
+                />
               </FormField>
             </FormRow>
 
