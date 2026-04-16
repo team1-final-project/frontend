@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import TableComponent from "../../../components/TableComponent";
@@ -12,7 +12,8 @@ const movementTypeOptions = [
 
 const weekLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
-const formatCount = (value) => `${Math.abs(Number(value || 0)).toLocaleString()}개`;
+const formatCount = (value) =>
+  `${Math.abs(Number(value || 0)).toLocaleString()}개`;
 
 const formatSignedCount = (value) =>
   `${Number(value || 0) > 0 ? "+" : ""}${Number(value || 0).toLocaleString()}개`;
@@ -32,6 +33,22 @@ const buildPolylinePoints = (values, width, height, padding = 12) => {
       return `${x},${y}`;
     })
     .join(" ");
+};
+
+const buildChartPoints = (values, width, height, padding = 12) => {
+  const max = Math.max(...values, 0);
+  const min = Math.min(...values, 0);
+  const range = max - min || 1;
+
+  return values.map((value, index) => {
+    const x =
+      padding +
+      (index * (width - padding * 2)) / Math.max(values.length - 1, 1);
+    const y =
+      height - padding - ((value - min) * (height - padding * 2)) / range;
+
+    return { x, y, value };
+  });
 };
 
 const formatOccurredAt = (value) => {
@@ -77,6 +94,7 @@ const buildDailyTrend = (rows, targetType) => {
 
 export default function InventoryHistory() {
   const nav = useNavigate();
+  const chartAreaRef = useRef(null);
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -87,6 +105,8 @@ export default function InventoryHistory() {
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     let mounted = true;
@@ -169,6 +189,47 @@ export default function InventoryHistory() {
 
   const inboundTrend = useMemo(() => buildDailyTrend(rows, "INBOUND"), [rows]);
   const outboundTrend = useMemo(() => buildDailyTrend(rows, "ORDER_OUT"), [rows]);
+
+  const inboundPoints = useMemo(
+    () => buildChartPoints(inboundTrend, 260, 96, 10),
+    [inboundTrend]
+  );
+  const outboundPoints = useMemo(
+    () => buildChartPoints(outboundTrend, 260, 96, 10),
+    [outboundTrend]
+  );
+
+  const tooltipData =
+    hoveredIndex !== null
+      ? {
+          label: weekLabels[hoveredIndex],
+          inbound: inboundTrend[hoveredIndex] ?? 0,
+          outbound: outboundTrend[hoveredIndex] ?? 0,
+        }
+      : null;
+
+  const handleChartMouseMove = (e) => {
+    if (!chartAreaRef.current) return;
+
+    const rect = chartAreaRef.current.getBoundingClientRect();
+    const relativeX = e.clientX - rect.left;
+    const clampedX = Math.max(0, Math.min(relativeX, rect.width));
+    const sectionWidth = rect.width / weekLabels.length;
+    const index = Math.min(
+      weekLabels.length - 1,
+      Math.max(0, Math.floor(clampedX / sectionWidth))
+    );
+
+    setHoveredIndex(index);
+    setTooltipPosition({
+      x: sectionWidth * index + sectionWidth / 2,
+      y: 8,
+    });
+  };
+
+  const handleChartMouseLeave = () => {
+    setHoveredIndex(null);
+  };
 
   const columns = [
     {
@@ -299,8 +360,46 @@ export default function InventoryHistory() {
               </LegendItem>
             </LegendArea>
 
-            <ChartArea>
+            <ChartArea
+              ref={chartAreaRef}
+              onMouseMove={handleChartMouseMove}
+              onMouseLeave={handleChartMouseLeave}
+            >
+              {tooltipData ? (
+                <ChartTooltip
+                  style={{
+                    left: `${tooltipPosition.x}px`,
+                    top: `${tooltipPosition.y}px`,
+                  }}
+                >
+                  <TooltipTitle>{tooltipData.label}</TooltipTitle>
+                  <TooltipRow>
+                    <TooltipLabel>
+                      <LegendDot $color="#2563eb" />
+                      입고
+                    </TooltipLabel>
+                    <TooltipValue>{tooltipData.inbound.toLocaleString()}개</TooltipValue>
+                  </TooltipRow>
+                  <TooltipRow>
+                    <TooltipLabel>
+                      <LegendDot $color="#ef4444" />
+                      출고
+                    </TooltipLabel>
+                    <TooltipValue>{tooltipData.outbound.toLocaleString()}개</TooltipValue>
+                  </TooltipRow>
+                </ChartTooltip>
+              ) : null}
+
               <TrendSvg viewBox="0 0 260 96" preserveAspectRatio="none">
+                {hoveredIndex !== null ? (
+                  <HoverGuide
+                    x1={inboundPoints[hoveredIndex]?.x ?? 0}
+                    x2={inboundPoints[hoveredIndex]?.x ?? 0}
+                    y1="0"
+                    y2="96"
+                  />
+                ) : null}
+
                 <polyline
                   fill="none"
                   stroke="#2563eb"
@@ -317,11 +416,36 @@ export default function InventoryHistory() {
                   strokeLinejoin="round"
                   points={buildPolylinePoints(outboundTrend, 260, 96, 10)}
                 />
+
+                {inboundPoints.map((point, index) => (
+                  <circle
+                    key={`inbound-${index}`}
+                    cx={point.x}
+                    cy={point.y}
+                    r={hoveredIndex === index ? 4.5 : 0}
+                    fill="#2563eb"
+                  />
+                ))}
+
+                {outboundPoints.map((point, index) => (
+                  <circle
+                    key={`outbound-${index}`}
+                    cx={point.x}
+                    cy={point.y}
+                    r={hoveredIndex === index ? 4.5 : 0}
+                    fill="#ef4444"
+                  />
+                ))}
               </TrendSvg>
 
               <XAxis>
-                {weekLabels.map((label) => (
-                  <span key={label}>{label}</span>
+                {weekLabels.map((label, index) => (
+                  <XAxisLabel
+                    key={label}
+                    $active={hoveredIndex === index}
+                  >
+                    {label}
+                  </XAxisLabel>
                 ))}
               </XAxis>
             </ChartArea>
@@ -515,9 +639,11 @@ const LegendDot = styled.span`
   height: 10px;
   border-radius: 999px;
   background: ${({ $color }) => $color};
+  flex-shrink: 0;
 `;
 
 const ChartArea = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -529,6 +655,56 @@ const TrendSvg = styled.svg`
   overflow: visible;
 `;
 
+const HoverGuide = styled.line`
+  stroke: #cbd5e1;
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+`;
+
+const ChartTooltip = styled.div`
+  position: absolute;
+  z-index: 5;
+  transform: translate(-50%, -100%);
+  min-width: 120px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(17, 24, 39, 0.94);
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+  pointer-events: none;
+`;
+
+const TooltipTitle = styled.div`
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 800;
+`;
+
+const TooltipRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  & + & {
+    margin-top: 6px;
+  }
+`;
+
+const TooltipLabel = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+`;
+
+const TooltipValue = styled.div`
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+`;
+
 const XAxis = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -538,6 +714,11 @@ const XAxis = styled.div`
   font-size: 11px;
   font-weight: 700;
   text-align: center;
+`;
+
+const XAxisLabel = styled.span`
+  color: ${({ $active }) => ($active ? "#111827" : "#9ca3af")};
+  font-weight: ${({ $active }) => ($active ? 800 : 700)};
 `;
 
 const CustomToolbar = styled.div`
