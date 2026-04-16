@@ -53,9 +53,12 @@ export const getAdminProductList = async (params = {}) => {
   return response.data;
 }
 
-export const updateAdminProductVisibility = async (productId, isVisible) => {
-  const response = await api.patch(`/admin/products/${productId}/visibility`, {
-    is_visible: isVisible,
+export const updateAdminProductAiPricing = async (
+  productId,
+  aiPricingEnabled
+) => {
+  const response = await api.patch(`/admin/products/${productId}/ai-pricing`, {
+    ai_pricing_enabled: aiPricingEnabled,
   });
   return response.data;
 };

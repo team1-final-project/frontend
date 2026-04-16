@@ -7,7 +7,10 @@ import TableComponent from "../../../components/TableComponent";
 import StatusBadge from "../../../components/StatusBadge";
 import ToggleSwitch from "../../../components/ToggleSwitch";
 import { getCategories } from "../../../api/category";
-import { getAdminProductList, updateAdminProductVisibility } from "../../../api/adminProduct";
+import {
+  getAdminProductList,
+  updateAdminProductAiPricing,
+} from "../../../api/adminProduct";
 
 const statusStyleMap = {
   판매중: { label: "판매중", variant: "success" },
@@ -54,12 +57,12 @@ export default function ProductList() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const [summary, setSummary] = useState({
-    totalCount: 0,
-    saleCount: 0,
-    soldOutCount: 0,
-    hiddenCount: 0,
-  });
+ const [summary, setSummary] = useState({
+  totalCount: 0,
+  saleCount: 0,
+  soldOutCount: 0,
+  aiEnabledCount: 0,
+});
 
   const nav = useNavigate();
 
@@ -106,7 +109,7 @@ useEffect(() => {
         productName: item.product_name,
         category: item.category_name,
         price: item.sale_price,
-        isVisible: item.is_visible,
+        aiPricingEnabled: item.ai_pricing_enabled,
         stock: item.stock_qty,
         saleStatus: mapSaleStatusLabel(item.sale_status),
         updatedAt: formatUpdatedAt(item.updated_at),
@@ -118,7 +121,7 @@ useEffect(() => {
         totalCount: data.summary?.total_count || 0,
         saleCount: data.summary?.sale_count || 0,
         soldOutCount: data.summary?.sold_out_count || 0,
-        hiddenCount: data.summary?.hidden_count || 0,
+        aiEnabledCount: data.summary?.ai_enabled_count || 0,
       });
       
       setTotal(data.total || 0);
@@ -134,23 +137,39 @@ useEffect(() => {
   fetchProducts();
 }, [searchValue, categoryValue, startDate, endDate, page, pageSize]);
 
-  const handleToggleVisible = async (id, nextVisible) => {
+  const handleToggleAiPricing = async (id, nextChecked) => {
     const previousProducts = products;
 
     setProducts((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, isVisible: nextVisible } : item
+        item.id === id ? { ...item, aiPricingEnabled: nextChecked } : item
       )
     );
 
+    setSummary((prev) => ({
+      ...prev,
+      aiEnabledCount: nextChecked
+        ? prev.aiEnabledCount + 1
+        : Math.max(0, prev.aiEnabledCount - 1),
+    }));
+
     try {
-      await updateAdminProductVisibility(id, nextVisible);
+      await updateAdminProductAiPricing(id, nextChecked);
     } catch (error) {
       console.error(error);
 
       setProducts(previousProducts);
 
-      alert(error?.response?.data?.detail || "노출 상태 변경에 실패했습니다.");
+      setSummary((prev) => ({
+        ...prev,
+        aiEnabledCount: nextChecked
+          ? Math.max(0, prev.aiEnabledCount - 1)
+          : prev.aiEnabledCount + 1,
+      }));
+
+      alert(
+        error?.response?.data?.detail || "AI 가격변경 상태 변경에 실패했습니다."
+      );
     }
   };
 
@@ -201,16 +220,16 @@ useEffect(() => {
       render: (value) => formatNumber(value),
     },
     {
-      key: "isVisible",
-      title: "노출",
-      width: "80px",
+      key: "aiPricingEnabled",
+      title: "AI 가격변경",
+      width: "120px",
       align: "center",
       sortable: false,
       render: (value, row) => (
         <CenterCell>
           <ToggleSwitch
             checked={value}
-            onChange={(nextChecked) => handleToggleVisible(row.id, nextChecked)}
+            onChange={(nextChecked) => handleToggleAiPricing(row.id, nextChecked)}
           />
         </CenterCell>
       ),
@@ -281,10 +300,10 @@ useEffect(() => {
           up
         />
         <SummaryCard
-          title="판매중지"
-          subText="비노출/중지 상품"
-          value={`${summary.hiddenCount} SKU`}
-          change="6 SKU"
+          title="AI 가격변경"
+          subText="AI 가격변경 사용 상품"
+          value={`${summary.aiEnabledCount} SKU`}
+          change="0 SKU"
           up
         />
       </SummaryGrid>
