@@ -24,3 +24,13 @@ export const getAdminInventoryHistoryList = async (params = {}) => {
   });
   return response.data;
 };
+
+export const getAdminLiveInventorySummary = async () => {
+  const response = await api.get("/admin/products/live-inventory/summary");
+  return response.data;
+};
+
+export const getAdminInventoryHistorySummary = async () => {
+  const response = await api.get("/admin/products/inventory-history/summary");
+  return response.data;
+};
