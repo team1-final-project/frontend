@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import TableComponent from "../../../components/TableComponent";
@@ -13,7 +19,7 @@ const movementTypeOptions = [
   { label: "출고", value: "ORDER_OUT" },
 ];
 
-const weekLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+const weekLabels = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
 const formatCount = (value) =>
   `${Math.abs(Number(value || 0)).toLocaleString()}개`;
@@ -69,33 +75,52 @@ const formatOccurredAt = (value) => {
   return `${year}/${month}/${day} ${hour}:${minute}`;
 };
 
-const buildDailyTrend = (rows, targetType) => {
+const buildCurrentWeekMeta = () => {
   const today = new Date();
-  const result = [];
+  today.setHours(0, 0, 0, 0);
 
-  for (let offset = 6; offset >= 0; offset -= 1) {
-    const current = new Date(today);
-    current.setHours(0, 0, 0, 0);
-    current.setDate(today.getDate() - offset);
+  const sunday = new Date(today);
+  sunday.setDate(today.getDate() - today.getDay());
 
-    const next = new Date(current);
-    next.setDate(current.getDate() + 1);
+  return weekLabels.map((label, index) => {
+    const start = new Date(sunday);
+    start.setDate(sunday.getDate() + index);
+    start.setHours(0, 0, 0, 0);
 
-    const total = rows
+    const end = new Date(start);
+    end.setDate(start.getDate() + 1);
+
+    return {
+      label,
+      start,
+      end,
+    };
+  });
+};
+
+const buildWeeklyTrend = (rows, targetType, weekMeta) => {
+  return weekMeta.map(({ start, end }) =>
+    rows
       .filter((row) => row.changeType === targetType)
       .filter((row) => {
         const occurredAt = new Date(row.occurredAt);
-        return occurredAt >= current && occurredAt < next;
+        if (Number.isNaN(occurredAt.getTime())) return false;
+        return occurredAt >= start && occurredAt < end;
       })
-      .reduce((acc, row) => acc + Math.abs(Number(row.movementQty || 0)), 0);
+      .reduce((acc, row) => acc + Math.abs(Number(row.movementQty || 0)), 0)
+  );
+};
 
-    result.push(total);
-  }
-
-  return result;
+const getMsUntilNextMidnight = () => {
+  const now = new Date();
+  const nextMidnight = new Date(now);
+  nextMidnight.setHours(24, 0, 0, 0);
+  return nextMidnight.getTime() - now.getTime();
 };
 
 const defaultSummaryData = {
+  total_count: 0,
+  total_diff: 0,
   inbound_sku_count: 0,
   inbound_qty: 0,
   inbound_sku_diff: 0,
@@ -112,6 +137,9 @@ export default function InventoryHistory() {
 
   const [rows, setRows] = useState([]);
   const [summaryData, setSummaryData] = useState(defaultSummaryData);
+  const [currentWeekMeta, setCurrentWeekMeta] = useState(() =>
+    buildCurrentWeekMeta()
+  );
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [searchValue, setSearchValue] = useState("");
@@ -123,28 +151,23 @@ export default function InventoryHistory() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-  useEffect(() => {
-    let mounted = true;
+  const fetchInventoryHistory = useCallback(async () => {
+    setLoading(true);
+    setErrorMessage("");
 
-    const fetchInventoryHistory = async () => {
-      setLoading(true);
-      setErrorMessage("");
+    try {
+      const [historyResponse, summaryResponse] = await Promise.all([
+        getAdminInventoryHistoryList({
+          keyword: searchValue.trim() || undefined,
+          change_type: movementType || undefined,
+          start_date: startDate || undefined,
+          end_date: endDate || undefined,
+        }),
+        getAdminInventoryHistorySummary(),
+      ]);
 
-      try {
-        const [historyResponse, summaryResponse] = await Promise.all([
-          getAdminInventoryHistoryList({
-            keyword: searchValue.trim() || undefined,
-            change_type: movementType || undefined,
-            start_date: startDate || undefined,
-            end_date: endDate || undefined,
-          }),
-          getAdminInventoryHistorySummary(),
-        ]);
-
-        if (!mounted) return;
-
-        const mappedRows = Array.isArray(historyResponse?.items)
-          ? historyResponse.items.map((item) => ({
+      const mappedRows = Array.isArray(historyResponse?.items)
+        ? historyResponse.items.map((item) => ({
             id: item.id,
             productId: item.product_id,
             productCode: item.product_code,
@@ -158,33 +181,62 @@ export default function InventoryHistory() {
             occurredAt: item.occurred_at,
             note: item.note || "-",
           }))
-          : [];
+        : [];
 
-        setRows(mappedRows);
-        setSummaryData(summaryResponse || defaultSummaryData);
-      } catch (error) {
-        if (!mounted) return;
-        console.error("재고 변동 이력 조회 실패", error);
-        setRows([]);
-        setSummaryData(defaultSummaryData);
-        setErrorMessage("재고 변동 이력을 불러오지 못했습니다.");
-      } finally {
-        if (mounted) {
-          setLoading(false);
-          setPage(1);
-        }
-      }
-    };
-
-    fetchInventoryHistory();
-
-    return () => {
-      mounted = false;
-    };
+      setRows(mappedRows);
+      setSummaryData(summaryResponse || defaultSummaryData);
+      setPage(1);
+    } catch (error) {
+      console.error("재고 변동 이력 조회 실패", error);
+      setRows([]);
+      setSummaryData(defaultSummaryData);
+      setErrorMessage("재고 변동 이력을 불러오지 못했습니다.");
+    } finally {
+      setLoading(false);
+    }
   }, [searchValue, movementType, startDate, endDate]);
 
-  const inboundTrend = useMemo(() => buildDailyTrend(rows, "INBOUND"), [rows]);
-  const outboundTrend = useMemo(() => buildDailyTrend(rows, "ORDER_OUT"), [rows]);
+  useEffect(() => {
+    fetchInventoryHistory();
+  }, [fetchInventoryHistory]);
+
+  useEffect(() => {
+    let timeoutId = null;
+    let cancelled = false;
+
+    const scheduleNextRefresh = () => {
+      const delay = getMsUntilNextMidnight();
+
+      timeoutId = window.setTimeout(async () => {
+        if (cancelled) return;
+
+        setCurrentWeekMeta(buildCurrentWeekMeta());
+        await fetchInventoryHistory();
+
+        if (!cancelled) {
+          scheduleNextRefresh();
+        }
+      }, delay);
+    };
+
+    scheduleNextRefresh();
+
+    return () => {
+      cancelled = true;
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [fetchInventoryHistory]);
+
+  const inboundTrend = useMemo(
+    () => buildWeeklyTrend(rows, "INBOUND", currentWeekMeta),
+    [rows, currentWeekMeta]
+  );
+  const outboundTrend = useMemo(
+    () => buildWeeklyTrend(rows, "ORDER_OUT", currentWeekMeta),
+    [rows, currentWeekMeta]
+  );
 
   const inboundPoints = useMemo(
     () => buildChartPoints(inboundTrend, 260, 96, 10),
@@ -198,10 +250,10 @@ export default function InventoryHistory() {
   const tooltipData =
     hoveredIndex !== null
       ? {
-        label: weekLabels[hoveredIndex],
-        inbound: inboundTrend[hoveredIndex] ?? 0,
-        outbound: outboundTrend[hoveredIndex] ?? 0,
-      }
+          label: weekLabels[hoveredIndex],
+          inbound: inboundTrend[hoveredIndex] ?? 0,
+          outbound: outboundTrend[hoveredIndex] ?? 0,
+        }
       : null;
 
   const isInboundUp =
@@ -459,7 +511,7 @@ export default function InventoryHistory() {
               <XAxis>
                 {weekLabels.map((label, index) => (
                   <XAxisLabel
-                    key={label}
+                    key={`${label}-${index}`}
                     $active={hoveredIndex === index}
                   >
                     {label}

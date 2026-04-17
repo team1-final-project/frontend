@@ -43,3 +43,8 @@ export const patchAdminPriceSearchRow = async (productCode, patch = {}) => {
     buildAdminProductUpdatePayload(detail, patch),
   );
 };
+
+export const getAdminMatchingSummary = async () => {
+  const response = await api.get("/admin/products/matching/summary");
+  return response.data;
+};

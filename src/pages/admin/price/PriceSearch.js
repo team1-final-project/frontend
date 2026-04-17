@@ -7,6 +7,7 @@ import StatusBadge from "../../../components/StatusBadge";
 import ToggleSwitch from "../../../components/ToggleSwitch";
 import {
   getAdminPriceSearchList,
+  getAdminMatchingSummary,
   patchAdminPriceSearchRow,
 } from "../../../api/adminPrice.js";
 
@@ -30,6 +31,17 @@ const lowestStyleMap = {
   Y: { label: "Y", variant: "success" },
   N: { label: "N", variant: "danger" },
   "-": { label: "-", variant: "info" },
+};
+
+const defaultSummaryData = {
+  total_count: 0,
+  total_diff: 0,
+  matched_count: 0,
+  matched_diff: 0,
+  unmatched_count: 0,
+  unmatched_diff: 0,
+  ai_price_count: 0,
+  ai_price_diff: 0,
 };
 
 const formatCurrency = (value) => {
@@ -87,6 +99,8 @@ const formatDateTimeDisplay = (value) => {
   return `${year}/${month}/${day} ${hours}:${minutes}`;
 };
 
+const formatSummaryChange = (value) => `${Math.abs(Number(value || 0))} SKU`;
+
 const mapPriceRow = (item) => ({
   id: item.id,
   catalogId: item.catalog_external_id ?? "-",
@@ -117,6 +131,7 @@ export default function PriceSearch() {
   const nav = useNavigate();
 
   const [rows, setRows] = useState([]);
+  const [summaryData, setSummaryData] = useState(defaultSummaryData);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [pendingActionKey, setPendingActionKey] = useState("");
@@ -134,12 +149,21 @@ export default function PriceSearch() {
       setIsLoading(true);
       setErrorMessage("");
 
-      const response = await getAdminPriceSearchList();
-      const items = Array.isArray(response) ? response : response?.items ?? [];
+      const [listResponse, summaryResponse] = await Promise.all([
+        getAdminPriceSearchList(),
+        getAdminMatchingSummary(),
+      ]);
+
+      const items = Array.isArray(listResponse)
+        ? listResponse
+        : listResponse?.items ?? [];
+
       setRows(items.map(mapPriceRow));
+      setSummaryData(summaryResponse?.summary ?? defaultSummaryData);
     } catch (error) {
       console.error(error);
       setRows([]);
+      setSummaryData(defaultSummaryData);
       setErrorMessage(
         error?.response?.data?.detail ||
           "가격 조회 목록을 불러오지 못했습니다.",
@@ -160,15 +184,6 @@ export default function PriceSearch() {
         value,
       }),
     );
-  }, [rows]);
-
-  const summary = useMemo(() => {
-    return {
-      totalCount: rows.length,
-      aiChangedCount: rows.filter((item) => item.aiPriceChanged).length,
-      lowestCount: rows.filter((item) => item.isLowest === "Y").length,
-      notLowestCount: rows.filter((item) => item.isLowest === "N").length,
-    };
   }, [rows]);
 
   const filteredData = useMemo(() => {
@@ -215,6 +230,8 @@ export default function PriceSearch() {
       await patchAdminPriceSearchRow(productCode, {
         ai_pricing_enabled: checked,
       });
+
+      await fetchRows();
     } catch (error) {
       console.error(error);
       setRows(previousRows);
@@ -248,6 +265,8 @@ export default function PriceSearch() {
       await patchAdminPriceSearchRow(productCode, {
         sale_status: nextStatusCode,
       });
+
+      await fetchRows();
     } catch (error) {
       console.error(error);
       setRows(previousRows);
@@ -451,30 +470,30 @@ export default function PriceSearch() {
         <SummaryCard
           title="전체 상품 수"
           subText="가격 조회 대상"
-          value={`${summary.totalCount} SKU`}
-          change="0 SKU"
-          up
+          value={`${summaryData.total_count} SKU`}
+          change={formatSummaryChange(summaryData.total_diff)}
+          up={Number(summaryData.total_diff) >= 0}
         />
         <SummaryCard
           title="AI 가격변경 상품"
           subText="자동 조정 대상"
-          value={`${summary.aiChangedCount} SKU`}
-          change="0 SKU"
-          up
+          value={`${summaryData.ai_price_count} SKU`}
+          change={formatSummaryChange(summaryData.ai_price_diff)}
+          up={Number(summaryData.ai_price_diff) >= 0}
         />
         <SummaryCard
           title="최저가 유지 상품"
           subText="현재 최저가 일치"
-          value={`${summary.lowestCount} SKU`}
-          change="0 SKU"
-          up
+          value={`${summaryData.matched_count} SKU`}
+          change={formatSummaryChange(summaryData.matched_diff)}
+          up={Number(summaryData.matched_diff) >= 0}
         />
         <SummaryCard
           title="최저가 아닌 상품"
           subText="재조정 필요"
-          value={`${summary.notLowestCount} SKU`}
-          change="0 SKU"
-          up={false}
+          value={`${summaryData.unmatched_count} SKU`}
+          change={formatSummaryChange(summaryData.unmatched_diff)}
+          up={Number(summaryData.unmatched_diff) >= 0}
         />
       </SummaryGrid>
 
