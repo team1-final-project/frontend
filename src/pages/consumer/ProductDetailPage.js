@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   BadgeCheck,
+  Bell,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -13,6 +14,8 @@ import * as S from "./ProductDetailPageStyles.js";
 import shinramyunImg from "../../assets/shinramyeon.jpg";
 
 const PRODUCT_IMAGE = shinramyunImg;
+const DETAIL_IMAGE_TOP = shinramyunImg;
+const DETAIL_IMAGE_BOTTOM = shinramyunImg;
 
 const REVIEW_IMAGES = [
   "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=300&q=80",
@@ -23,6 +26,15 @@ const REVIEW_IMAGES = [
 ];
 
 const TABS = ["상품상세", "상품평(788,617)", "상품문의", "교환/반품 안내"];
+
+const PRICE_TREND_POINTS = [24, 23, 31, 34, 46];
+const PRICE_TREND_LABELS = ["4주전", "3주전", "2주전", "1주전", "현재"];
+
+const BUY_TIMING_DATA = [
+  { label: "오늘", value: 4150, status: "추천" },
+  { label: "3일 후", value: 4280, status: "보통" },
+  { label: "7일 후", value: 4410, status: "상승 가능성" },
+];
 
 const PRODUCT_INQUIRIES = Array.from({ length: 4 }).map((_, index) => ({
   id: index + 1,
@@ -69,12 +81,27 @@ const RETURN_DENIED_RULES = [
   "슈팅배송 상품의 교환을 요청하는 경우",
 ];
 
+function buildLinePoints(values) {
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = Math.max(max - min, 1);
+
+  return values
+    .map((value, index) => {
+      const x = values.length === 1 ? 0 : (index / (values.length - 1)) * 100;
+      const y = 42 - ((value - min) / range) * 28;
+      return `${x},${y}`;
+    })
+    .join(" ");
+}
+
 export default function ProductDetailPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState("상품평(788,617)");
+  const [activeTab, setActiveTab] = useState("상품상세");
   const [currentPage, setCurrentPage] = useState(1);
 
   const reviews = useMemo(
@@ -83,7 +110,7 @@ export default function ProductDetailPage() {
         id: index + 1,
         author: "김하* (hari***@naver.com)",
         date: "Posted on August 14, 2023",
-        body: "라면을 워낙 좋아하는 터라 여러 종류의 라면을 구비해 두고 즐기는데요. 신라면만의 진한 표고 버섯 풍미와 매콤한 맛이 가장 손이 자주 갑니다. 특유의 감칠맛과 국물 밸런스가 좋아 무난하게 먹기 좋고, 가끔 느끼하다는 의견도 있지만 전체적으로는 꾸준히 찾게 되는 제품이에요. 신라면 본연의 맛이 오래 유지되었으면 좋겠습니다!",
+        body: "라면을 워낙 좋아하는 터라 여러 종류의 라면을 구비해 두고 즐기는데요. 신라면만의 진한 표고 버섯 풍미와 매콤한 맛이 가장 손이 자주 갑니다. 특유의 감칠맛과 국물 밸런스가 좋아 무난하게 먹기 좋고, 전체적으로는 꾸준히 찾게 되는 제품이에요.",
       })),
     [],
   );
@@ -93,13 +120,17 @@ export default function ProductDetailPage() {
   const decreaseQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
 
+  const linePoints = buildLinePoints(PRICE_TREND_POINTS);
+
   return (
     <S.Page>
       <S.Content>
         <S.Breadcrumb>
           <span>Home</span>
           <S.Divider>›</S.Divider>
-          <S.CurrentCategory>스낵</S.CurrentCategory>
+          <span>라면</span>
+          <S.Divider>›</S.Divider>
+          <S.CurrentCategory>농심 신라면</S.CurrentCategory>
         </S.Breadcrumb>
 
         <S.HeroSection>
@@ -120,24 +151,37 @@ export default function ProductDetailPage() {
             <S.PriceRow>
               <S.CurrentPrice>4,150원</S.CurrentPrice>
               <S.OriginalPrice>5,000원</S.OriginalPrice>
-              <S.DiscountBadge>- 40%</S.DiscountBadge>
+              <S.DiscountBadge>-17%</S.DiscountBadge>
             </S.PriceRow>
 
-            <S.Description>
-              <p>Spicy happiness In Noodles</p>
-              <p>
-                1986년 한국인의 입맛에 맞춘 매운맛 라면으로 시작한 신라면은 진한
-                소고기 육수와 깊은 버섯의 조화로 전 세계인의 입맛까지 사로잡은
-                K-푸드 대표 아이콘입니다.
-              </p>
-              <p>
-                SHIN : Spicy happiness In Noodles라는 슬로건으로 그 가치를
-                새롭게 이야기 합니다.
-              </p>
-              <p>전 세계 100여 국가에서 사랑받는 신라면.</p>
-              <p>Spicy happiness In Noodles.</p>
-              <p>그리고, 당신의 입맛을 맛있게.</p>
-            </S.Description>
+            <S.AIBadgeRow>
+              <S.AIBadge $tone="primary">AI 추천</S.AIBadge>
+              <S.AIBadge $tone="accent">최저가 근접</S.AIBadge>
+            </S.AIBadgeRow>
+
+            <S.AISummaryCard>
+              <S.AISummaryTitle>AI 구매 추천</S.AISummaryTitle>
+              <S.AISummaryHeadline>지금 구매 추천</S.AISummaryHeadline>
+              <S.AISummaryText>
+                최근 7일 평균 대비 가격이 충분히 낮고, 다음 주에는 소폭 상승
+                가능성이 있어 지금 구매하는 편이 유리해요.
+              </S.AISummaryText>
+            </S.AISummaryCard>
+
+            <S.SpecGrid>
+              <S.SpecCard>
+                <S.SpecLabel>현재가</S.SpecLabel>
+                <S.SpecValue>4,150원</S.SpecValue>
+              </S.SpecCard>
+              <S.SpecCard>
+                <S.SpecLabel>최근 최저가</S.SpecLabel>
+                <S.SpecValue>3,980원</S.SpecValue>
+              </S.SpecCard>
+              <S.SpecCard>
+                <S.SpecLabel>예상 최저가 시점</S.SpecLabel>
+                <S.SpecValue>이번 주</S.SpecValue>
+              </S.SpecCard>
+            </S.SpecGrid>
 
             <S.Specs>
               <li>중량 : 120g</li>
@@ -157,10 +201,93 @@ export default function ProductDetailPage() {
                 </S.QtyButton>
               </S.QuantityBox>
 
-              <S.CartButton type="button">Add to Cart</S.CartButton>
+              <S.SecondaryButton type="button">
+                <Bell size={16} />
+                가격 알림
+              </S.SecondaryButton>
+
+              <S.CartButton type="button">장바구니 담기</S.CartButton>
             </S.ActionArea>
           </S.InfoPanel>
         </S.HeroSection>
+
+        <S.AnalysisSection>
+          <S.AnalysisGrid>
+            <S.AnalysisCard>
+              <S.AnalysisCardTitle>최근 가격 추이</S.AnalysisCardTitle>
+              <S.AnalysisCardSub>
+                최근 4주 기준으로 현재 가격이 가장 낮은 구간에 가까워요.
+              </S.AnalysisCardSub>
+
+              <S.SimpleTrendChart>
+                <S.SimpleTrendSvg
+                  viewBox="0 0 100 48"
+                  preserveAspectRatio="none"
+                >
+                  <polyline
+                    fill="none"
+                    stroke="#2f6fd6"
+                    strokeWidth="2.5"
+                    points={linePoints}
+                  />
+                  {PRICE_TREND_POINTS.map((_, index) => {
+                    const x =
+                      PRICE_TREND_POINTS.length === 1
+                        ? 0
+                        : (index / (PRICE_TREND_POINTS.length - 1)) * 100;
+
+                    const min = Math.min(...PRICE_TREND_POINTS);
+                    const max = Math.max(...PRICE_TREND_POINTS);
+                    const range = Math.max(max - min, 1);
+                    const y =
+                      42 - ((PRICE_TREND_POINTS[index] - min) / range) * 28;
+
+                    return (
+                      <circle
+                        key={index}
+                        cx={x}
+                        cy={y}
+                        r="1.8"
+                        fill="#ffffff"
+                        stroke="#2f6fd6"
+                        strokeWidth="1.4"
+                      />
+                    );
+                  })}
+                </S.SimpleTrendSvg>
+              </S.SimpleTrendChart>
+
+              <S.TrendLabelRow>
+                {PRICE_TREND_LABELS.map((label) => (
+                  <S.TrendLabel key={label}>{label}</S.TrendLabel>
+                ))}
+              </S.TrendLabelRow>
+            </S.AnalysisCard>
+
+            <S.AnalysisCard>
+              <S.AnalysisCardTitle>구매 타이밍 예측</S.AnalysisCardTitle>
+              <S.AnalysisCardSub>
+                AI 분석 기준으로 이번 주 구매가 가장 유리할 가능성이 높아요.
+              </S.AnalysisCardSub>
+
+              <S.TimingList>
+                {BUY_TIMING_DATA.map((item) => (
+                  <S.TimingItem key={item.label}>
+                    <S.TimingLabelWrap>
+                      <S.TimingLabel>{item.label}</S.TimingLabel>
+                      <S.TimingStatus $status={item.status}>
+                        {item.status}
+                      </S.TimingStatus>
+                    </S.TimingLabelWrap>
+                    <S.TimingPrice>
+                      {item.value.toLocaleString()}원
+                    </S.TimingPrice>
+                  </S.TimingItem>
+                ))}
+              </S.TimingList>
+            </S.AnalysisCard>
+          </S.AnalysisGrid>
+        </S.AnalysisSection>
 
         <S.TabBar>
           {TABS.map((tab) => (
@@ -177,10 +304,93 @@ export default function ProductDetailPage() {
 
         {activeTab === "상품상세" && (
           <S.DetailSection>
-            <S.DetailTitle>상품상세</S.DetailTitle>
-            <S.DetailPlaceholder>
-              상품상세 본문은 추후 연결하면 됩니다.
-            </S.DetailPlaceholder>
+            <S.DetailImageHero>
+              <S.DetailHeroImage
+                src={DETAIL_IMAGE_TOP}
+                alt="신라면 메인 이미지"
+              />
+            </S.DetailImageHero>
+
+            <S.BrandStorySection>
+              <S.BrandStoryEyebrow>Brand Story</S.BrandStoryEyebrow>
+              <S.BrandStoryTitle>
+                신라면
+                <br />
+                브랜드 이야기
+              </S.BrandStoryTitle>
+
+              <S.BrandStoryGrid>
+                <S.BrandStoryImageWrap>
+                  <S.BrandStoryImage
+                    src={DETAIL_IMAGE_BOTTOM}
+                    alt="신라면 브랜드 이미지"
+                  />
+                </S.BrandStoryImageWrap>
+
+                <S.BrandStoryTextWrap>
+                  <S.BrandStoryHeadline>
+                    Spicy Happiness In Noodles
+                  </S.BrandStoryHeadline>
+
+                  <S.BrandStoryText>
+                    1986년 한국인의 입맛에 맞춘 매운맛 라면으로 시작한 신라면은
+                    진한 소고기 육수와 깊은 양념의 조화로 전 세계인의 입맛까지
+                    사로잡은 K-푸드 대표 아이콘입니다.
+                  </S.BrandStoryText>
+
+                  <S.BrandStoryText>
+                    이제 신라면 한 그릇이 전하는 매콤하지만 행복한 순간을 담아,
+                    <strong> SHIN : Spicy Happiness In Noodles</strong>라는
+                    슬로건으로 그 가치를 새롭게 이야기합니다.
+                  </S.BrandStoryText>
+
+                  <S.BrandStoryText>
+                    전 세계 100여 국가에서 사랑받는 신라면.
+                    <br />
+                    <strong>Spicy Happiness In Noodles.</strong>
+                    <br />
+                    그리고, 당신의 입맛을 맛있게.
+                  </S.BrandStoryText>
+                </S.BrandStoryTextWrap>
+              </S.BrandStoryGrid>
+            </S.BrandStorySection>
+
+            <S.CheckPointSection>
+              <S.CheckPointEyebrow>Check Point</S.CheckPointEyebrow>
+              <S.CheckPointTitle>
+                신라면
+                <br />
+                특별한 매력
+              </S.CheckPointTitle>
+
+              <S.CheckPointCardGrid>
+                <S.CheckPointCard>
+                  <S.CheckPointCardTitle>진한 국물 맛</S.CheckPointCardTitle>
+                  <S.CheckPointCardText>
+                    소고기 육수와 버섯 풍미가 더해져 깊고 균형감 있는 국물 맛을
+                    느낄 수 있어요.
+                  </S.CheckPointCardText>
+                </S.CheckPointCard>
+
+                <S.CheckPointCard>
+                  <S.CheckPointCardTitle>꾸준한 인기</S.CheckPointCardTitle>
+                  <S.CheckPointCardText>
+                    오랜 시간 사랑받아온 대표 라면으로, 호불호 적고 만족도가
+                    높은 제품이에요.
+                  </S.CheckPointCardText>
+                </S.CheckPointCard>
+
+                <S.CheckPointCard>
+                  <S.CheckPointCardTitle>
+                    AI 추천 구매 구간
+                  </S.CheckPointCardTitle>
+                  <S.CheckPointCardText>
+                    현재 가격은 최근 하락 구간에 위치해 있어 재구매용으로도
+                    부담이 적은 편이에요.
+                  </S.CheckPointCardText>
+                </S.CheckPointCard>
+              </S.CheckPointCardGrid>
+            </S.CheckPointSection>
           </S.DetailSection>
         )}
 

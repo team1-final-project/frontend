@@ -19,6 +19,8 @@ import CheckoutPage from "./pages/consumer/CheckoutPage";
 import PaymentSuccessPage from "./pages/consumer/PaymentSuccessPage";
 import PaymentFailPage from "./pages/consumer/PaymentFailPage";
 import OrderCompletePage from "./pages/consumer/OrderCompletePage";
+import AILowestPricePage from "./pages/consumer/AILowestPricePage";
+import AllProductsPage from "./pages/consumer/AllProductsPage";
 
 import Dashboard from "./pages/admin/Dashboard";
 import ProductList from "./pages/admin/products/ProductList";
@@ -39,9 +41,16 @@ function App() {
       <AuthProvider>
         <GlobalStyle />
         <Routes>
+          {/* Consumer */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
+            <Route path="/ai-lowest-price" element={<AILowestPricePage />} />
+            <Route path="/products" element={<AllProductsPage />} />
             <Route path="/product-detail" element={<ProductDetailPage />} />
+            <Route
+              path="/products/:productId"
+              element={<ProductDetailPage />}
+            />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkoutPage" element={<CheckoutPage />} />
             <Route path="/order-complete" element={<OrderCompletePage />} />

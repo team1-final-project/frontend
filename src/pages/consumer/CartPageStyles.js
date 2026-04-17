@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const Page = styled.div`
   min-height: 100vh;
   background: #f7f4ee;
-  padding: 40px 24px 80px;
+  padding: 50px 30px 200px;
 `;
 
 export const Inner = styled.div`

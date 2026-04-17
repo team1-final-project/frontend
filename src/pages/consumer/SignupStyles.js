@@ -10,7 +10,7 @@ export const GuideText = styled.p`
 export const Page = styled.div`
   min-height: 100vh;
   background: #f4f1eb;
-  padding: 40px 24px;
+  padding: 50px 30px 200px;
 `;
 
 export const Inner = styled.div`

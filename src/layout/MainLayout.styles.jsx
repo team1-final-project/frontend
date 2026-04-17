@@ -8,4 +8,5 @@ export const Wrap = styled.div`
 
 export const Content = styled.main`
   flex: 1;
+  min-height: calc(100vh - 160px);
 `;

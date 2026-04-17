@@ -6,7 +6,7 @@ export const Page = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 50px 30px 200px;
 `;
 
 export const Card = styled.div`

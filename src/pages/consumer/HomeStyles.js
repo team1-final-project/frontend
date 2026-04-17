@@ -8,6 +8,7 @@ import { ChevronDown } from "lucide-react";
 export const Page = styled.div`
   width: 100%;
   background: #efefef;
+  padding: 50px 30px 200px;
 `;
 
 /* =========================

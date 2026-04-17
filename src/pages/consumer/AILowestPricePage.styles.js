@@ -1,0 +1,423 @@
+import styled, { css } from "styled-components";
+import { Link } from "react-router-dom";
+
+export const Page = styled.div`
+  width: 100%;
+  background: #efefef;
+`;
+
+export const Inner = styled.div`
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 50px 30px 200px;
+`;
+
+export const PageHeader = styled.div`
+  margin-bottom: 24px;
+`;
+
+export const PageTitle = styled.h1`
+  font-size: 38px;
+  line-height: 1.1;
+  font-weight: 900;
+  color: #111111;
+  letter-spacing: -0.04em;
+`;
+
+export const PageDescription = styled.p`
+  margin-top: 10px;
+  font-size: 15px;
+  color: #7a736b;
+  line-height: 1.5;
+`;
+
+export const FilterPanel = styled.section`
+  background: #ffffff;
+  border: 1px solid #ebe5dc;
+  border-radius: 24px;
+  padding: 24px 22px;
+`;
+
+export const SectionLabel = styled.h2`
+  font-size: 18px;
+  font-weight: 900;
+  color: #111111;
+  margin-bottom: 16px;
+`;
+
+export const CategoryRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+`;
+
+export const CategoryButton = styled.button`
+  min-width: 110px;
+  height: 50px;
+  padding: 0 18px;
+  border-radius: 16px;
+  border: 1px solid ${({ $active }) => ($active ? "#111111" : "#e3dbcf")};
+  background: ${({ $active }) => ($active ? "#f7f1e9" : "#ffffff")};
+  color: #111111;
+  font-size: 14px;
+  font-weight: ${({ $active }) => ($active ? 800 : 600)};
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f7f1e9;
+  }
+`;
+
+export const SearchSortRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const SearchBox = styled.div`
+  height: 50px;
+  border-radius: 16px;
+  background: #f7f4ef;
+  border: 1px solid #ebe5dc;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+`;
+
+export const SearchIcon = styled.div`
+  margin-right: 10px;
+  color: #9a938a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const SearchInput = styled.input`
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #111111;
+  font-size: 14px;
+
+  &::placeholder {
+    color: #9f988f;
+  }
+`;
+
+export const SortSelect = styled.select`
+  height: 50px;
+  border-radius: 16px;
+  border: 1px solid #ebe5dc;
+  background: #f7f4ef;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111111;
+  outline: none;
+`;
+
+export const ResultRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+`;
+
+export const ResultText = styled.p`
+  font-size: 14px;
+  color: #6f685f;
+`;
+
+export const ResultStrong = styled.span`
+  color: #111111;
+  font-weight: 800;
+`;
+
+export const GridSection = styled.section`
+  margin-top: 28px;
+`;
+
+export const ProductGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ProductCard = styled.article`
+  background: #ffffff;
+  border: 1px solid #ebe5dc;
+  border-radius: 24px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 16px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ProductThumb = styled.div`
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+  background: #f7f7f7;
+  border: 1px solid #ece5db;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const ProductImage = styled.img`
+  display: block;
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  background: transparent;
+`;
+
+export const ProductBody = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const BrandText = styled.p`
+  font-size: 11px;
+  color: #8b847c;
+  font-weight: 700;
+`;
+
+export const ProductName = styled.h3`
+  margin-top: 6px;
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 900;
+  color: #111111;
+  letter-spacing: -0.02em;
+`;
+
+const badgeTone = {
+  primary: css`
+    background: #eef4ff;
+    color: #2f6fd6;
+  `,
+  accent: css`
+    background: #fbe8e8;
+    color: #d65f5f;
+  `,
+  default: css`
+    background: #f5f1eb;
+    color: #6f685f;
+  `,
+};
+
+export const AITag = styled.span`
+  margin-top: 10px;
+  width: fit-content;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+
+  ${({ $tone }) => badgeTone[$tone] || badgeTone.default}
+`;
+
+export const PriceSummary = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const InfoCard = styled.div`
+  border-radius: 16px;
+  background: #f8f6f2;
+  border: 1px solid #eee7dd;
+  padding: 12px 10px;
+`;
+
+export const InfoLabel = styled.p`
+  font-size: 11px;
+  color: #8f887f;
+  font-weight: 700;
+`;
+
+export const InfoValue = styled.p`
+  margin-top: 6px;
+  font-size: 18px;
+  color: #111111;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+`;
+
+export const DropValue = styled(InfoValue)`
+  color: #d65f5f;
+`;
+
+export const AIBox = styled.div`
+  margin-top: 14px;
+  border-radius: 18px;
+  background: #fbf9f6;
+  border: 1px solid #eee7dd;
+  padding: 14px 12px;
+`;
+
+export const AIBoxTitle = styled.p`
+  font-size: 13px;
+  font-weight: 900;
+  color: #111111;
+`;
+
+export const AIBoxDescription = styled.p`
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #6f685f;
+`;
+
+export const TrendSection = styled.div`
+  margin-top: 14px;
+  padding: 14px 12px;
+  border-radius: 18px;
+  background: #fbf9f6;
+  border: 1px solid #eee7dd;
+`;
+
+export const TrendHeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+`;
+
+export const TrendLabel = styled.p`
+  font-size: 13px;
+  color: #111111;
+  font-weight: 900;
+`;
+
+export const TrendCurrentPrice = styled.p`
+  font-size: 14px;
+  color: #eb6c6c;
+  font-weight: 900;
+`;
+
+export const SimpleTrendChart = styled.div`
+  width: 100%;
+  height: 86px;
+  display: flex;
+  align-items: center;
+`;
+
+export const SimpleTrendSvg = styled.svg`
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+`;
+
+export const TrendDateRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+`;
+
+export const TrendDate = styled.span`
+  font-size: 11px;
+  color: #7f776f;
+  font-weight: 600;
+`;
+
+export const PeriodTabRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+`;
+
+export const PeriodChip = styled.button`
+  min-width: 56px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid ${({ $active }) => ($active ? "#2f6fd6" : "#ddd5c9")};
+  background: ${({ $active }) => ($active ? "#eef4ff" : "#ffffff")};
+  color: ${({ $active }) => ($active ? "#2f6fd6" : "#6f685f")};
+  font-size: 12px;
+  font-weight: ${({ $active }) => ($active ? 800 : 700)};
+`;
+
+export const ButtonRow = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+
+  @media (max-width: 520px) {
+    flex-direction: column;
+  }
+`;
+
+export const DetailButton = styled(Link)`
+  flex: 1;
+  height: 44px;
+  border-radius: 14px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    opacity: 0.94;
+  }
+`;
+
+export const AlertButton = styled.button`
+  flex: 1;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid #d9cfc1;
+  background: #ffffff;
+  color: #111111;
+  font-size: 14px;
+  font-weight: 800;
+
+  &:hover {
+    background: #f8f6f2;
+  }
+`;
+
+export const EmptyBox = styled.div`
+  background: #ffffff;
+  border: 1px solid #ebe5dc;
+  border-radius: 24px;
+  padding: 48px 20px;
+  text-align: center;
+  color: #7a736b;
+  font-size: 15px;
+  font-weight: 600;
+`;
