@@ -6,6 +6,22 @@ export const getAdminPriceSearchList = async () => {
   return response.data;
 };
 
+export const getAdminPriceHistory = async ({
+  keyword,
+  startDate,
+  endDate,
+}) => {
+  const response = await api.get("/admin/price/history", {
+    params: {
+      keyword,
+      start_date: startDate || undefined,
+      end_date: endDate || undefined,
+    },
+  });
+
+  return response.data;
+};
+
 const buildAdminProductUpdatePayload = (detail, patch = {}) => {
   const nextAiPricingEnabled =
     patch.ai_pricing_enabled ?? Boolean(detail.ai_pricing_enabled);
