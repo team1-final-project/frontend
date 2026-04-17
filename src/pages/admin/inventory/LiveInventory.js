@@ -5,6 +5,7 @@ import TableComponent from "../../../components/TableComponent";
 import InboundRegisterModal from "./InboundRegisterModal";
 import {
   getAdminLiveInventoryList,
+  getAdminLiveInventorySummary,
   patchAdminLiveInventoryRow,
   createAdminInbound,
 } from "../../../api/adminInventory";
@@ -46,6 +47,11 @@ const mapInventoryRow = (item) => ({
   category: item.category ?? "-",
 });
 
+const defaultSummaryData = {
+  total_count: 0,
+  total_diff: 0,
+};
+
 export default function LiveInventory() {
   const nav = useNavigate();
 
@@ -57,6 +63,7 @@ export default function LiveInventory() {
   const [pageSize, setPageSize] = useState(10);
 
   const [rows, setRows] = useState([]);
+  const [summaryData, setSummaryData] = useState(defaultSummaryData);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [pendingActionKey, setPendingActionKey] = useState("");
@@ -69,12 +76,21 @@ export default function LiveInventory() {
       setIsLoading(true);
       setErrorMessage("");
 
-      const response = await getAdminLiveInventoryList();
-      const items = Array.isArray(response) ? response : response?.items ?? [];
+      const [listResponse, summaryResponse] = await Promise.all([
+        getAdminLiveInventoryList(),
+        getAdminLiveInventorySummary(),
+      ]);
+
+      const items = Array.isArray(listResponse)
+        ? listResponse
+        : listResponse?.items ?? [];
+
       setRows(items.map(mapInventoryRow));
+      setSummaryData(summaryResponse || defaultSummaryData);
     } catch (error) {
       console.error(error);
       setRows([]);
+      setSummaryData(defaultSummaryData);
       setErrorMessage(
         error?.response?.data?.detail ||
           "실시간 재고 목록을 불러오지 못했습니다.",
@@ -306,6 +322,8 @@ export default function LiveInventory() {
     },
   ];
 
+  const isTotalUp = Number(summaryData.total_diff || 0) >= 0;
+
   return (
     <>
       <PageWrap>
@@ -324,9 +342,14 @@ export default function LiveInventory() {
           <SummaryCardBox>
             <CardTitle>전체 재고 수</CardTitle>
             <CardValueWrap>
-              <CardValue>{summary.totalCount}개</CardValue>
+              <CardValue>{summaryData.total_count}</CardValue>
+              <CardUnit>SKU</CardUnit>
             </CardValueWrap>
-            <CardMeta>실시간 조회 기준</CardMeta>
+            <CardChangeRow $up={isTotalUp}>
+              <ChangeArrow>{isTotalUp ? "↑" : "↓"}</ChangeArrow>
+              <span>{Math.abs(summaryData.total_diff)} SKU</span>
+              <ChangeMuted>vs Yesterday</ChangeMuted>
+            </CardChangeRow>
           </SummaryCardBox>
 
           <SummaryCardBox>
@@ -561,6 +584,9 @@ const CardTitle = styled.div`
 
 const CardValueWrap = styled.div`
   margin-top: 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 `;
 
 const CardValue = styled.div`
@@ -570,9 +596,30 @@ const CardValue = styled.div`
   line-height: 1;
 `;
 
-const CardMeta = styled.div`
+const CardUnit = styled.span`
+  color: #111827;
+  font-size: 16px;
+  font-weight: 700;
+`;
+
+const CardChangeRow = styled.div`
   margin-top: 10px;
-  color: #22c55e;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: ${({ $up }) => ($up ? "#16a34a" : "#ef4444")};
+  font-size: 14px;
+  font-weight: 700;
+`;
+
+const ChangeArrow = styled.span`
+  font-size: 14px;
+  line-height: 1;
+`;
+
+const ChangeMuted = styled.span`
+  margin-left: 4px;
+  color: #9ca3af;
   font-size: 13px;
   font-weight: 600;
 `;

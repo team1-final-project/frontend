@@ -2,7 +2,10 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import TableComponent from "../../../components/TableComponent";
-import { getAdminInventoryHistoryList } from "../../../api/adminInventory";
+import {
+  getAdminInventoryHistoryList,
+  getAdminInventoryHistorySummary,
+} from "../../../api/adminInventory";
 
 const movementTypeOptions = [
   { label: "입출고 구분", value: "" },
@@ -92,11 +95,23 @@ const buildDailyTrend = (rows, targetType) => {
   return result;
 };
 
+const defaultSummaryData = {
+  inbound_sku_count: 0,
+  inbound_qty: 0,
+  inbound_sku_diff: 0,
+  inbound_qty_diff: 0,
+  outbound_sku_count: 0,
+  outbound_qty: 0,
+  outbound_sku_diff: 0,
+  outbound_qty_diff: 0,
+};
+
 export default function InventoryHistory() {
   const nav = useNavigate();
   const chartAreaRef = useRef(null);
 
   const [rows, setRows] = useState([]);
+  const [summaryData, setSummaryData] = useState(defaultSummaryData);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [searchValue, setSearchValue] = useState("");
@@ -116,37 +131,42 @@ export default function InventoryHistory() {
       setErrorMessage("");
 
       try {
-        const response = await getAdminInventoryHistoryList({
-          keyword: searchValue.trim() || undefined,
-          change_type: movementType || undefined,
-          start_date: startDate || undefined,
-          end_date: endDate || undefined,
-        });
+        const [historyResponse, summaryResponse] = await Promise.all([
+          getAdminInventoryHistoryList({
+            keyword: searchValue.trim() || undefined,
+            change_type: movementType || undefined,
+            start_date: startDate || undefined,
+            end_date: endDate || undefined,
+          }),
+          getAdminInventoryHistorySummary(),
+        ]);
 
         if (!mounted) return;
 
-        const mappedRows = Array.isArray(response?.items)
-          ? response.items.map((item) => ({
-              id: item.id,
-              productId: item.product_id,
-              productCode: item.product_code,
-              productName: item.product_name,
-              type: item.change_type_label,
-              changeType: item.change_type,
-              baseStock: Number(item.qty_before ?? 0),
-              movementQty: Number(item.change_qty ?? 0),
-              resultStock: Number(item.qty_after ?? 0),
-              date: formatOccurredAt(item.occurred_at),
-              occurredAt: item.occurred_at,
-              note: item.note || "-",
-            }))
+        const mappedRows = Array.isArray(historyResponse?.items)
+          ? historyResponse.items.map((item) => ({
+            id: item.id,
+            productId: item.product_id,
+            productCode: item.product_code,
+            productName: item.product_name,
+            type: item.change_type_label,
+            changeType: item.change_type,
+            baseStock: Number(item.qty_before ?? 0),
+            movementQty: Number(item.change_qty ?? 0),
+            resultStock: Number(item.qty_after ?? 0),
+            date: formatOccurredAt(item.occurred_at),
+            occurredAt: item.occurred_at,
+            note: item.note || "-",
+          }))
           : [];
 
         setRows(mappedRows);
+        setSummaryData(summaryResponse || defaultSummaryData);
       } catch (error) {
         if (!mounted) return;
         console.error("재고 변동 이력 조회 실패", error);
         setRows([]);
+        setSummaryData(defaultSummaryData);
         setErrorMessage("재고 변동 이력을 불러오지 못했습니다.");
       } finally {
         if (mounted) {
@@ -163,30 +183,6 @@ export default function InventoryHistory() {
     };
   }, [searchValue, movementType, startDate, endDate]);
 
-  const summary = useMemo(() => {
-    const inboundRows = rows.filter((row) => row.changeType === "INBOUND");
-    const outboundRows = rows.filter((row) => row.changeType === "ORDER_OUT");
-
-    const inboundSkuCount = new Set(inboundRows.map((row) => row.productCode)).size;
-    const outboundSkuCount = new Set(outboundRows.map((row) => row.productCode)).size;
-
-    const inboundQty = inboundRows.reduce(
-      (acc, row) => acc + Math.abs(row.movementQty),
-      0
-    );
-    const outboundQty = outboundRows.reduce(
-      (acc, row) => acc + Math.abs(row.movementQty),
-      0
-    );
-
-    return {
-      inboundSkuCount,
-      outboundSkuCount,
-      inboundQty,
-      outboundQty,
-    };
-  }, [rows]);
-
   const inboundTrend = useMemo(() => buildDailyTrend(rows, "INBOUND"), [rows]);
   const outboundTrend = useMemo(() => buildDailyTrend(rows, "ORDER_OUT"), [rows]);
 
@@ -202,11 +198,19 @@ export default function InventoryHistory() {
   const tooltipData =
     hoveredIndex !== null
       ? {
-          label: weekLabels[hoveredIndex],
-          inbound: inboundTrend[hoveredIndex] ?? 0,
-          outbound: outboundTrend[hoveredIndex] ?? 0,
-        }
+        label: weekLabels[hoveredIndex],
+        inbound: inboundTrend[hoveredIndex] ?? 0,
+        outbound: outboundTrend[hoveredIndex] ?? 0,
+      }
       : null;
+
+  const isInboundUp =
+    Number(summaryData.inbound_sku_diff || 0) >= 0 &&
+    Number(summaryData.inbound_qty_diff || 0) >= 0;
+
+  const isOutboundUp =
+    Number(summaryData.outbound_sku_diff || 0) < 0 ||
+    Number(summaryData.outbound_qty_diff || 0) < 0;
 
   const handleChartMouseMove = (e) => {
     if (!chartAreaRef.current) return;
@@ -322,26 +326,36 @@ export default function InventoryHistory() {
         <StatCard>
           <CardTitle>입고</CardTitle>
           <BigLine>
-            <BigNumber>{summary.inboundSkuCount}</BigNumber>
+            <BigNumber>{summaryData.inbound_sku_count}</BigNumber>
             <Unit>SKU</Unit>
             <Slash>/</Slash>
-            <SubNumber>{summary.inboundQty.toLocaleString()}개</SubNumber>
+            <SubNumber>{summaryData.inbound_qty.toLocaleString()}개</SubNumber>
           </BigLine>
-          <ChangeRow $up>
-            최근 조회 기준 입고 합계 <span>실데이터 반영</span>
+          <ChangeRow $up={isInboundUp}>
+            <ChangeArrow>{isInboundUp ? "↑" : "↓"}</ChangeArrow>
+            <span>
+              {Math.abs(summaryData.inbound_sku_diff)} SKU /{" "}
+              {Math.abs(summaryData.inbound_qty_diff).toLocaleString()}개
+            </span>
+            <ChangeMuted>vs Yesterday</ChangeMuted>
           </ChangeRow>
         </StatCard>
 
         <StatCard>
           <CardTitle>출고</CardTitle>
           <BigLine>
-            <BigNumber>{summary.outboundSkuCount}</BigNumber>
+            <BigNumber>{summaryData.outbound_sku_count}</BigNumber>
             <Unit>SKU</Unit>
             <Slash>/</Slash>
-            <SubNumber>{summary.outboundQty.toLocaleString()}개</SubNumber>
+            <SubNumber>{summaryData.outbound_qty.toLocaleString()}개</SubNumber>
           </BigLine>
-          <ChangeRow $up={false}>
-            최근 조회 기준 출고 합계 <span>실데이터 반영</span>
+          <ChangeRow $up={isOutboundUp}>
+            <ChangeArrow>{isOutboundUp ? "↑" : "↓"}</ChangeArrow>
+            <span>
+              {Math.abs(summaryData.outbound_sku_diff)} SKU /{" "}
+              {Math.abs(summaryData.outbound_qty_diff).toLocaleString()}개
+            </span>
+            <ChangeMuted>vs Yesterday</ChangeMuted>
           </ChangeRow>
         </StatCard>
 
@@ -378,14 +392,18 @@ export default function InventoryHistory() {
                       <LegendDot $color="#2563eb" />
                       입고
                     </TooltipLabel>
-                    <TooltipValue>{tooltipData.inbound.toLocaleString()}개</TooltipValue>
+                    <TooltipValue>
+                      {tooltipData.inbound.toLocaleString()}개
+                    </TooltipValue>
                   </TooltipRow>
                   <TooltipRow>
                     <TooltipLabel>
                       <LegendDot $color="#ef4444" />
                       출고
                     </TooltipLabel>
-                    <TooltipValue>{tooltipData.outbound.toLocaleString()}개</TooltipValue>
+                    <TooltipValue>
+                      {tooltipData.outbound.toLocaleString()}개
+                    </TooltipValue>
                   </TooltipRow>
                 </ChartTooltip>
               ) : null}
@@ -588,16 +606,25 @@ const SubNumber = styled.span`
 `;
 
 const ChangeRow = styled.div`
-  margin-top: 18px;
-  color: ${({ $up }) => ($up ? "#2563eb" : "#ef4444")};
-  font-size: 13px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: ${({ $up }) => ($up ? "#16a34a" : "#ef4444")};
+  font-size: 14px;
   font-weight: 700;
+`;
 
-  span {
-    margin-left: 6px;
-    color: #9ca3af;
-    font-weight: 500;
-  }
+const ChangeArrow = styled.span`
+  font-size: 14px;
+  line-height: 1;
+`;
+
+const ChangeMuted = styled.span`
+  margin-left: 4px;
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 600;
 `;
 
 const TrendCard = styled(StatCard)`
