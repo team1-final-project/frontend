@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import SummaryCard from "../../../components/SummaryCard";
@@ -6,178 +6,93 @@ import TableComponent from "../../../components/TableComponent";
 import StatusBadge from "../../../components/StatusBadge";
 import ToggleSwitch from "../../../components/ToggleSwitch";
 
-const initialRows = [
-  {
-    id: 1,
-    matchStatus: "매칭",
-    matchYn: "Y",
-    catalogNo: "53390091166",
-    productCode: "9744302255",
-    productName: "농심 신라면컵 114g, 1개",
-    category: "가공 / 간편식류 > 라면",
-    price: 1250,
-    useAiPrice: true,
-    saleStatus: "판매중",
-    updatedAt: "2026-04-07 09:07",
-  },
-  {
-    id: 2,
-    matchStatus: "미매칭",
-    matchYn: "N",
-    catalogNo: "-",
-    productCode: "12277997925",
-    productName: "농심 포테토칩 오리지널 390g, 1개",
-    category: "간식 / 음료 > 스낵식사",
-    price: 5700,
-    useAiPrice: false,
-    saleStatus: "판매대기",
-    updatedAt: "2026-04-07 09:07",
-  },
-  {
-    id: 3,
-    matchStatus: "매칭",
-    matchYn: "Y",
-    catalogNo: "51929484460",
-    productCode: "6156192012",
-    productName: "CJ 비비고 사골곰탕 500g, 18개",
-    category: "가공 / 간편식류 > 즉석식품",
-    price: 21400,
-    useAiPrice: false,
-    saleStatus: "품절",
-    updatedAt: "2026-04-07 09:07",
-  },
-  {
-    id: 4,
-    matchStatus: "매칭",
-    matchYn: "Y",
-    catalogNo: "58572119865",
-    productCode: "5909188198",
-    productName: "코카콜라 클래식 1.5L, 12개",
-    category: "간식 / 음료 > 탄산음료",
-    price: 34080,
-    useAiPrice: false,
-    saleStatus: "판매중",
-    updatedAt: "2026-04-07 09:07",
-  },
-  {
-    id: 5,
-    matchStatus: "매칭",
-    matchYn: "Y",
-    catalogNo: "58572119866",
-    productCode: "5909188199",
-    productName: "코카콜라 제로 1.5L, 12개",
-    category: "간식 / 음료 > 탄산음료",
-    price: 34080,
-    useAiPrice: false,
-    saleStatus: "판매중",
-    updatedAt: "2026-04-07 09:07",
-  },
-  {
-    id: 6,
-    matchStatus: "매칭",
-    matchYn: "Y",
-    catalogNo: "58572119867",
-    productCode: "5909188200",
-    productName: "칠성사이다 1.5L, 12개",
-    category: "간식 / 음료 > 탄산음료",
-    price: 31800,
-    useAiPrice: true,
-    saleStatus: "판매중",
-    updatedAt: "2026-04-07 09:07",
-  },
-  {
-    id: 7,
-    matchStatus: "미매칭",
-    matchYn: "N",
-    catalogNo: "-",
-    productCode: "5909188201",
-    productName: "웅진 하늘보리 500ml, 20개",
-    category: "간식 / 음료 > 차음료",
-    price: 17800,
-    useAiPrice: true,
-    saleStatus: "판매대기",
-    updatedAt: "2026-04-06 09:07",
-  },
-  {
-    id: 8,
-    matchStatus: "매칭",
-    matchYn: "Y",
-    catalogNo: "58572119868",
-    productCode: "5909188202",
-    productName: "오리온 초코파이 468g, 1개",
-    category: "간식 / 음료 > 과자",
-    price: 4850,
-    useAiPrice: true,
-    saleStatus: "판매중",
-    updatedAt: "2026-04-06 09:07",
-  },
-  {
-    id: 9,
-    matchStatus: "매칭",
-    matchYn: "Y",
-    catalogNo: "58572119869",
-    productCode: "5909188203",
-    productName: "삼립 정통 크림빵 3입",
-    category: "가공 / 간편식류 > 빵류",
-    price: 2980,
-    useAiPrice: false,
-    saleStatus: "판매중",
-    updatedAt: "2026-04-06 09:07",
-  },
-  {
-    id: 10,
-    matchStatus: "매칭",
-    matchYn: "Y",
-    catalogNo: "58572119870",
-    productCode: "5909188204",
-    productName: "팔도 비빔면 130g, 5개",
-    category: "가공 / 간편식류 > 라면",
-    price: 5980,
-    useAiPrice: true,
-    saleStatus: "판매중",
-    updatedAt: "2026-04-05 09:07",
-  },
-];
+import {
+  getAdminMatchingList,
+  getAdminMatchingSummary,
+  patchAdminMatchingAiPricing,
+} from "../../../api/adminMatching";
 
-const categoryOptions = [
-  { label: "가공 / 간편식류 > 라면", value: "가공 / 간편식류 > 라면" },
-  { label: "간식 / 음료 > 스낵식사", value: "간식 / 음료 > 스낵식사" },
-  { label: "가공 / 간편식류 > 즉석식품", value: "가공 / 간편식류 > 즉석식품" },
-  { label: "간식 / 음료 > 탄산음료", value: "간식 / 음료 > 탄산음료" },
-  { label: "간식 / 음료 > 차음료", value: "간식 / 음료 > 차음료" },
-  { label: "간식 / 음료 > 과자", value: "간식 / 음료 > 과자" },
-  { label: "가공 / 간편식류 > 빵류", value: "가공 / 간편식류 > 빵류" },
-];
-
-const matchStatusOptions = [
-  { label: "매칭", value: "매칭" },
-  { label: "미매칭", value: "미매칭" },
-];
+const saleStatusLabelMap = {
+  ON_SALE: "판매중",
+  READY: "판매대기",
+  STOPPED: "임시중지",
+  SOLD_OUT: "품절",
+  ENDED: "판매종료",
+};
 
 const saleStatusStyleMap = {
   판매중: { label: "판매중", variant: "success" },
   판매대기: { label: "판매대기", variant: "warning" },
   임시중지: { label: "임시중지", variant: "warning" },
   품절: { label: "품절", variant: "purple" },
+  판매종료: { label: "판매종료", variant: "info" },
 };
+
+const matchStatusOptions = [
+  { label: "매칭", value: "매칭" },
+  { label: "미매칭", value: "미매칭" },
+];
+
 
 const matchingStyleMap = {
   매칭: { label: "매칭", variant: "success" },
-  미매칭: { label: "매칭", variant: "danger" },
+  미매칭: { label: "미매칭", variant: "danger" },
 };
 
-function formatNumber(value) {
-  return `${Number(value).toLocaleString()}원`;
-}
 
 function toDateValue(dateTimeText = "") {
   return dateTimeText.split(" ")[0].replace(/\//g, "-");
 }
 
+function formatPrice(value) {
+  if (value === null || value === undefined || value === "") return "-";
+  const numberValue = Number(value);
+  if (Number.isNaN(numberValue)) return "-";
+  return `${numberValue.toLocaleString()}원`;
+}
+
+function formatDateTimeDisplay(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  const year = String(date.getFullYear()).slice(-2);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${year}/${month}/${day} ${hours}:${minutes}`;
+}
+
+const mapMatchingRow = (item) => {
+  const catalogNo = item.catalog_external_id ?? "-";
+  const matched = Boolean(item.catalog_external_id);
+
+  return {
+    id: item.id,
+    matchStatus: matched ? "매칭" : "미매칭",
+    matchYn: matched ? "Y" : "N",
+    catalogNo,
+    productCode: item.product_code ?? "-",
+    productName: item.product_name ?? "-",
+    category: item.category_path ?? "-",
+    price: formatPrice(item.sale_price),
+    useAiPrice: Boolean(item.ai_pricing_enabled),
+    saleStatus: saleStatusLabelMap[item.sale_status] ?? item.sale_status ?? "-",
+    updatedAt: formatDateTimeDisplay(item.updated_at),
+  };
+};
+
 export default function MatchingManage() {
   const nav = useNavigate();
 
-  const [rows, setRows] = useState(initialRows);
+  const [rows, setRows] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [pendingActionKey, setPendingActionKey] = useState("");
+
   const [searchValue, setSearchValue] = useState("");
   const [categoryValue, setCategoryValue] = useState("");
   const [matchFilter, setMatchFilter] = useState("");
@@ -185,6 +100,51 @@ export default function MatchingManage() {
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [summaryData, setSummaryData] = useState(null);
+
+  const categoryOptions = useMemo(() => {
+    return [...new Set(rows.map((item) => item.category).filter(Boolean))].map(
+      (value) => ({
+        label: value,
+        value,
+      }),
+    );
+  }, [rows]);
+
+  const fetchRows = async () => {
+    try {
+      setIsLoading(true);
+      setErrorMessage("");
+
+      const response = await getAdminMatchingList();
+      const items = Array.isArray(response) ? response : response?.items ?? [];
+      setRows(items.map(mapMatchingRow));
+    } catch (error) {
+      console.error(error);
+      setRows([]);
+      setErrorMessage(
+        error?.response?.data?.detail ||
+        "카탈로그 매칭 목록을 불러오지 못했습니다.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchSummary = async () => {
+    try {
+      const response = await getAdminMatchingSummary();
+      setSummaryData(response.summary);
+    } catch (error) {
+      console.error(error);
+      setSummaryData(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchRows();
+    fetchSummary();
+  }, []);
 
   const summary = useMemo(() => {
     return {
@@ -229,12 +189,30 @@ export default function MatchingManage() {
     });
   }, [rows, searchValue, categoryValue, matchFilter, startDate, endDate]);
 
-  const handleToggleAiPrice = (id) => {
-    setRows((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, useAiPrice: !item.useAiPrice } : item,
-      ),
-    );
+  const handleToggleAiPrice = async (row, checked) => {
+    const actionKey = `${row.id}:ai`;
+    const previousRows = rows;
+
+    try {
+      setPendingActionKey(actionKey);
+
+      setRows((prev) =>
+        prev.map((item) =>
+          item.id === row.id ? { ...item, useAiPrice: checked } : item,
+        ),
+      );
+
+      await patchAdminMatchingAiPricing(row.id, checked);
+    } catch (error) {
+      console.error(error);
+      setRows(previousRows);
+      alert(
+        error?.response?.data?.detail ||
+        "AI 가격 설정 변경에 실패했습니다.",
+      );
+    } finally {
+      setPendingActionKey("");
+    }
   };
 
   const columns = [
@@ -336,8 +314,6 @@ export default function MatchingManage() {
       key: "price",
       title: "판매가",
       width: "100px",
-      sortType: "number",
-      render: (value) => formatNumber(value),
     },
     {
       key: "useAiPrice",
@@ -349,7 +325,8 @@ export default function MatchingManage() {
         <CenterCell>
           <ToggleSwitch
             checked={value}
-            onChange={() => handleToggleAiPrice(row.id)}
+            disabled={pendingActionKey === `${row.id}:ai`}
+            onChange={(checked) => handleToggleAiPrice(row, checked)}
           />
         </CenterCell>
       ),
@@ -387,34 +364,41 @@ export default function MatchingManage() {
     <PageWrap>
       <Title>카탈로그 매칭 조회</Title>
 
+      {isLoading && (
+        <PageStatusText>카탈로그 매칭 목록을 불러오는 중입니다.</PageStatusText>
+      )}
+      {!isLoading && errorMessage && (
+        <PageStatusText $error>{errorMessage}</PageStatusText>
+      )}
+
       <SummaryGrid>
         <SummaryCard
           title="전체 상품 수"
-          subText="전체 등록 상품"
-          value={`${summary.totalCount}개`}
-          change="6개"
-          up
+          subText="최근 7일 기준"
+          value={`${summaryData?.total_count ?? summary.totalCount}개`}
+          change={`${Math.abs(summaryData?.total_diff ?? 0)}개`}
+          up={(summaryData?.total_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="카탈로그 매칭 상품"
-          subText="매칭 완료 상품"
-          value={`${summary.matchedCount}개`}
-          change="0개"
-          up={false}
+          subText="최근 7일 기준"
+          value={`${summaryData?.matched_count ?? summary.matchedCount}개`}
+          change={`${Math.abs(summaryData?.matched_diff ?? 0)}개`}
+          up={(summaryData?.matched_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="카탈로그 미매칭 상품"
-          subText="매칭 대기 상품"
-          value={`${summary.unmatchedCount}개`}
-          change="1개"
-          up
+          subText="최근 7일 기준"
+          value={`${summaryData?.unmatched_count ?? summary.unmatchedCount}개`}
+          change={`${Math.abs(summaryData?.unmatched_diff ?? 0)}개`}
+          up={(summaryData?.unmatched_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="AI 가격변경 상품"
-          subText="AI 가격 적용 상품"
-          value={`${summary.aiPriceCount}개`}
-          change="0개"
-          up={false}
+          subText="최근 7일 기준"
+          value={`${summaryData?.ai_price_count ?? summary.aiPriceCount}개`}
+          change={`${Math.abs(summaryData?.ai_price_diff ?? 0)}개`}
+          up={(summaryData?.ai_price_diff ?? 0) >= 0}
         />
       </SummaryGrid>
 
@@ -659,4 +643,11 @@ const CenterCell = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+
+const PageStatusText = styled.div`
+  margin-bottom: 14px;
+  color: ${({ $error }) => ($error ? "#dc2626" : "#6b7280")};
+  font-size: 13px;
+  font-weight: 600;
 `;
