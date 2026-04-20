@@ -282,14 +282,6 @@ export default function AIHistory() {
       <PageInner>
         <TopBar>
           <PageTitle>AI 가격변경 이력 조회</PageTitle>
-
-          <TopActions>
-            <BellWrap>
-              <Bell size={20} />
-              <Badge>4</Badge>
-            </BellWrap>
-            <ProfileCircle />
-          </TopActions>
         </TopBar>
 
         <FilterBar>

@@ -855,7 +855,7 @@ const CodeLink = styled.button`
   border: 0;
   padding: 0;
   background: none;
-  color: #2563eb;
+  color: #111827;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
