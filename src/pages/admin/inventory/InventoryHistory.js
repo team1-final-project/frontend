@@ -168,19 +168,19 @@ export default function InventoryHistory() {
 
       const mappedRows = Array.isArray(historyResponse?.items)
         ? historyResponse.items.map((item) => ({
-            id: item.id,
-            productId: item.product_id,
-            productCode: item.product_code,
-            productName: item.product_name,
-            type: item.change_type_label,
-            changeType: item.change_type,
-            baseStock: Number(item.qty_before ?? 0),
-            movementQty: Number(item.change_qty ?? 0),
-            resultStock: Number(item.qty_after ?? 0),
-            date: formatOccurredAt(item.occurred_at),
-            occurredAt: item.occurred_at,
-            note: item.note || "-",
-          }))
+          id: item.id,
+          productId: item.product_id,
+          productCode: item.product_code,
+          productName: item.product_name,
+          type: item.change_type_label,
+          changeType: item.change_type,
+          baseStock: Number(item.qty_before ?? 0),
+          movementQty: Number(item.change_qty ?? 0),
+          resultStock: Number(item.qty_after ?? 0),
+          date: formatOccurredAt(item.occurred_at),
+          occurredAt: item.occurred_at,
+          note: item.note || "-",
+        }))
         : [];
 
       setRows(mappedRows);
@@ -250,10 +250,10 @@ export default function InventoryHistory() {
   const tooltipData =
     hoveredIndex !== null
       ? {
-          label: weekLabels[hoveredIndex],
-          inbound: inboundTrend[hoveredIndex] ?? 0,
-          outbound: outboundTrend[hoveredIndex] ?? 0,
-        }
+        label: weekLabels[hoveredIndex],
+        inbound: inboundTrend[hoveredIndex] ?? 0,
+        outbound: outboundTrend[hoveredIndex] ?? 0,
+      }
       : null;
 
   const isInboundUp =
@@ -261,8 +261,8 @@ export default function InventoryHistory() {
     Number(summaryData.inbound_qty_diff || 0) >= 0;
 
   const isOutboundUp =
-    Number(summaryData.outbound_sku_diff || 0) < 0 ||
-    Number(summaryData.outbound_qty_diff || 0) < 0;
+    Number(summaryData.outbound_sku_diff || 0) >= 0 &&
+    Number(summaryData.outbound_qty_diff || 0) >= 0;
 
   const handleChartMouseMove = (e) => {
     if (!chartAreaRef.current) return;
@@ -410,6 +410,7 @@ export default function InventoryHistory() {
             <ChangeMuted>vs Yesterday</ChangeMuted>
           </ChangeRow>
         </StatCard>
+
 
         <TrendCard>
           <TrendHeader>입출고 추이</TrendHeader>

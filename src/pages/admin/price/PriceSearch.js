@@ -33,15 +33,18 @@ const lowestStyleMap = {
   "-": { label: "-", variant: "info" },
 };
 
+const defaultSummaryCard = {
+  value: 0,
+  change: 0,
+  change_label: "",
+  up: true,
+};
+
 const defaultSummaryData = {
-  total_count: 0,
-  total_diff: 0,
-  matched_count: 0,
-  matched_diff: 0,
-  unmatched_count: 0,
-  unmatched_diff: 0,
-  ai_price_count: 0,
-  ai_price_diff: 0,
+  total_products: { ...defaultSummaryCard },
+  ai_pricing_products: { ...defaultSummaryCard },
+  matched_products: { ...defaultSummaryCard },
+  unmatched_products: { ...defaultSummaryCard },
 };
 
 const formatCurrency = (value) => {
@@ -99,7 +102,10 @@ const formatDateTimeDisplay = (value) => {
   return `${year}/${month}/${day} ${hours}:${minutes}`;
 };
 
-const formatSummaryChange = (value) => `${Math.abs(Number(value || 0))} SKU`;
+const formatSummaryChange = (value) => {
+  const amount = Math.abs(Number(value || 0));
+  return `${amount} SKU`;
+};
 
 const mapPriceRow = (item) => ({
   id: item.id,
@@ -166,7 +172,7 @@ export default function PriceSearch() {
       setSummaryData(defaultSummaryData);
       setErrorMessage(
         error?.response?.data?.detail ||
-          "가격 조회 목록을 불러오지 못했습니다.",
+        "가격 조회 목록을 불러오지 못했습니다.",
       );
     } finally {
       setIsLoading(false);
@@ -237,7 +243,7 @@ export default function PriceSearch() {
       setRows(previousRows);
       alert(
         error?.response?.data?.detail ||
-          "AI 가격 설정 변경에 실패했습니다.",
+        "AI 가격 설정 변경에 실패했습니다.",
       );
     } finally {
       setPendingActionKey("");
@@ -254,10 +260,10 @@ export default function PriceSearch() {
         prev.map((item) =>
           item.productCode === productCode
             ? {
-                ...item,
-                statusCode: nextStatusCode,
-                status: saleStatusLabelMap[nextStatusCode] ?? nextStatusCode,
-              }
+              ...item,
+              statusCode: nextStatusCode,
+              status: saleStatusLabelMap[nextStatusCode] ?? nextStatusCode,
+            }
             : item,
         ),
       );
@@ -272,7 +278,7 @@ export default function PriceSearch() {
       setRows(previousRows);
       alert(
         error?.response?.data?.detail ||
-          "판매상태 변경에 실패했습니다.",
+        "판매상태 변경에 실패했습니다.",
       );
     } finally {
       setPendingActionKey("");
@@ -470,30 +476,42 @@ export default function PriceSearch() {
         <SummaryCard
           title="전체 상품 수"
           subText="가격 조회 대상"
-          value={`${summaryData.total_count} SKU`}
-          change={formatSummaryChange(summaryData.total_diff)}
-          up={Number(summaryData.total_diff) >= 0}
+          value={`${summaryData.total_products.value} SKU`}
+          change={formatSummaryChange(
+            summaryData.total_products.change,
+            summaryData.total_products.change_label,
+          )}
+          up={summaryData.total_products.up}
         />
         <SummaryCard
           title="AI 가격변경 상품"
           subText="자동 조정 대상"
-          value={`${summaryData.ai_price_count} SKU`}
-          change={formatSummaryChange(summaryData.ai_price_diff)}
-          up={Number(summaryData.ai_price_diff) >= 0}
+          value={`${summaryData.ai_pricing_products.value} SKU`}
+          change={formatSummaryChange(
+            summaryData.ai_pricing_products.change,
+            summaryData.ai_pricing_products.change_label,
+          )}
+          up={summaryData.ai_pricing_products.up}
         />
         <SummaryCard
           title="최저가 유지 상품"
           subText="현재 최저가 일치"
-          value={`${summaryData.matched_count} SKU`}
-          change={formatSummaryChange(summaryData.matched_diff)}
-          up={Number(summaryData.matched_diff) >= 0}
+          value={`${summaryData.matched_products.value} SKU`}
+          change={formatSummaryChange(
+            summaryData.matched_products.change,
+            summaryData.matched_products.change_label,
+          )}
+          up={summaryData.matched_products.up}
         />
         <SummaryCard
           title="최저가 아닌 상품"
           subText="재조정 필요"
-          value={`${summaryData.unmatched_count} SKU`}
-          change={formatSummaryChange(summaryData.unmatched_diff)}
-          up={Number(summaryData.unmatched_diff) >= 0}
+          value={`${summaryData.unmatched_products.value} SKU`}
+          change={formatSummaryChange(
+            summaryData.unmatched_products.change,
+            summaryData.unmatched_products.change_label,
+          )}
+          up={summaryData.unmatched_products.up}
         />
       </SummaryGrid>
 
