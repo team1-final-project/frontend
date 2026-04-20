@@ -15,7 +15,6 @@ import {
 } from "../../../api/adminProduct";
 import ToggleSwitch from "../../../components/ToggleSwitch";
 
-
 Quill.register("modules/blotFormatter", BlotFormatter);
 const saleStatusOptions = [
   { value: "ON_SALE", label: "판매중" },
@@ -25,8 +24,10 @@ const saleStatusOptions = [
   { value: "ENDED", label: "판매종료" },
 ];
 
-const FIXED_SHIPPING_FROM = "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
-const FIXED_RETURN_ADDRESS = "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
+const FIXED_SHIPPING_FROM =
+  "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
+const FIXED_RETURN_ADDRESS =
+  "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
 
 export default function ProductRegist() {
   const nav = useNavigate();
@@ -105,13 +106,15 @@ export default function ProductRegist() {
   }, []);
 
   const activeMainCategory = useMemo(() => {
-    return categories.find((category) => category.id === selectedMainCategoryId);
+    return categories.find(
+      (category) => category.id === selectedMainCategoryId,
+    );
   }, [categories, selectedMainCategoryId]);
 
   const activeSubCategory = useMemo(() => {
     if (!activeMainCategory) return null;
     return activeMainCategory.subCategories?.find(
-      (subCategory) => subCategory.id === selectedSubCategoryId
+      (subCategory) => subCategory.id === selectedSubCategoryId,
     );
   }, [activeMainCategory, selectedSubCategoryId]);
 
@@ -133,7 +136,7 @@ export default function ProductRegist() {
           category.subCategories?.filter((subCategory) =>
             `${category.name} ${subCategory.name}`
               .toLowerCase()
-              .includes(keyword)
+              .includes(keyword),
           ) || [];
 
         if (mainMatched) return category;
@@ -174,7 +177,7 @@ export default function ProductRegist() {
     } catch (error) {
       console.error(error);
       setCatalogError(
-        error?.response?.data?.detail || "카탈로그 이름 조회에 실패했습니다."
+        error?.response?.data?.detail || "카탈로그 이름 조회에 실패했습니다.",
       );
       handleChange("catalogName", "");
     } finally {
@@ -195,7 +198,9 @@ export default function ProductRegist() {
       setThumbnailUrl(result.image_url);
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.detail || "대표이미지 업로드에 실패했습니다.");
+      alert(
+        error?.response?.data?.detail || "대표이미지 업로드에 실패했습니다.",
+      );
       setThumbnailPreview(null);
       setThumbnailUrl("");
     } finally {
@@ -224,7 +229,7 @@ export default function ProductRegist() {
           editor.insertEmbed(
             range ? range.index : editor.getLength(),
             "image",
-            result.image_url
+            result.image_url,
           );
           editor.setSelection((range ? range.index : editor.getLength()) + 1);
         }
@@ -235,7 +240,9 @@ export default function ProductRegist() {
         });
       } catch (error) {
         console.error(error);
-        alert(error?.response?.data?.detail || "상세 이미지 업로드에 실패했습니다.");
+        alert(
+          error?.response?.data?.detail || "상세 이미지 업로드에 실패했습니다.",
+        );
       } finally {
         setIsDetailImageUploading(false);
       }
@@ -261,7 +268,7 @@ export default function ProductRegist() {
       },
       blotFormatter: {},
     }),
-    []
+    [],
   );
 
   const quillFormats = [
@@ -329,8 +336,10 @@ export default function ProductRegist() {
         cost_price: Number(form.costPrice || 0),
 
         ai_pricing_enabled: form.useAiPrice,
-        min_price_limit: form.useAiPrice && form.minPrice ? Number(form.minPrice) : null,
-        max_price_limit: form.useAiPrice && form.maxPrice ? Number(form.maxPrice) : null,
+        min_price_limit:
+          form.useAiPrice && form.minPrice ? Number(form.minPrice) : null,
+        max_price_limit:
+          form.useAiPrice && form.maxPrice ? Number(form.maxPrice) : null,
 
         stock_qty: Number(form.stockQty || 0),
         safety_stock_qty: Number(form.safetyStock || 0),
@@ -350,10 +359,10 @@ export default function ProductRegist() {
       const result = await createAdminProduct(payload);
 
       alert("상품이 등록되었습니다.");
-        nav("/admin/product-list", {
-          replace: true,
-          state: { createdProductCode: result.product_code },
-        });
+      nav("/admin/product-list", {
+        replace: true,
+        state: { createdProductCode: result.product_code },
+      });
     } catch (error) {
       console.error(error);
       alert(error?.response?.data?.detail || "상품 등록에 실패했습니다.");
@@ -364,7 +373,7 @@ export default function ProductRegist() {
 
   return (
     <PageWrap>
-      <PageTitle>상품 등록</PageTitle>
+      <Title>상품 등록</Title>
 
       <Form onSubmit={handleSubmit}>
         <Section>
@@ -397,7 +406,9 @@ export default function ProductRegist() {
                     $active={selectedMainCategoryId === category.id}
                     onClick={() => {
                       setSelectedMainCategoryId(category.id);
-                      setSelectedSubCategoryId(category.subCategories?.[0]?.id ?? null);
+                      setSelectedSubCategoryId(
+                        category.subCategories?.[0]?.id ?? null,
+                      );
                     }}
                   >
                     <span>{category.name}</span>
@@ -453,7 +464,7 @@ export default function ProductRegist() {
                         {fullName}
                       </SearchResultButton>
                     );
-                  })
+                  }),
                 )}
               </SearchResultList>
             </SearchCategoryPanel>
@@ -528,7 +539,9 @@ export default function ProductRegist() {
               <FormField>
                 <Input
                   value={form.catalogExternalId}
-                  onChange={(e) => handleChange("catalogExternalId", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("catalogExternalId", e.target.value)
+                  }
                   onBlur={handleResolveCatalogName}
                   placeholder="예: 53390091166"
                 />
@@ -541,7 +554,11 @@ export default function ProductRegist() {
                 <Input
                   value={form.catalogName}
                   readOnly
-                  placeholder={isCatalogLoading ? "카탈로그 조회 중..." : "자동으로 입력됩니다."}
+                  placeholder={
+                    isCatalogLoading
+                      ? "카탈로그 조회 중..."
+                      : "자동으로 입력됩니다."
+                  }
                 />
                 {catalogError ? (
                   <HelperText style={{ color: "#dc2626", textAlign: "left" }}>
@@ -590,7 +607,9 @@ export default function ProductRegist() {
               <FormField>
                 <ToggleSwitch
                   checked={form.useAiPrice}
-                  onChange={(nextChecked) => handleChange("useAiPrice", nextChecked)}
+                  onChange={(nextChecked) =>
+                    handleChange("useAiPrice", nextChecked)
+                  }
                 />
               </FormField>
             </FormRow>
@@ -651,7 +670,9 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.safetyStock}
-                    onChange={(e) => handleChange("safetyStock", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("safetyStock", e.target.value)
+                    }
                     placeholder="안전재고"
                   />
                   <UnitText>개</UnitText>
@@ -776,7 +797,9 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.shippingFee}
-                    onChange={(e) => handleChange("shippingFee", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("shippingFee", e.target.value)
+                    }
                     placeholder="배송비"
                   />
                   <UnitText>원</UnitText>
@@ -817,7 +840,9 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.exchangeFee}
-                    onChange={(e) => handleChange("exchangeFee", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("exchangeFee", e.target.value)
+                    }
                     placeholder="교환배송비"
                   />
                   <UnitText>원</UnitText>
@@ -841,16 +866,18 @@ export default function ProductRegist() {
 }
 
 const PageWrap = styled.div`
-  padding: 24px;
-  background: #f6f8fb;
+  padding: 25px;
+  background: var(--background);
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
 `;
 
-const PageTitle = styled.h2`
-  margin: 0 0 18px;
-  color: #111827;
-  font-size: 28px;
-  font-weight: 800;
+const Title = styled.h2`
+  margin: 0;
+  font-size: var(--title);
+  font-weight: 700;
 `;
 
 const Form = styled.form`

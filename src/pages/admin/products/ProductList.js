@@ -278,9 +278,7 @@ export default function ProductList() {
 
   return (
     <PageWrap>
-      <HeaderRow>
-        <Title>상품 목록</Title>
-      </HeaderRow>
+      <Title>상품 목록</Title>
 
       <SummaryGrid>
         <SummaryCard
@@ -394,15 +392,9 @@ const PageWrap = styled.div`
   padding: 25px;
   background: var(--background);
   min-height: 100%;
-`;
-
-const HeaderRow = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 20px;
-  margin-top: 5px;
+  flex-direction: column;
+  gap: 25px;
 `;
 
 const Title = styled.h2`
@@ -435,7 +427,6 @@ const PrimaryButton = styled.button`
 `;
 
 const SummaryGrid = styled.div`
-  margin-bottom: 18px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
