@@ -34,7 +34,10 @@ const GlobalStyle = createGlobalStyle`
 
     --background : #FAFAFA;
 
+    --hover-bg : #fafcff;
+
     --border : #EAEAEA;
+    --focus-border : #b7cdeb;
 
     --hover-gray : #F3F4F8;
 
@@ -44,7 +47,7 @@ const GlobalStyle = createGlobalStyle`
     --placeholder : #8B909A;
 
     /* 박스 그림자 */
-    --shadow : 5px 3px 6px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.15);
+    --shadow : 2px 2px 8px rgba(0, 0, 0, 0.03);
 
 
     /* 폰트 사이즈 정의 */

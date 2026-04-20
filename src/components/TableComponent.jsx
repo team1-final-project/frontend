@@ -175,7 +175,7 @@ export default function TableComponent({
   };
 
   return (
-    <Wrap $variant={variant}>
+    <Container>
       <Toolbar $variant={variant}>
         {customToolbar ? (
           <CustomToolbarWrap $variant={variant}>
@@ -186,15 +186,15 @@ export default function TableComponent({
             <ToolbarLeft $variant={variant}>
               {typeof onSearchChange === "function" && (
                 <SearchWrap $variant={variant}>
-                  <SearchIcon>
-                    <Search size={15} />
-                  </SearchIcon>
                   <SearchInput
                     $variant={variant}
                     value={searchValue}
                     onChange={(e) => onSearchChange(e.target.value)}
                     placeholder={searchPlaceholder}
                   />
+                  <SearchIcon>
+                    <Search size={15} />
+                  </SearchIcon>
                 </SearchWrap>
               )}
 
@@ -230,83 +230,85 @@ export default function TableComponent({
         )}
       </Toolbar>
 
-      <TableScroll>
-        <StyledTable $variant={variant}>
-          <thead>
-            <tr>
-              {columns.map((column) => (
-                <th
-                  key={column.key}
-                  style={{
-                    width: column.width || "auto",
-                    textAlign:
-                      column.headerAlign ||
-                      headerAlign ||
-                      column.align ||
-                      "left",
-                  }}
-                >
-                  <HeaderButton
-                    type="button"
-                    $variant={variant}
-                    $sortable={column.sortable !== false}
-                    $align={
-                      column.headerAlign ||
-                      headerAlign ||
-                      column.align ||
-                      "left"
-                    }
-                    onClick={() => handleSort(column)}
-                  >
-                    <span>{column.title}</span>
-                    {renderSortIcon(column)}
-                  </HeaderButton>
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody>
-            {pagedData.length > 0 ? (
-              pagedData.map((row, rowIndex) => (
-                <tr key={row[rowKey] ?? rowIndex}>
-                  {columns.map((column) => {
-                    const value = row[column.key];
-
-                    return (
-                      <td
-                        key={column.key}
-                        style={{
-                          textAlign: column.align || cellAlign || "left",
-                        }}
-                      >
-                        {column.render ? column.render(value, row) : value}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))
-            ) : (
+      <Wrap $variant={variant}>
+        <TableScroll>
+          <StyledTable $variant={variant}>
+            <thead>
               <tr>
-                <EmptyCell colSpan={columns.length}>
-                  데이터가 없습니다.
-                </EmptyCell>
+                {columns.map((column) => (
+                  <th
+                    key={column.key}
+                    style={{
+                      width: column.width || "auto",
+                      textAlign:
+                        column.headerAlign ||
+                        headerAlign ||
+                        column.align ||
+                        "left",
+                    }}
+                  >
+                    <HeaderButton
+                      type="button"
+                      $variant={variant}
+                      $sortable={column.sortable !== false}
+                      $align={
+                        column.headerAlign ||
+                        headerAlign ||
+                        column.align ||
+                        "left"
+                      }
+                      onClick={() => handleSort(column)}
+                    >
+                      <span>{column.title}</span>
+                      {renderSortIcon(column)}
+                    </HeaderButton>
+                  </th>
+                ))}
               </tr>
-            )}
-          </tbody>
-        </StyledTable>
-      </TableScroll>
+            </thead>
 
-      <TablePagination
-        page={currentPage}
-        totalPages={totalPages}
-        pageSize={pageSize}
-        totalCount={totalCount}
-        onPageChange={onPageChange}
-        onPageSizeChange={onPageSizeChange}
-        pageSizeOptions={pageSizeOptions}
-      />
-    </Wrap>
+            <tbody>
+              {pagedData.length > 0 ? (
+                pagedData.map((row, rowIndex) => (
+                  <tr key={row[rowKey] ?? rowIndex}>
+                    {columns.map((column) => {
+                      const value = row[column.key];
+
+                      return (
+                        <td
+                          key={column.key}
+                          style={{
+                            textAlign: column.align || cellAlign || "left",
+                          }}
+                        >
+                          {column.render ? column.render(value, row) : value}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <EmptyCell colSpan={columns.length}>
+                    데이터가 없습니다.
+                  </EmptyCell>
+                </tr>
+              )}
+            </tbody>
+          </StyledTable>
+        </TableScroll>
+
+        <TablePagination
+          page={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+          pageSizeOptions={pageSizeOptions}
+        />
+      </Wrap>
+    </Container>
   );
 }
 
@@ -318,45 +320,47 @@ export function RowActionButton({ onClick }) {
   );
 }
 
+const Container = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 20px;
+`;
+
 const Wrap = styled.div`
   width: 100%;
-  background: #ffffff;
+  background: white;
   overflow: hidden;
 
   ${({ $variant }) =>
     $variant === "inventory" &&
     css`
-      border: 1px solid #eef1f5;
-      border-radius: 18px;
-      padding: 0;
-      box-shadow:
-        0 1px 0 rgba(17, 24, 39, 0.02),
-        0 8px 20px rgba(31, 41, 55, 0.04);
+      border-radius: 16px;
+      padding: 15px;
+      box-shadow: var(--shadow);
     `}
-
   ${({ $variant }) =>
     $variant === "price" &&
     css`
-      border: 1px solid #eef0f4;
       border-radius: 16px;
-      padding: 14px;
-      box-shadow: 0 2px 12px rgba(17, 24, 39, 0.04);
+      padding: 15px;
+      box-shadow: var(--shadow);
     `}
-
-  ${({ $variant }) =>
+    ${({ $variant }) =>
     $variant === "default" &&
     css`
-      border: 1px solid #eef0f4;
       border-radius: 16px;
-      padding: 14px;
-    `}
+      padding: 15px;
+      box-shadow: var(--shadow);
+    `};
 `;
 
 const Toolbar = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 10px;
 
   ${({ $variant }) =>
     $variant === "inventory"
@@ -374,7 +378,7 @@ const ToolbarLeft = styled.div`
   align-items: center;
   flex-wrap: wrap;
   flex: 1;
-  gap: ${({ $variant }) => ($variant === "inventory" ? "10px" : "12px")};
+  gap: 10px;
 `;
 
 const ToolbarRight = styled.div`
@@ -389,7 +393,7 @@ const CustomToolbarWrap = styled.div`
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: ${({ $variant }) => ($variant === "inventory" ? "10px" : "12px")};
+  gap: 10px;
 `;
 
 const SearchWrap = styled.div`
@@ -406,44 +410,45 @@ const SearchWrap = styled.div`
 const SearchIcon = styled.div`
   position: absolute;
   top: 50%;
-  left: 12px;
+  right: 12px;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
 `;
 
 const SearchInput = styled.input`
   width: 100%;
   border-radius: 10px;
-  background: #ffffff;
-  color: #374151;
+  background: white;
+  color: var(--font);
   font-size: 13px;
   outline: none;
 
   &::placeholder {
-    color: #98a2b3;
+    color: var(--placeholder);
   }
 
   ${({ $variant }) =>
     $variant === "inventory"
       ? css`
           height: 44px;
-          padding: 0 14px 0 36px;
-          border: 1px solid #e6eaf2;
+          padding: 0 36px 0 14px;
+          border: 1px solid var(--border);
 
           &:focus {
-            border-color: #c9d6ff;
+            border-color: var(--border);
           }
         `
       : css`
           height: 38px;
-          padding: 0 14px 0 34px;
-          border: 1px solid #edf0f4;
+          padding: 0 34px 0 14px;
+          border: 1px solid var(--border);
 
           &:focus {
-            border-color: #cfd8e3;
+            border-color: var(--focus-border);
           }
         `}
 `;
@@ -472,21 +477,21 @@ const FilterSelect = styled.select`
       ? css`
           height: 44px;
           padding: 0 34px 0 14px;
-          border: 1px solid #e6eaf2;
-          color: #7b8494;
+          border: 1px solid var(--border);
+          color: var(--placeholder);
 
           &:focus {
-            border-color: #c9d6ff;
+            border-color: var(--border-focus);
           }
         `
       : css`
           height: 38px;
           padding: 0 34px 0 14px;
-          border: 1px solid #edf0f4;
-          color: #6b7280;
+          border: 1px solid var(--border);
+          color: var(--placeholder);
 
           &:focus {
-            border-color: #cfd8e3;
+            border-color: var(--border-focus);
           }
         `}
 `;
@@ -496,7 +501,7 @@ const FilterIcon = styled.div`
   top: 50%;
   right: 12px;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--placeholder);
   pointer-events: none;
   display: flex;
   align-items: center;
@@ -528,11 +533,11 @@ const StyledTable = styled.table`
       ? css`
           thead th {
             padding: 16px 14px;
-            border-top: 1px solid #edf1f7;
-            border-bottom: 1px solid #edf1f7;
-            color: #98a2b3;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            color: var(--placeholder);
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 600;
             text-transform: none;
             letter-spacing: normal;
           }
@@ -540,23 +545,23 @@ const StyledTable = styled.table`
           tbody td {
             position: relative;
             padding: 16px 14px;
-            border-bottom: 1px solid #edf1f7;
-            color: #3b4352;
-            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+            color: var(--font);
+            font-size: 12px;
             white-space: nowrap;
             vertical-align: middle;
             background: #ffffff;
           }
 
           tbody tr:hover td {
-            background: #fafcff;
+            background: var(--hover-bg);
           }
         `
       : css`
           thead th {
             padding: 14px 16px;
-            border-bottom: 1px solid #eef0f4;
-            color: #9ca3af;
+            border-bottom: 1px solid var(--border);
+            color: var(--placeholder);
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
@@ -565,12 +570,17 @@ const StyledTable = styled.table`
 
           tbody td {
             position: relative;
-            padding: 16px;
-            border-bottom: 1px solid #f3f4f6;
-            color: #374151;
-            font-size: 13px;
+            padding: 16px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--font);
+            font-size: 12px;
             white-space: nowrap;
             vertical-align: middle;
+            background: #ffffff;
+          }
+
+          tbody tr:hover td {
+            background: var(--hover-bg);
           }
         `}
 `;
@@ -594,7 +604,8 @@ const HeaderButton = styled.button`
   cursor: ${({ $sortable }) => ($sortable ? "pointer" : "default")};
 
   svg {
-    color: #b0b7c3;
+    color: var(--placeholder);
+
     flex-shrink: 0;
   }
 `;
@@ -602,8 +613,8 @@ const HeaderButton = styled.button`
 const EmptyCell = styled.td`
   padding: 40px 16px !important;
   text-align: center !important;
-  color: #9ca3af !important;
-  font-size: 14px !important;
+  color: var(--placeholder) !important;
+  font-size: 12px !important;
 `;
 
 const StyledRowActionButton = styled.button`
@@ -611,7 +622,7 @@ const StyledRowActionButton = styled.button`
   height: 28px;
   border: none;
   background: transparent;
-  color: #9ca3af;
+  color: var(--placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
