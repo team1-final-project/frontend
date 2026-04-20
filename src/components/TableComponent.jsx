@@ -636,8 +636,12 @@ const DatePickerContainer = styled.div`
     cursor: pointer;
     transition: all 0.2s;
 
+    &::placeholder {
+      color: var(--placeholder);
+    }
+
     &:focus {
-      border-color: var(--blue);
+      border-color: var(--focus-border);
     }
   }
 `;
