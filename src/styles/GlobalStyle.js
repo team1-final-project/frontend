@@ -36,8 +36,11 @@ const GlobalStyle = createGlobalStyle`
 
     --hover-bg : #fafcff;
 
+
     --border : #EAEAEA;
     --focus-border : #b7cdeb;
+
+    --choice : #f3f6fb;
 
     --hover-gray : #F3F4F8;
 

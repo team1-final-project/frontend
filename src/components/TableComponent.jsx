@@ -631,7 +631,6 @@ const DatePickerContainer = styled.div`
     background: white;
     color: var(--font);
     font-size: 13px;
-    font-weight: 500;
     outline: none;
     cursor: pointer;
     transition: all 0.2s;

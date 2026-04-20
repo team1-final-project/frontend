@@ -890,31 +890,33 @@ const Section = styled.section`
   padding: 18px 20px;
   box-shadow: var(--shadow);
   border-radius: 16px;
-  background: #ffffff;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 `;
 
 const SectionTitle = styled.h3`
-  margin: 0 0 16px;
-  color: #111827;
-  font-size: 20px;
-  font-weight: 800;
+  color: var(--font);
+  font-size: 17px;
+  font-weight: 600;
 `;
 
 const CategoryTabs = styled.div`
   display: inline-flex;
-  margin-bottom: 12px;
+  width: 240px;
+  height: 35px;
   border-radius: 10px;
-  background: #f3f6fb;
-  padding: 4px;
+  background: var(--choice);
 `;
 
 const CategoryTabButton = styled.button`
   min-width: 120px;
-  height: 34px;
+  height: 35px;
   border: none;
   border-radius: 8px;
-  background: ${({ $active }) => ($active ? "#2563eb" : "transparent")};
-  color: ${({ $active }) => ($active ? "#ffffff" : "#6b7280")};
+  background: ${({ $active }) => ($active ? "var(--blue)" : "transparent")};
+  color: ${({ $active }) => ($active ? "#ffffff" : "var(--placeholder)")};
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -924,7 +926,6 @@ const CategoryPanel = styled.div`
   display: grid;
   grid-template-columns: 220px 220px;
   gap: 12px;
-  margin-bottom: 12px;
 
   @media (max-width: 700px) {
     grid-template-columns: 1fr;
@@ -933,7 +934,7 @@ const CategoryPanel = styled.div`
 
 const CategoryColumn = styled.div`
   min-height: 180px;
-  border: 1px solid #e8edf4;
+  border: 1px solid var(--border);
   border-radius: 12px;
   background: #ffffff;
   overflow: hidden;
@@ -941,12 +942,12 @@ const CategoryColumn = styled.div`
 
 const CategoryItemButton = styled.button`
   width: 100%;
-  min-height: 42px;
+  min-height: 40px;
   padding: 0 14px;
   border: none;
-  border-bottom: 1px solid #f1f4f8;
-  background: ${({ $active }) => ($active ? "#f4f8ff" : "#ffffff")};
-  color: ${({ $active }) => ($active ? "#2563eb" : "#374151")};
+  border-bottom: 1px solid var(--border);
+  background: ${({ $active }) => ($active ? "var(--choice)" : "#ffffff")};
+  color: ${({ $active }) => ($active ? "var(--blue)" : "var(--font)")};
   font-size: 13px;
   font-weight: ${({ $active }) => ($active ? 700 : 500)};
   display: flex;
@@ -974,7 +975,7 @@ const SearchIconWrap = styled.div`
   top: 50%;
   left: 12px;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -984,15 +985,15 @@ const CategorySearchInput = styled.input`
   width: 100%;
   height: 40px;
   padding: 0 14px 0 36px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
   background: #ffffff;
-  color: #374151;
+  color: var(--font);
   font-size: 13px;
   outline: none;
 
   &:focus {
-    border-color: #cfd8e3;
+    border-color: var(--border);
   }
 `;
 
