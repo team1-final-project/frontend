@@ -492,7 +492,6 @@ export default function ProductRegist() {
                   placeholder="상품명을 입력하세요"
                   maxLength={100}
                 />
-                <HelperText>{form.productName.length}/100</HelperText>
               </FormField>
             </FormRow>
           </FormGrid>
