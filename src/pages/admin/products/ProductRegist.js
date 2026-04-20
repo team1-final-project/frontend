@@ -933,7 +933,7 @@ const CategoryPanel = styled.div`
 `;
 
 const CategoryColumn = styled.div`
-  min-height: 180px;
+  min-height: 40px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: #ffffff;
@@ -1006,12 +1006,13 @@ const SearchResultList = styled.div`
 const SearchResultButton = styled.button`
   height: 34px;
   padding: 0 12px;
-  border: 1px solid ${({ $active }) => ($active ? "#2563eb" : "#e5e7eb")};
+  border: 1px solid
+    ${({ $active }) => ($active ? "var(--focus-border)" : "var(--border)")};
   border-radius: 999px;
-  background: ${({ $active }) => ($active ? "#eff6ff" : "#ffffff")};
-  color: ${({ $active }) => ($active ? "#2563eb" : "#4b5563")};
+  background: ${({ $active }) => ($active ? "var(--hover-bg)" : "#ffffff")};
+  color: ${({ $active }) => ($active ? "var(--font)" : "var(--placeholder)")};
   font-size: 12px;
-  font-weight: 600;
+  font-weight: ${({ $active }) => ($active ? "600" : "500")};
   cursor: pointer;
 `;
 
@@ -1023,18 +1024,16 @@ const SelectedCategoryRow = styled.div`
 `;
 
 const MiniLabel = styled.div`
-  color: #6b7280;
+  color: var(--font);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
 `;
 
 const SelectedCategoryValue = styled.div`
   min-height: 40px;
   padding: 0 14px;
-  border: 1px solid #e5e7eb;
   border-radius: 10px;
-  background: #fafbfc;
-  color: #111827;
+  color: var(--font);
   font-size: 13px;
   font-weight: 600;
   display: inline-flex;
@@ -1060,9 +1059,9 @@ const FormRow = styled.div`
 `;
 
 const FormLabel = styled.label`
-  color: #374151;
+  color: var(--font);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
 `;
 
 const FormField = styled.div`
@@ -1073,21 +1072,21 @@ const Input = styled.input`
   width: 100%;
   height: 40px;
   padding: 0 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
   background: ${({ readOnly, disabled }) =>
-    disabled || readOnly ? "#f3f4f6" : "#ffffff"};
-  color: #111827;
+    disabled || readOnly ? "var(--read-only)" : "white"};
+  color: var(--font);
   font-size: 13px;
   outline: none;
   box-sizing: border-box;
 
   &:focus {
-    border-color: #cfd8e3;
+    border-color: var(--focus-border);
   }
 
   &::placeholder {
-    color: #9ca3af;
+    color: var(--placeholder);
   }
 `;
 
@@ -1095,17 +1094,17 @@ const Select = styled.select`
   width: 180px;
   height: 40px;
   padding: 0 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #ffffff;
-  color: #111827;
+  background: white;
+  color: var(--font);
   font-size: 13px;
   outline: none;
 `;
 
 const HelperText = styled.div`
   margin-top: 6px;
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 12px;
   text-align: right;
 `;
@@ -1120,9 +1119,9 @@ const UnitText = styled.span`
   top: 50%;
   right: 12px;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
 `;
 
 const DateInputWrap = styled.div`
@@ -1135,7 +1134,7 @@ const DateIconWrap = styled.div`
   top: 50%;
   right: 12px;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--placeholder);
   pointer-events: none;
   display: flex;
   align-items: center;
@@ -1155,9 +1154,9 @@ const HiddenFileInput = styled.input`
 const ImagePreviewButton = styled.button`
   width: 160px;
   height: 160px;
-  border: 1px dashed #d1d5db;
+  border: 1px dashed var(--border);
   border-radius: 14px;
-  background: #fafbfc;
+  background: var(--read-only);
   overflow: hidden;
   padding: 0;
   cursor: pointer;
@@ -1166,7 +1165,7 @@ const ImagePreviewButton = styled.button`
 const UploadPlaceholder = styled.div`
   width: 100%;
   height: 100%;
-  color: #9ca3af;
+  color: var(--placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1179,38 +1178,38 @@ const PreviewImage = styled.img`
 `;
 
 const ImageGuide = styled.div`
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 12px;
   line-height: 1.6;
 `;
 
 const EditorWrap = styled.div`
   .ql-toolbar.ql-snow {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border);
     border-top-left-radius: 14px;
     border-top-right-radius: 14px;
   }
 
   .ql-container.ql-snow {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border);
     border-top: none;
     border-bottom-left-radius: 14px;
     border-bottom-right-radius: 14px;
     min-height: 280px;
-    background: #ffffff;
+    background: white;
   }
 
   .ql-editor {
     min-height: 280px;
     font-size: 14px;
     line-height: 1.7;
-    color: #111827;
+    color: var(--font);
   }
 `;
 
 const EditorNotice = styled.div`
   margin-top: 10px;
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 12px;
   line-height: 1.7;
 `;
@@ -1226,12 +1225,12 @@ const BottomButtonRow = styled.div`
 const CancelButton = styled.button`
   min-width: 96px;
   height: 40px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #ffffff;
-  color: #4b5563;
+  background: white;
+  color: var(--font);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
 `;
 

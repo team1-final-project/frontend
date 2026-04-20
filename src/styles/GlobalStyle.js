@@ -44,6 +44,8 @@ const GlobalStyle = createGlobalStyle`
 
     --hover-gray : #F3F4F8;
 
+    --read-only : #f3f4f6;
+
     --font : #000000;
     --font2 : #828282;
 

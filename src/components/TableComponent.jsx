@@ -11,6 +11,8 @@ import {
 import TablePagination from "./TablePagination";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import SearchDate from "./SearchDate";
+import SelectBar from "./SelectBar";
 
 const DatePickerStyle = createGlobalStyle`
   .react-datepicker-wrapper {
@@ -69,9 +71,6 @@ export default function TableComponent({
     key: "",
     direction: "asc",
   });
-
-  const sDate = startDate ? new Date(startDate) : null;
-  const eDate = endDate ? new Date(endDate) : null;
 
   const handleSort = (column) => {
     if (column.sortable === false) return;
@@ -236,60 +235,23 @@ export default function TableComponent({
               )}
 
               {typeof onFilterChange === "function" && (
-                <FilterSelectWrap $variant={variant}>
-                  <FilterSelect
-                    $variant={variant}
-                    value={filterValue}
-                    onChange={(e) => onFilterChange(e.target.value)}
-                  >
-                    <option value="">{filterPlaceholder}</option>
-                    {filterOptions.map((option) => (
-                      <option
-                        key={option.value ?? option.label}
-                        value={option.value ?? option.label}
-                      >
-                        {option.label}
-                      </option>
-                    ))}
-                  </FilterSelect>
-
-                  <FilterIcon>
-                    <ChevronDown size={15} />
-                  </FilterIcon>
-                </FilterSelectWrap>
+                <SelectBar
+                  variant={variant}
+                  value={filterValue}
+                  onChange={onFilterChange}
+                  options={filterOptions}
+                  placeholder={filterPlaceholder}
+                />
               )}
 
               {onStartDateChange && onEndDateChange && (
-                <DateFilterGroup>
-                  <DatePickerContainer $variant={variant}>
-                    <DatePicker
-                      selected={sDate}
-                      onChange={(date) =>
-                        onStartDateChange(date.toISOString().split("T")[0])
-                      }
-                      placeholderText="시작일"
-                      dateFormat="yyyy-MM-dd"
-                      className="custom-datepicker"
-                    />
-                    <Calendar size={14} className="calendar-icon" />
-                  </DatePickerContainer>
-
-                  <DateDivider>~</DateDivider>
-
-                  <DatePickerContainer $variant={variant}>
-                    <Calendar size={14} className="calendar-icon" />
-                    <DatePicker
-                      selected={eDate}
-                      onChange={(date) =>
-                        onEndDateChange(date.toISOString().split("T")[0])
-                      }
-                      placeholderText="종료일"
-                      dateFormat="yyyy-MM-dd"
-                      className="custom-datepicker"
-                      minDate={sDate} // 시작일 이전은 선택 못하게 막음
-                    />
-                  </DatePickerContainer>
-                </DateFilterGroup>
+                <SearchDate
+                  variant={variant}
+                  startDate={startDate}
+                  onStartDateChange={onStartDateChange}
+                  endDate={endDate}
+                  onEndDateChange={onEndDateChange}
+                />
               )}
               {extraToolbar}
             </ToolbarLeft>
