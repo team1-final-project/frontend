@@ -27,10 +27,23 @@ const formatCount = (value) =>
 const formatSignedCount = (value) =>
   `${Number(value || 0) > 0 ? "+" : ""}${Number(value || 0).toLocaleString()}개`;
 
-const buildPolylinePoints = (values, width, height, padding = 12) => {
-  const max = Math.max(...values, 0);
-  const min = Math.min(...values, 0);
+const getChartScale = (...datasets) => {
+  const flatValues = datasets.flat().map((value) => Number(value || 0));
+  const max = Math.max(...flatValues, 0);
+  const min = Math.min(...flatValues, 0);
   const range = max - min || 1;
+
+  return { max, min, range };
+};
+
+const buildPolylinePoints = (
+  values,
+  width,
+  height,
+  padding = 12,
+  scale
+) => {
+  const { min, range } = scale;
 
   return values
     .map((value, index) => {
@@ -39,15 +52,20 @@ const buildPolylinePoints = (values, width, height, padding = 12) => {
         (index * (width - padding * 2)) / Math.max(values.length - 1, 1);
       const y =
         height - padding - ((value - min) * (height - padding * 2)) / range;
+
       return `${x},${y}`;
     })
     .join(" ");
 };
 
-const buildChartPoints = (values, width, height, padding = 12) => {
-  const max = Math.max(...values, 0);
-  const min = Math.min(...values, 0);
-  const range = max - min || 1;
+const buildChartPoints = (
+  values,
+  width,
+  height,
+  padding = 12,
+  scale
+) => {
+  const { min, range } = scale;
 
   return values.map((value, index) => {
     const x =
@@ -238,13 +256,19 @@ export default function InventoryHistory() {
     [rows, currentWeekMeta]
   );
 
-  const inboundPoints = useMemo(
-    () => buildChartPoints(inboundTrend, 260, 96, 10),
-    [inboundTrend]
+  const chartScale = useMemo(
+    () => getChartScale(inboundTrend, outboundTrend),
+    [inboundTrend, outboundTrend]
   );
+
+  const inboundPoints = useMemo(
+    () => buildChartPoints(inboundTrend, 260, 96, 10, chartScale),
+    [inboundTrend, chartScale]
+  );
+
   const outboundPoints = useMemo(
-    () => buildChartPoints(outboundTrend, 260, 96, 10),
-    [outboundTrend]
+    () => buildChartPoints(outboundTrend, 260, 96, 10, chartScale),
+    [outboundTrend, chartScale]
   );
 
   const tooltipData =
@@ -256,13 +280,35 @@ export default function InventoryHistory() {
       }
       : null;
 
+  const formatHistoryChange = (skuDiff, qtyDiff) => {
+    const sku = Math.abs(Number(skuDiff || 0));
+    const qty = Math.abs(Number(qtyDiff || 0));
+
+    if (sku === 0 && qty === 0) return "-";
+
+    return `${sku} SKU / ${qty.toLocaleString()}개`;
+  };
+
+  const isNoHistoryChange = (skuDiff, qtyDiff) =>
+    Number(skuDiff || 0) === 0 && Number(qtyDiff || 0) === 0;
+
+  const isInboundNoChange = isNoHistoryChange(
+    summaryData.inbound_sku_diff,
+    summaryData.inbound_qty_diff
+  );
+
+  const isOutboundNoChange = isNoHistoryChange(
+    summaryData.outbound_sku_diff,
+    summaryData.outbound_qty_diff
+  )
+
   const isInboundUp =
     Number(summaryData.inbound_sku_diff || 0) >= 0 &&
     Number(summaryData.inbound_qty_diff || 0) >= 0;
 
   const isOutboundUp =
-    Number(summaryData.outbound_sku_diff || 0) >= 0 &&
-    Number(summaryData.outbound_qty_diff || 0) >= 0;
+    Number(summaryData.outbound_sku_diff || 0) <= 0 &&
+    Number(summaryData.outbound_qty_diff || 0) <= 0;
 
   const handleChartMouseMove = (e) => {
     if (!chartAreaRef.current) return;
@@ -383,11 +429,15 @@ export default function InventoryHistory() {
             <Slash>/</Slash>
             <SubNumber>{summaryData.inbound_qty.toLocaleString()}개</SubNumber>
           </BigLine>
-          <ChangeRow $up={isInboundUp}>
-            <ChangeArrow>{isInboundUp ? "↑" : "↓"}</ChangeArrow>
+          <ChangeRow $up={isInboundUp} $neutral={isInboundNoChange}>
+            <ChangeArrow>
+              {isInboundNoChange ? "-" : isInboundUp ? "↑" : "↓"}
+            </ChangeArrow>
             <span>
-              {Math.abs(summaryData.inbound_sku_diff)} SKU /{" "}
-              {Math.abs(summaryData.inbound_qty_diff).toLocaleString()}개
+              {formatHistoryChange(
+                summaryData.inbound_sku_diff,
+                summaryData.inbound_qty_diff
+              )}
             </span>
             <ChangeMuted>vs Yesterday</ChangeMuted>
           </ChangeRow>
@@ -401,11 +451,15 @@ export default function InventoryHistory() {
             <Slash>/</Slash>
             <SubNumber>{summaryData.outbound_qty.toLocaleString()}개</SubNumber>
           </BigLine>
-          <ChangeRow $up={isOutboundUp}>
-            <ChangeArrow>{isOutboundUp ? "↑" : "↓"}</ChangeArrow>
+          <ChangeRow $up={isOutboundUp} $neutral={isOutboundNoChange}>
+            <ChangeArrow>
+              {isOutboundNoChange ? "-" : isOutboundUp ? "↑" : "↓"}
+            </ChangeArrow>
             <span>
-              {Math.abs(summaryData.outbound_sku_diff)} SKU /{" "}
-              {Math.abs(summaryData.outbound_qty_diff).toLocaleString()}개
+              {formatHistoryChange(
+                summaryData.outbound_sku_diff,
+                summaryData.outbound_qty_diff
+              )}
             </span>
             <ChangeMuted>vs Yesterday</ChangeMuted>
           </ChangeRow>
@@ -477,7 +531,7 @@ export default function InventoryHistory() {
                   strokeWidth="4"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points={buildPolylinePoints(inboundTrend, 260, 96, 10)}
+                  points={buildPolylinePoints(inboundTrend, 260, 96, 10, chartScale)}
                 />
                 <polyline
                   fill="none"
@@ -485,7 +539,7 @@ export default function InventoryHistory() {
                   strokeWidth="4"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points={buildPolylinePoints(outboundTrend, 260, 96, 10)}
+                  points={buildPolylinePoints(outboundTrend, 260, 96, 10, chartScale)}
                 />
 
                 {inboundPoints.map((point, index) => (
@@ -663,7 +717,8 @@ const ChangeRow = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
-  color: ${({ $up }) => ($up ? "#16a34a" : "#ef4444")};
+  color: ${({ $neutral, $up }) =>
+    $neutral ? "#9ca3af" : $up ? "#16a34a" : "#ef4444"};
   font-size: 14px;
   font-weight: 700;
 `;
@@ -855,7 +910,7 @@ const CodeLink = styled.button`
   border: 0;
   padding: 0;
   background: none;
-  color: #2563eb;
+  color: #111827;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
