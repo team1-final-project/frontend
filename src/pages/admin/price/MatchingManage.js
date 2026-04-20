@@ -373,29 +373,25 @@ export default function MatchingManage() {
 
       <SummaryGrid>
         <SummaryCard
-          title="전체 상품 수"
-          subText="최근 7일 기준"
+          title="전체 상품 수"        
           value={`${summaryData?.total_count ?? summary.totalCount}SKU`}
           change={`${Math.abs(summaryData?.total_diff ?? 0)}SKU`}
           up={(summaryData?.total_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="카탈로그 매칭 상품"
-          subText="최근 7일 기준"
           value={`${summaryData?.matched_count ?? summary.matchedCount}SKU`}
           change={`${Math.abs(summaryData?.matched_diff ?? 0)}SKU`}
           up={(summaryData?.matched_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="카탈로그 미매칭 상품"
-          subText="최근 7일 기준"
           value={`${summaryData?.unmatched_count ?? summary.unmatchedCount}SKU`}
           change={`${Math.abs(summaryData?.unmatched_diff ?? 0)}SKU`}
           up={(summaryData?.unmatched_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="AI 가격변경 상품"
-          subText="최근 7일 기준"
           value={`${summaryData?.ai_price_count ?? summary.aiPriceCount}SKU`}
           change={`${Math.abs(summaryData?.ai_price_diff ?? 0)}SKU`}
           up={(summaryData?.ai_price_diff ?? 0) >= 0}
