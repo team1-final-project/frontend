@@ -1,13 +1,42 @@
 import React, { useMemo, useState } from "react";
-import styled, { css } from "styled-components";
+import styled, { css, createGlobalStyle } from "styled-components";
 import {
   Search,
   MoreHorizontal,
   ChevronDown,
   ArrowUpDown,
   ChevronUp,
+  Calendar,
 } from "lucide-react";
 import TablePagination from "./TablePagination";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
+const DatePickerStyle = createGlobalStyle`
+  .react-datepicker-wrapper {
+    width: auto;
+  }
+  .react-datepicker {
+    font-family: "Pretendard", sans-serif;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+  .react-datepicker__header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #f1f5f9;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding-top: 10px;
+  }
+  .react-datepicker__day--selected {
+    background-color: #2563eb !important; 
+    border-radius: 8px;
+  }
+  .react-datepicker__day:hover {
+    border-radius: 8px;
+  }
+`;
 
 export default function TableComponent({
   columns = [],
@@ -23,6 +52,10 @@ export default function TableComponent({
   onFilterChange,
   filterOptions = [],
   filterPlaceholder = "Filter",
+  startDate = "",
+  onStartDateChange,
+  endDate = "",
+  onEndDateChange,
   extraToolbar = null,
   toolbarRight = null,
   customToolbar = null,
@@ -36,6 +69,9 @@ export default function TableComponent({
     key: "",
     direction: "asc",
   });
+
+  const sDate = startDate ? new Date(startDate) : null;
+  const eDate = endDate ? new Date(endDate) : null;
 
   const handleSort = (column) => {
     if (column.sortable === false) return;
@@ -176,6 +212,7 @@ export default function TableComponent({
 
   return (
     <Container>
+      <DatePickerStyle />
       <Toolbar $variant={variant}>
         {customToolbar ? (
           <CustomToolbarWrap $variant={variant}>
@@ -222,6 +259,38 @@ export default function TableComponent({
                 </FilterSelectWrap>
               )}
 
+              {onStartDateChange && onEndDateChange && (
+                <DateFilterGroup>
+                  <DatePickerContainer $variant={variant}>
+                    <DatePicker
+                      selected={sDate}
+                      onChange={(date) =>
+                        onStartDateChange(date.toISOString().split("T")[0])
+                      }
+                      placeholderText="시작일"
+                      dateFormat="yyyy-MM-dd"
+                      className="custom-datepicker"
+                    />
+                    <Calendar size={14} className="calendar-icon" />
+                  </DatePickerContainer>
+
+                  <DateDivider>~</DateDivider>
+
+                  <DatePickerContainer $variant={variant}>
+                    <Calendar size={14} className="calendar-icon" />
+                    <DatePicker
+                      selected={eDate}
+                      onChange={(date) =>
+                        onEndDateChange(date.toISOString().split("T")[0])
+                      }
+                      placeholderText="종료일"
+                      dateFormat="yyyy-MM-dd"
+                      className="custom-datepicker"
+                      minDate={sDate} // 시작일 이전은 선택 못하게 막음
+                    />
+                  </DatePickerContainer>
+                </DateFilterGroup>
+              )}
               {extraToolbar}
             </ToolbarLeft>
 
@@ -425,6 +494,7 @@ const SearchInput = styled.input`
   color: var(--font);
   font-size: 13px;
   outline: none;
+  box-shadow: var(--shadow);
 
   &::placeholder {
     color: var(--placeholder);
@@ -435,16 +505,16 @@ const SearchInput = styled.input`
       ? css`
           height: 44px;
           padding: 0 36px 0 14px;
-          border: 1px solid var(--border);
+          border: 1px solid transparent;
 
           &:focus {
-            border-color: var(--border);
+            border-color: var(--focus-border);
           }
         `
       : css`
           height: 38px;
           padding: 0 34px 0 14px;
-          border: 1px solid var(--border);
+          border: 1px solid transparent;
 
           &:focus {
             border-color: var(--focus-border);
@@ -454,6 +524,7 @@ const SearchInput = styled.input`
 
 const FilterSelectWrap = styled.div`
   position: relative;
+  box-shadow: var(--shadow);
   min-width: ${({ $variant }) =>
     $variant === "inventory" ? "126px" : "180px"};
 
@@ -465,7 +536,7 @@ const FilterSelectWrap = styled.div`
 const FilterSelect = styled.select`
   width: 100%;
   border-radius: 10px;
-  background: #ffffff;
+  background: white;
   font-size: 13px;
   outline: none;
   appearance: none;
@@ -476,21 +547,21 @@ const FilterSelect = styled.select`
       ? css`
           height: 44px;
           padding: 0 34px 0 14px;
-          border: 1px solid var(--border);
+          border: 1px solid transparent;
           color: var(--placeholder);
 
           &:focus {
-            border-color: var(--border-focus);
+            border-color: var(--focus-border);
           }
         `
       : css`
           height: 38px;
           padding: 0 34px 0 14px;
-          border: 1px solid var(--border);
+          border: 1px solid transparent;
           color: var(--placeholder);
 
           &:focus {
-            border-color: var(--border-focus);
+            border-color: var(--focus-border);
           }
         `}
 `;
@@ -505,6 +576,76 @@ const FilterIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+
+const DateFilterGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const DateInput = styled.input`
+  border-radius: 10px;
+  background: white;
+  color: var(--font);
+  font-size: 13px;
+  outline: none;
+  border: 1px solid transparent;
+
+  &:focus {
+    border-color: var(--focus-border);
+  }
+
+  ${({ $variant }) =>
+    $variant === "inventory"
+      ? css`
+          height: 44px;
+          padding: 0 12px;
+        `
+      : css`
+          height: 38px;
+          padding: 0 12px;
+        `}
+`;
+
+const DatePickerContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-shadow: var(--shadow);
+
+  .calendar-icon {
+    position: absolute;
+    right: 12px;
+    color: var(--placeholder);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .custom-datepicker {
+    width: 130px;
+    height: ${({ $variant }) => ($variant === "inventory" ? "44px" : "38px")};
+    padding: 0 34px 0 12px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: white;
+    color: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:focus {
+      border-color: var(--blue);
+    }
+  }
+`;
+
+const DateDivider = styled.span`
+  color: var(--placeholder);
+  font-size: 13px;
+  font-weight: 600;
 `;
 
 const TableScroll = styled.div`

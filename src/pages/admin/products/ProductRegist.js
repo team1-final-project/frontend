@@ -883,12 +883,12 @@ const Title = styled.h2`
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 15px;
 `;
 
 const Section = styled.section`
   padding: 18px 20px;
-  border: 1px solid #eef2f7;
+  box-shadow: var(--shadow);
   border-radius: 16px;
   background: #ffffff;
 `;

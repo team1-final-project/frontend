@@ -346,27 +346,16 @@ export default function ProductList() {
         }}
         filterPlaceholder="전체"
         filterOptions={categoryOptions}
-        extraToolbar={
-          <DateFilterGroup>
-            <DateInput
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                setPage(1);
-              }}
-            />
-            <DateDivider>~</DateDivider>
-            <DateInput
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                setPage(1);
-              }}
-            />
-          </DateFilterGroup>
-        }
+        startDate={startDate}
+        onStartDateChange={(val) => {
+          setStartDate(val);
+          setPage(1);
+        }}
+        endDate={endDate}
+        onEndDateChange={(val) => {
+          setEndDate(val);
+          setPage(1);
+        }}
         toolbarRight={
           <PrimaryButton
             type="button"
@@ -438,34 +427,6 @@ const SummaryGrid = styled.div`
   @media (max-width: 700px) {
     grid-template-columns: 1fr;
   }
-`;
-
-const DateFilterGroup = styled.div`
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-`;
-
-const DateInput = styled.input`
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: white;
-  color: var(--font);
-  font-size: 13px;
-  outline: none;
-
-  &:focus {
-    border-color: var(--focus-border);
-  }
-`;
-
-const DateDivider = styled.span`
-  color: var(--placeholder);
-  font-size: 13px;
-  font-weight: 600;
 `;
 
 const ProductNameLink = styled.a`
