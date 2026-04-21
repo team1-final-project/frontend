@@ -633,6 +633,7 @@ export default function ProductUpdate() {
                   placeholder="판매상태 선택"
                   width="220px"
                   border
+                  shadow={false}
                 />
               </FormField>
             </FormRow>

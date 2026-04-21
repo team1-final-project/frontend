@@ -553,6 +553,7 @@ export default function ProductRegist() {
                   placeholder="판매상태 선택"
                   width="220px"
                   border="true"
+                  shadow={false}
                 />
               </FormField>
             </FormRow>

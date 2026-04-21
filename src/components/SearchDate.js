@@ -20,7 +20,7 @@ export default function SearchDate({
   endDate,
   onEndDateChange,
   variant = "default",
-  width,
+  width = "120px",
   border = false, // 기본값: 테두리 없음
   shadow = true, // 기본값: 그림자 있음
 }) {
@@ -54,7 +54,7 @@ export default function SearchDate({
           </DatePickerContainer>
         ) : (
           <>
-            <DatePickerContainer $variant={variant} $width={width}>
+            <DatePickerContainer {...containerProps}>
               <DatePicker
                 selected={sDate}
                 onChange={(date) =>
@@ -71,7 +71,7 @@ export default function SearchDate({
 
             <DateDivider>~</DateDivider>
 
-            <DatePickerContainer $variant={variant} $width={width}>
+            <DatePickerContainer {...containerProps}>
               <DatePicker
                 selected={eDate}
                 onChange={(date) =>

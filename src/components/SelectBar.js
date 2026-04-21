@@ -26,6 +26,7 @@ export default function SelectBar({
         type="button"
         $variant={variant}
         $border={border}
+        $shadow={shadow}
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className={!value ? "placeholder" : ""}>
