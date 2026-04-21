@@ -163,6 +163,8 @@ export default function ProductUpdate() {
             detail.max_price_limit != null
               ? String(detail.max_price_limit)
               : "",
+          pricePerTime:
+            detail.price_per_time != null ? String(detail.price_per_time) : "",
 
           stockQty: detail.stock_qty != null ? String(detail.stock_qty) : "",
           safetyStock:
@@ -446,6 +448,10 @@ export default function ProductUpdate() {
           form.useAiPrice && form.minPrice ? Number(form.minPrice) : null,
         max_price_limit:
           form.useAiPrice && form.maxPrice ? Number(form.maxPrice) : null,
+        price_per_time:
+          form.useAiPrice && form.pricePerTime
+            ? Number(form.pricePerTime)
+            : null,
 
         stock_qty: Number(form.stockQty || 0),
         safety_stock_qty: Number(form.safetyStock || 0),

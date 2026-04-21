@@ -386,7 +386,7 @@ export default function InventoryHistory() {
     },
     {
       key: "baseStock",
-      title: "기준재고",
+      title: "기존재고",
       width: "110px",
       sortType: "number",
       render: (value) => formatCount(value),

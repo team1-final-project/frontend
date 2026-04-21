@@ -48,20 +48,30 @@ export default function TableComponent({
   variant = "default",
   headerAlign = "left",
   cellAlign = "left",
+
   searchValue = "",
   onSearchChange,
   searchPlaceholder = "Search...",
+
   filterValue = "",
   onFilterChange,
   filterOptions = [],
   filterPlaceholder = "Filter",
+
+  filterValue2 = "",
+  onFilterChange2,
+  filterOptions2 = [],
+  filterPlaceholder2 = "Filter 2",
+
   startDate = "",
   onStartDateChange,
   endDate = "",
   onEndDateChange,
+
   extraToolbar = null,
   toolbarRight = null,
   customToolbar = null,
+
   page = 1,
   pageSize = 10,
   onPageChange,
@@ -221,6 +231,16 @@ export default function TableComponent({
         ) : (
           <>
             <ToolbarLeft $variant={variant}>
+              {onStartDateChange && onEndDateChange && (
+                <SearchDate
+                  variant={variant}
+                  startDate={startDate}
+                  onStartDateChange={onStartDateChange}
+                  endDate={endDate}
+                  onEndDateChange={onEndDateChange}
+                />
+              )}
+              {extraToolbar}
               {typeof onSearchChange === "function" && (
                 <SearchBar
                   variant={variant}
@@ -240,16 +260,16 @@ export default function TableComponent({
                 />
               )}
 
-              {onStartDateChange && onEndDateChange && (
-                <SearchDate
+              {typeof onFilterChange2 === "function" && (
+                <SelectBar
                   variant={variant}
-                  startDate={startDate}
-                  onStartDateChange={onStartDateChange}
-                  endDate={endDate}
-                  onEndDateChange={onEndDateChange}
+                  value={filterValue2}
+                  onChange={onFilterChange2}
+                  options={filterOptions2}
+                  placeholder={filterPlaceholder2}
+                  shadow={true}
                 />
               )}
-              {extraToolbar}
             </ToolbarLeft>
 
             {toolbarRight && <ToolbarRight>{toolbarRight}</ToolbarRight>}
