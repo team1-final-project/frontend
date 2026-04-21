@@ -149,7 +149,7 @@ export const ProductGrid = styled.div`
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
 
-  @media (max-width: 860px) {
+  @media (max-width: 980px) {
     grid-template-columns: 1fr;
   }
 `;
@@ -159,9 +159,13 @@ export const ProductCard = styled.article`
   border: 1px solid #ebe5dc;
   border-radius: 24px;
   padding: 16px;
+`;
+
+export const ProductTop = styled.div`
   display: grid;
-  grid-template-columns: 160px 1fr;
+  grid-template-columns: 160px minmax(0, 1fr);
   gap: 16px;
+  align-items: start;
 
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
@@ -182,15 +186,23 @@ export const ProductThumb = styled.div`
 
 export const ProductImage = styled.img`
   display: block;
-  width: 70%;
-  height: 70%;
+  width: 78%;
+  height: 78%;
   object-fit: contain;
   background: transparent;
 `;
 
-export const ProductBody = styled.div`
+export const ProductMain = styled.div`
   display: flex;
   flex-direction: column;
+  min-width: 0;
+`;
+
+export const ProductBottom = styled.div`
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 `;
 
 export const BrandText = styled.p`
@@ -233,7 +245,6 @@ export const AITag = styled.span`
   font-weight: 800;
   display: inline-flex;
   align-items: center;
-
   ${({ $tone }) => badgeTone[$tone] || badgeTone.default}
 `;
 
@@ -274,7 +285,7 @@ export const DropValue = styled(InfoValue)`
 `;
 
 export const AIBox = styled.div`
-  margin-top: 14px;
+  width: 100%;
   border-radius: 18px;
   background: #fbf9f6;
   border: 1px solid #eee7dd;
@@ -295,7 +306,7 @@ export const AIBoxDescription = styled.p`
 `;
 
 export const TrendSection = styled.div`
-  margin-top: 14px;
+  width: 100%;
   padding: 14px 12px;
   border-radius: 18px;
   background: #fbf9f6;
@@ -304,10 +315,15 @@ export const TrendSection = styled.div`
 
 export const TrendHeaderRow = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+
+  @media (max-width: 520px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
 
 export const TrendLabel = styled.p`
@@ -316,43 +332,83 @@ export const TrendLabel = styled.p`
   font-weight: 900;
 `;
 
-export const TrendCurrentPrice = styled.p`
-  font-size: 14px;
-  color: #eb6c6c;
-  font-weight: 900;
+export const TrendChartWrap = styled.div`
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 12px;
+  align-items: start;
+`;
+
+export const TrendYAxis = styled.div`
+  display: grid;
+  grid-template-rows: repeat(5, 1fr);
+  align-items: center;
+  height: 96px;
+`;
+
+export const TrendYAxisValue = styled.span`
+  font-size: 11px;
+  color: #7f776f;
+  font-weight: 700;
+  line-height: 1;
+`;
+
+export const ChartArea = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 export const SimpleTrendChart = styled.div`
+  position: relative;
   width: 100%;
-  height: 86px;
-  display: flex;
-  align-items: center;
+  height: 96px;
+`;
+
+export const ChartGuideLine = styled.div`
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: ${({ $top }) => $top};
+  height: 1px;
+  background: #ddd4c7;
+  z-index: 0;
 `;
 
 export const SimpleTrendSvg = styled.svg`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   width: 100%;
   height: 100%;
   overflow: visible;
+
+  circle {
+    shape-rendering: geometricPrecision;
+  }
+`;
+
+export const TrendBottomWrap = styled.div`
+  margin-top: 10px;
 `;
 
 export const TrendDateRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
+  width: 100%;
 `;
 
 export const TrendDate = styled.span`
-  font-size: 11px;
+  font-size: 12px;
   color: #7f776f;
-  font-weight: 600;
+  font-weight: 700;
+  white-space: nowrap;
 `;
 
 export const PeriodTabRow = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 14px;
   flex-wrap: wrap;
 `;
 
@@ -370,21 +426,18 @@ export const PeriodChip = styled.button`
 
 export const ButtonRow = styled.div`
   display: flex;
-  gap: 10px;
-  margin-top: 16px;
-
-  @media (max-width: 520px) {
-    flex-direction: column;
-  }
+  justify-content: center;
+  margin-top: 12px;
 `;
 
 export const DetailButton = styled(Link)`
-  flex: 1;
-  height: 44px;
+  width: 360px;
+  max-width: 100%;
+  height: 48px;
   border-radius: 14px;
   background: #111111;
   color: #ffffff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
   text-decoration: none;
   display: inline-flex;
@@ -393,21 +446,6 @@ export const DetailButton = styled(Link)`
 
   &:hover {
     opacity: 0.94;
-  }
-`;
-
-export const AlertButton = styled.button`
-  flex: 1;
-  height: 44px;
-  border-radius: 14px;
-  border: 1px solid #d9cfc1;
-  background: #ffffff;
-  color: #111111;
-  font-size: 14px;
-  font-weight: 800;
-
-  &:hover {
-    background: #f8f6f2;
   }
 `;
 
