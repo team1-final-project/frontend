@@ -10,13 +10,16 @@ import { getCategories } from "../../../api/category";
 import {
   getAdminProductList,
   updateAdminProductAiPricing,
+  updateAdminProductSaleStatus,
 } from "../../../api/adminProduct";
 
-const statusStyleMap = {
-  판매중: { label: "판매중", variant: "success" },
-  일시품절: { label: "일시품절", variant: "warning" },
-  품절: { label: "품절", variant: "danger" },
-};
+const saleStatusOptions = [
+  { label: "판매중", value: "ON_SALE" },
+  { label: "판매예정", value: "READY" },
+  { label: "판매중지", value: "STOPPED" },
+  { label: "품절", value: "SOLD_OUT" },
+  { label: "판매종료", value: "ENDED" },
+];
 
 const salesStatusLabelMap = {
   ON_SALE: "판매중",
@@ -37,10 +40,6 @@ function formatUpdatedAt(value) {
 
 function formatNumber(value) {
   return `${Number(value).toLocaleString()}원`;
-}
-
-function toDateValue(dateTimeText) {
-  return dateTimeText?.split(" ")[0] ?? "";
 }
 
 export default function ProductList() {
@@ -112,6 +111,7 @@ export default function ProductList() {
           aiPricingEnabled: item.ai_pricing_enabled,
           stock: item.stock_qty,
           saleStatus: mapSaleStatusLabel(item.sale_status),
+          saleStatusCode: item.sale_status,
           updatedAt: formatUpdatedAt(item.updated_at),
         }));
 
@@ -172,6 +172,33 @@ export default function ProductList() {
       alert(
         error?.response?.data?.detail ||
           "AI 가격변경 상태 변경에 실패했습니다.",
+      );
+    }
+  };
+
+  const handleChangeSaleStatus = async (id, nextStatusCode) => {
+    const previousProducts = products;
+    const nextStatusLabel = mapSaleStatusLabel(nextStatusCode);
+
+    setProducts((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              saleStatusCode: nextStatusCode,
+              saleStatus: nextStatusLabel,
+            }
+          : item,
+      ),
+    );
+
+    try {
+      await updateAdminProductSaleStatus(id, nextStatusCode);
+    } catch (error) {
+      console.error(error);
+      setProducts(previousProducts);
+      alert(
+        error?.response?.data?.detail || "판매상태 변경에 실패했습니다.",
       );
     }
   };
@@ -239,7 +266,6 @@ export default function ProductList() {
         </CenterCell>
       ),
     },
-
     {
       key: "stock",
       title: "재고",
@@ -250,22 +276,21 @@ export default function ProductList() {
     {
       key: "saleStatus",
       title: "판매상태",
-      width: "110px",
+      width: "120px",
       sortable: false,
-      render: (value) => {
-        const status = statusStyleMap[value] || {
-          label: value,
-          variant: "info",
-        };
-
-        return (
+      render: (_, row) => (
+        <CenterCell>
           <StatusBadge
-            value={status.label}
-            variant={status.variant}
-            width="88px"
+            value={row.saleStatus}
+            mode="select"
+            options={saleStatusOptions}
+            onChange={(nextValue) =>
+              handleChangeSaleStatus(row.id, nextValue)
+            }
+            width="96px"
           />
-        );
-      },
+        </CenterCell>
+      ),
     },
     {
       key: "updatedAt",

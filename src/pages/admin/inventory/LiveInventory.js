@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import TableComponent from "../../../components/TableComponent";
+import StatusBadge from "../../../components/StatusBadge";
 import InboundRegisterModal from "./InboundRegisterModal";
 import {
   getAdminLiveInventoryList,
@@ -11,7 +12,6 @@ import {
 } from "../../../api/adminInventory";
 
 const inventoryStatusOptions = ["안전재고", "발주권고", "일시품절"];
-const salesStatusOptions = ["판매중", "판매중지", "품절", "판매종료", "판매예정"];
 
 const salesStatusList = [
   { value: "ON_SALE", label: "판매중" },
@@ -303,20 +303,16 @@ export default function LiveInventory() {
       sortable: false,
       render: (value, row) => (
         <CenterCell>
-          <SalesStatusSelect
-            $type={value}
-            value={row.salesStatusCode}
+          <StatusBadge
+            value={value}
+            mode="select"
+            width="96px"
             disabled={pendingActionKey === `${row.productCode}:status`}
-            onChange={(e) =>
-              handleSalesStatusChange(row.productCode, e.target.value)
+            options={salesStatusList}
+            onChange={(nextValue) =>
+              handleSalesStatusChange(row.productCode, nextValue)
             }
-          >
-            {salesStatusList.map((status) => (
-              <option key={status.value} value={status.value}>
-                {status.label}
-              </option>
-            ))}
-          </SalesStatusSelect>
+          />
         </CenterCell>
       ),
     },
@@ -486,9 +482,9 @@ export default function LiveInventory() {
                 }}
               >
                 <option value="">판매상태별</option>
-                {salesStatusOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
+                {salesStatusList.map((status) => (
+                  <option key={status.value} value={status.label}>
+                    {status.label}
                   </option>
                 ))}
               </ToolbarSelect>
@@ -832,54 +828,6 @@ const InventoryStatusBadge = styled.span`
       return `
         background: #f3e8ff;
         color: #a855f7;
-      `;
-    }
-
-    return `
-      background: #e5e7eb;
-      color: #475569;
-    `;
-  }}
-`;
-
-const SalesStatusSelect = styled.select`
-  min-width: 96px;
-  height: 32px;
-  border: none;
-  border-radius: 999px;
-  padding: 0 12px;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-  appearance: none;
-
-  ${({ $type }) => {
-    if ($type === "판매중") {
-      return `
-        background: #dcfce7;
-        color: #16a34a;
-      `;
-    }
-
-    if ($type === "판매중지") {
-      return `
-        background: #fef3c7;
-        color: #d97706;
-      `;
-    }
-
-    if ($type === "품절") {
-      return `
-        background: #f3e8ff;
-        color: #a855f7;
-      `;
-    }
-
-    if ($type === "판매종료") {
-      return `
-        background: #e0e7ff;
-        color: #4f46e5;
       `;
     }
 

@@ -62,3 +62,10 @@ export const updateAdminProductAiPricing = async (
   });
   return response.data;
 };
+
+export const updateAdminProductSaleStatus = async (id, saleStatus) => {
+  const response = await api.patch(`/admin/products/${id}/sale-status`, {
+    sale_status: saleStatus,
+  });
+  return response.data;
+};
