@@ -485,13 +485,7 @@ export default function PriceSearch() {
     <PageWrap>
       <Title>가격 관리</Title>
 
-<<<<<<< HEAD
       {isLoading && <PageStatusText>목록을 불러오는 중입니다.</PageStatusText>}
-=======
-      {isLoading && (
-        <PageStatusText>가격 조회 목록을 불러오는 중입니다.</PageStatusText>
-      )}
->>>>>>> hyunsu
       {!isLoading && errorMessage && (
         <PageStatusText $error>{errorMessage}</PageStatusText>
       )}
@@ -660,23 +654,6 @@ const PriceGapWrap = styled.div`
   gap: 6px;
 `;
 
-<<<<<<< HEAD
-const RateBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 54px;
-  height: 24px;
-  padding: 0 8px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  background: ${({ $negative }) => ($negative ? "#dcf7e8" : "#ffe7e7")};
-  color: ${({ $negative }) => ($negative ? "var(--green)" : "var(--red)")};
-`;
-
-=======
->>>>>>> hyunsu
 const CodeLink = styled.button`
   border: none;
   background: transparent;
