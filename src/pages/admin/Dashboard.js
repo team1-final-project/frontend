@@ -1,166 +1,37 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
-import { ChevronDown, Info, Search } from "lucide-react";
+import { Info, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getAdminDashboard } from "../../api/adminDashboard";
 
-const tabs = ["라면", "소시지", "스낵과자", "즉석식품", "카레", "탄산음료"];
 const weekLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const hourLabels = [
-  "0시",
-  "3시",
-  "6시",
-  "9시",
-  "12시",
-  "15시",
-  "18시",
-  "21시",
-  "24시",
-];
+const hourLabels = ["0시", "3시", "6시", "9시", "12시", "15시", "18시", "21시", "24시"];
 
-const aiTrendMap = {
-  라면: {
-    aiSales: [4.8, 4.6, 4.9, 3.8, 3.0, 4.6, 4.1],
-    aiProfit: [3.6, 3.4, 3.6, 2.8, 2.0, 3.4, 4.0],
-    manualSales: [4.0, 4.3, 3.9, 4.5, 3.9, 4.7, 4.0],
-    manualProfit: [1.8, 2.1, 1.6, 2.4, 1.8, 0.5, 0.45],
-  },
-  소시지: {
-    aiSales: [4.9, 4.7, 4.9, 3.9, 3.0, 4.7, 4.2],
-    aiProfit: [3.6, 3.5, 3.7, 2.8, 2.0, 3.5, 4.1],
-    manualSales: [4.0, 4.4, 4.0, 4.6, 4.0, 4.8, 4.1],
-    manualProfit: [1.8, 2.1, 1.6, 2.4, 1.8, 0.5, 0.45],
-  },
-  스낵과자: {
-    aiSales: [3.8, 3.7, 3.9, 3.1, 2.7, 3.8, 3.5],
-    aiProfit: [2.9, 2.8, 3.0, 2.3, 1.8, 2.9, 2.7],
-    manualSales: [3.2, 3.4, 3.1, 3.6, 3.2, 3.7, 3.0],
-    manualProfit: [1.4, 1.7, 1.3, 1.9, 1.5, 0.7, 0.6],
-  },
-  즉석식품: {
-    aiSales: [4.3, 4.2, 4.4, 3.5, 2.9, 4.1, 3.8],
-    aiProfit: [3.1, 3.0, 3.2, 2.5, 1.9, 3.0, 2.8],
-    manualSales: [3.7, 3.9, 3.6, 4.1, 3.6, 4.0, 3.5],
-    manualProfit: [1.5, 1.8, 1.4, 2.0, 1.6, 0.8, 0.7],
-  },
-  카레: {
-    aiSales: [2.9, 2.8, 3.0, 2.4, 2.0, 2.9, 2.7],
-    aiProfit: [2.1, 2.0, 2.2, 1.7, 1.3, 2.1, 2.0],
-    manualSales: [2.4, 2.6, 2.3, 2.7, 2.4, 2.8, 2.5],
-    manualProfit: [1.0, 1.2, 0.9, 1.3, 1.0, 0.5, 0.4],
-  },
-  탄산음료: {
-    aiSales: [4.5, 4.4, 4.6, 4.1, 3.8, 4.7, 4.2],
-    aiProfit: [3.4, 3.3, 3.5, 3.0, 2.6, 3.4, 3.0],
-    manualSales: [3.9, 4.1, 3.8, 4.2, 3.9, 4.3, 3.8],
-    manualProfit: [1.6, 1.8, 1.5, 1.9, 1.6, 0.9, 0.7],
-  },
-};
-
-const competitorTrend = {
-  my: [4.7, 4.5, 4.7, 3.8, 3.0, 2.0, 4.2],
-  rival: [4.0, 4.3, 3.9, 4.5, 4.0, 4.5, 3.6],
-};
-
-const lowestProfitTrend = {
-  lowest: [5.2, 5.6, 6.8, 6.7, 5.5, 4.9, 1.8, 5.7, 4.7],
-  myPrice: [5.3, 4.8, 5.4, 6.2, 6.2, 5.6, 1.4, 5.0, 4.2],
-  sales: [1.2, 1.6, 1.5, 1.3, 1.3, 1.2, 1.5, 1.7, 1.3],
-  profit: [0.6, 0.7, 0.8, 0.9, 0.9, 0.7, 0.6, 0.25, 0.7],
-};
-
-const shareMap = {
-  라면: {
-    orange: [0.4, 0.7, 0.3, 0.4, 0.5, 0.5, 0.6],
-    pink: [1.0, 1.8, 0.8, 1.7, 1.4, 1.4, 1.3],
-    blue: [0.9, 0.7, 0.6, 2.4, 2.1, 2.1, 2.1],
-  },
-  소시지: {
-    orange: [0.5, 0.8, 0.4, 0.5, 0.8, 0.7, 0.7],
-    pink: [1.1, 1.9, 0.9, 1.6, 1.2, 1.2, 1.2],
-    blue: [0.8, 0.5, 0.5, 2.5, 2.2, 2.2, 2.2],
-  },
-  스낵과자: {
-    orange: [0.3, 0.6, 0.3, 0.4, 0.5, 0.4, 0.5],
-    pink: [0.9, 1.6, 0.7, 1.3, 1.1, 1.0, 1.0],
-    blue: [0.7, 0.5, 0.5, 2.0, 1.9, 1.8, 1.8],
-  },
-  즉석식품: {
-    orange: [0.4, 0.7, 0.3, 0.5, 0.6, 0.5, 0.5],
-    pink: [1.0, 1.7, 0.8, 1.5, 1.2, 1.2, 1.2],
-    blue: [0.9, 0.6, 0.6, 2.1, 2.0, 2.0, 2.0],
-  },
-  카레: {
-    orange: [0.3, 0.5, 0.2, 0.4, 0.4, 0.4, 0.4],
-    pink: [0.8, 1.2, 0.6, 1.0, 0.9, 0.9, 0.9],
-    blue: [0.6, 0.4, 0.4, 1.8, 1.7, 1.7, 1.7],
-  },
-  탄산음료: {
-    orange: [0.5, 0.8, 0.4, 0.6, 0.7, 0.7, 0.7],
-    pink: [1.1, 1.8, 0.9, 1.6, 1.3, 1.3, 1.3],
-    blue: [0.9, 0.6, 0.6, 2.2, 2.1, 2.1, 2.1],
-  },
-};
-
-const lowStrategyRows = Array.from({ length: 5 }).map((_, index) => ({
-  rank: index + 1,
-  productCode: "9744302255",
-  productName: "농심 신라면건면 114g, 1개",
-  reason: index % 2 === 0 ? "최저가 제한" : "최대 조정가 제한",
-}));
-
-const notLowestRows = Array.from({ length: 5 }).map(() => ({
-  productCode: "9744302255",
-  productName: "농심 신라면건면 114g, 1개",
-  salePrice: "800원",
-  lowestPrice: "700원",
-  gap: "100원",
-  rate: "+14.2%",
-}));
-
-const lowMarginRows = Array.from({ length: 5 }).map((_, index) => ({
-  rank: index + 1,
-  productCode: "9744302255",
-  productName: "농심 신라면건면 114g, 1개",
-  avgProfit: "800원",
-  profitRate: "28.5%",
-}));
-
-const rankingRows = Array.from({ length: 5 }).map((_, index) => ({
-  rank: index + 1,
-  productCode: "9744302255",
-  productName: "농심 신라면건면 114g, 1개",
-  salesQty: "1,864개",
-}));
+const numberFormat = (value) => `${Number(value || 0).toLocaleString()}원`;
+const qtyFormat = (value) => `${Number(value || 0).toLocaleString()}개`;
+const percentText = (value) => `${Number(value || 0).toFixed(1)}%`;
 
 function buildLinePoints(values, width, height, padding = 18) {
-  const max = Math.max(...values);
-  const min = Math.min(...values);
+  const safeValues = Array.isArray(values) && values.length ? values : [0];
+  const max = Math.max(...safeValues, 1);
+  const min = Math.min(...safeValues, 0);
   const range = max - min || 1;
 
-  return values
+  return safeValues
     .map((value, index) => {
-      const x =
-        padding +
-        (index * (width - padding * 2)) / Math.max(values.length - 1, 1);
-      const y =
-        height - padding - ((value - min) * (height - padding * 2)) / range;
+      const x = padding + (index * (width - padding * 2)) / Math.max(safeValues.length - 1, 1);
+      const y = height - padding - ((value - min) * (height - padding * 2)) / range;
       return `${x},${y}`;
     })
     .join(" ");
 }
 
-function buildBars(
-  values,
-  width,
-  height,
-  padding = 28,
-  offset = 0,
-  barWidth = 10,
-) {
-  const max = Math.max(...values, 1);
-  const groupWidth = (width - padding * 2) / values.length;
+function buildBars(values, width, height, padding = 28, offset = 0, barWidth = 10) {
+  const safeValues = Array.isArray(values) && values.length ? values : [0];
+  const max = Math.max(...safeValues, 1);
+  const groupWidth = (width - padding * 2) / safeValues.length;
 
-  return values.map((value, index) => {
+  return safeValues.map((value, index) => {
     const barHeight = (value / max) * (height - padding * 2);
     return {
       x: padding + index * groupWidth + offset,
@@ -171,30 +42,29 @@ function buildBars(
   });
 }
 
-function buildStackedBars(dataset, width, height, padding = 28) {
-  const totals = dataset.orange.map(
-    (_, index) =>
-      dataset.orange[index] + dataset.pink[index] + dataset.blue[index],
+function buildStackedBars(points, width, height, padding = 28) {
+  const safePoints =
+    Array.isArray(points) && points.length
+      ? points
+      : weekLabels.map((label) => ({ label, segments: [0, 0, 0] }));
+
+  const totals = safePoints.map((point) =>
+    (point.segments || []).reduce((sum, value) => sum + Number(value || 0), 0)
   );
   const max = Math.max(...totals, 1);
-  const groupWidth = (width - padding * 2) / totals.length;
+  const groupWidth = (width - padding * 2) / safePoints.length;
   const barWidth = Math.min(26, groupWidth * 0.45);
 
-  return totals.map((_, index) => {
+  return safePoints.map((point, index) => {
+    const [orange = 0, pink = 0, blue = 0] = point.segments || [];
     const x = padding + index * groupWidth + (groupWidth - barWidth) / 2;
     const baseY = height - padding;
-
-    const orangeHeight = (dataset.orange[index] / max) * (height - padding * 2);
-    const pinkHeight = (dataset.pink[index] / max) * (height - padding * 2);
-    const blueHeight = (dataset.blue[index] / max) * (height - padding * 2);
+    const orangeHeight = (orange / max) * (height - padding * 2);
+    const pinkHeight = (pink / max) * (height - padding * 2);
+    const blueHeight = (blue / max) * (height - padding * 2);
 
     return {
-      orange: {
-        x,
-        y: baseY - orangeHeight,
-        width: barWidth,
-        height: orangeHeight,
-      },
+      orange: { x, y: baseY - orangeHeight, width: barWidth, height: orangeHeight },
       pink: {
         x,
         y: baseY - orangeHeight - pinkHeight,
@@ -211,111 +81,242 @@ function buildStackedBars(dataset, width, height, padding = 28) {
   });
 }
 
+function formatDateTime(dateString) {
+  const date = dateString ? new Date(dateString) : new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "pm" : "am";
+  const displayHours = hours % 12 || 12;
+  return `${year}.${month}.${day} ｜ ${displayHours} : ${minutes} ${ampm}`;
+}
+
+const gmvTooltipLines = [
+  "매출(GMV) : 카드수수료 등을 제외하지 않은 실제 판매된 매출",
+  "전체 매출 : AI 매출 + 일반 매출",
+  "AI 매출 : AI 가격변경이 ON인 상태에서 발생한 매출",
+  "일반 매출 : AI 가격변경이 OFF인 상태에서 발생한 매출",
+];
+
+const contributionTooltipLines = [
+  "공헌이익 : 매출-(매출원가+변동비)",
+];
+
+const aiPerformanceTooltipLines = [
+  "수익성 개선 : 수동 가격변경 대비 AI 가격변경으로 인한 공헌이익 개선 금액",
+  "AI 가격변경 횟수 : AI 가격변경된 횟수",
+  "악성재고 판매 : AI 가격변경을 통한 악성재고의 판매량",
+  "악성재고(재고 보유일수 90일 초과)의 감가상각 및 폐기비용으로 인한 손실을 줄이기 위해 AI가 판매가를 인하하여 판매를 촉진함",
+];
+
+const InfoTooltip = ({ title, lines }) => {
+  return (
+    <TooltipWrap>
+      <InfoButton type="button" aria-label={`${title} 설명`}>
+        <Info size={14} />
+      </InfoButton>
+      <TooltipBox>
+        <TooltipTitle>{title}</TooltipTitle>
+        {lines.map((line, index) => (
+          <TooltipLine key={`${title}-${index}`}>{line}</TooltipLine>
+        ))}
+      </TooltipBox>
+    </TooltipWrap>
+  );
+};
+
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [activeAiTab, setActiveAiTab] = useState("소시지");
-  const [activeShareTab, setActiveShareTab] = useState("소시지");
-  const [aiEnabled, setAiEnabled] = useState(true);
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [activeAiTab, setActiveAiTab] = useState("");
+  const [activeShareTab, setActiveShareTab] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
 
-  const activeAiData = useMemo(
-    () => aiTrendMap[activeAiTab] || aiTrendMap["소시지"],
-    [activeAiTab],
+  const fetchDashboard = async (options = {}) => {
+    try {
+      setLoading(true);
+      setError("");
+      const data = await getAdminDashboard(options);
+      setDashboard(data);
+
+      if (!activeAiTab && data.categories?.length) {
+        setActiveAiTab(data.categories[0]);
+      }
+
+      if (!activeShareTab && data.categories?.length) {
+        setActiveShareTab(data.categories[0]);
+      }
+    } catch (err) {
+      setError(err?.response?.data?.detail || "대시보드 데이터를 불러오지 못했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const handleSearch = () => {
+    fetchDashboard({
+      category: activeAiTab || undefined,
+      share_category: activeShareTab || undefined,
+      contribution_keyword: searchKeyword || undefined,
+    });
+  };
+
+  const handleAiTabClick = (tab) => {
+    setActiveAiTab(tab);
+    fetchDashboard({
+      category: tab,
+      share_category: activeShareTab || tab,
+      contribution_keyword: searchKeyword || undefined,
+    });
+  };
+
+  const handleShareTabClick = (tab) => {
+    setActiveShareTab(tab);
+    fetchDashboard({
+      category: activeAiTab || tab,
+      share_category: tab,
+      contribution_keyword: searchKeyword || undefined,
+    });
+  };
+
+  const aiTrend = dashboard?.ai_strategy_trend || [];
+  const contributionTrend = dashboard?.contribution_trend || [];
+
+  const shareBars = useMemo(
+    () => buildStackedBars(dashboard?.share_points || [], 520, 250, 28),
+    [dashboard?.share_points]
   );
 
-  const activeShareBars = useMemo(
+  const salesBars = useMemo(
     () =>
-      buildStackedBars(
-        shareMap[activeShareTab] || shareMap["소시지"],
-        520,
-        250,
+      buildBars(
+        contributionTrend.map((item) => Number(item.sales_qty || 0)),
+        760,
+        260,
         28,
+        10,
+        10
       ),
-    [activeShareTab],
+    [contributionTrend]
   );
 
-  const lowestSalesBars = useMemo(
-    () => buildBars(lowestProfitTrend.sales, 760, 260, 28, 10, 10),
-    [],
+  const profitBars = useMemo(
+    () =>
+      buildBars(
+        contributionTrend.map((item) => Number(item.contribution_profit || 0)),
+        760,
+        260,
+        28,
+        24,
+        10
+      ),
+    [contributionTrend]
   );
 
-  const lowestProfitBars = useMemo(
-    () => buildBars(lowestProfitTrend.profit, 760, 260, 28, 24, 10),
-    [],
-  );
+  if (loading && !dashboard) {
+    return <PageState>대시보드 데이터를 불러오는 중입니다.</PageState>;
+  }
+
+  if (error && !dashboard) {
+    return <PageState>{error}</PageState>;
+  }
+
+  const categories = dashboard?.categories?.length ? dashboard.categories : ["전체"];
+  const gmvCard = dashboard?.gmv_card;
+  const contributionCard = dashboard?.contribution_card;
+  const aiPerformance = dashboard?.ai_performance;
+
 
   return (
     <PageWrap>
       <PageTitle>대시보드</PageTitle>
-      <DateText>2026.04.06 ｜ 11 : 36 am</DateText>
+      <DateText>{formatDateTime(dashboard?.current_time)}</DateText>
+      {error ? <ErrorText>{error}</ErrorText> : null}
+
+      <SectionLabel>
+        <Dot $color="#6b7280" />
+        KPI
+      </SectionLabel>
+      <SectionSubText>오늘 운영 성과와 주요 지표를 빠르게 확인하세요.</SectionSubText>
 
       <TopMetricGrid>
         <TopMetricCard>
           <MetricHeader>
-            <MetricTitle>금일 매출액(GMV)</MetricTitle>
-            <Info size={14} />
+            <MetricTitle>{gmvCard?.title || "금일 매출액(GMV)"}</MetricTitle>
+            <InfoTooltip title="금일 매출액(GMV)" lines={gmvTooltipLines} />
           </MetricHeader>
 
           <MetricRow>
             <Dot $color="#22c55e" />
-            <MetricLabel>전체 매출</MetricLabel>
-            <MetricValue>12,345,678 원</MetricValue>
+            <MetricLabel>{gmvCard?.total_label || "전체 매출"}</MetricLabel>
+            <MetricValue>{numberFormat(gmvCard?.total_value)}</MetricValue>
           </MetricRow>
-          <MetricRow>
-            <Dot $color="#2563eb" />
-            <MetricLabel>AI 매출</MetricLabel>
-            <MetricSubValue>8,345,678 원</MetricSubValue>
-          </MetricRow>
-          <MetricRow>
-            <Dot $color="#ef5a67" />
-            <MetricLabel>일반 매출</MetricLabel>
-            <MetricSubValue>4,000,000 원</MetricSubValue>
-          </MetricRow>
+
+          {(gmvCard?.details || []).map((detail, index) => (
+            <MetricRow key={`gmv-${detail.label}-${index}`}>
+              <Dot $color={index === 0 ? "#2563eb" : "#ef5a67"} />
+              <MetricLabel>{detail.label}</MetricLabel>
+              <MetricSubValue>{numberFormat(detail.value)}</MetricSubValue>
+            </MetricRow>
+          ))}
         </TopMetricCard>
 
         <TopMetricCard>
           <MetricHeader>
-            <MetricTitle>금일 공헌이익</MetricTitle>
-            <Info size={14} />
+            <MetricTitle>{contributionCard?.title || "금일 공헌이익"}</MetricTitle>
+            <InfoTooltip title="금일 공헌이익" lines={contributionTooltipLines} />
           </MetricHeader>
 
           <MetricRow>
             <Dot $color="#22c55e" />
-            <MetricLabel>전체 이익</MetricLabel>
-            <MetricValue>12,345,678 원</MetricValue>
+            <MetricLabel>{contributionCard?.total_label || "전체 이익"}</MetricLabel>
+            <MetricValue>{numberFormat(contributionCard?.total_value)}</MetricValue>
           </MetricRow>
-          <MetricRow>
-            <Dot $color="#2563eb" />
-            <MetricLabel>AI 이익</MetricLabel>
-            <MetricSubValue>8,345,678 원</MetricSubValue>
-          </MetricRow>
-          <MetricRow>
-            <Dot $color="#ef5a67" />
-            <MetricLabel>일반 이익</MetricLabel>
-            <MetricSubValue>4,000,000 원</MetricSubValue>
-          </MetricRow>
+
+          {(contributionCard?.details || []).map((detail, index) => (
+            <MetricRow key={`profit-${detail.label}-${index}`}>
+              <Dot $color={index === 0 ? "#2563eb" : "#ef5a67"} />
+              <MetricLabel>{detail.label}</MetricLabel>
+              <MetricSubValue>{numberFormat(detail.value)}</MetricSubValue>
+            </MetricRow>
+          ))}
         </TopMetricCard>
 
         <TopMetricCard>
           <MetricHeader>
             <MetricTitle>AI 성과</MetricTitle>
-            <Info size={14} />
+            <InfoTooltip title="AI 성과" lines={aiPerformanceTooltipLines} />
           </MetricHeader>
 
           <MetricRow>
             <Dot $color="#22c55e" />
             <MetricLabel>수익성 개선</MetricLabel>
-            <MetricValue>2,345,678 원</MetricValue>
+            <MetricValue>{numberFormat(aiPerformance?.improvement_profit)}</MetricValue>
           </MetricRow>
+
           <MetricRow>
             <Dot $color="#2563eb" />
             <MetricLabel>AI 가격변경 횟수</MetricLabel>
-            <MetricSubValue>48 회</MetricSubValue>
+            <MetricSubValue>
+              {Number(aiPerformance?.ai_price_change_count || 0).toLocaleString()}회
+            </MetricSubValue>
           </MetricRow>
+
           <MetricRow>
             <Dot $color="#ef5a67" />
             <MetricLabel>악성재고 판매</MetricLabel>
-            <MetricSubValue>4 sku / 68 개</MetricSubValue>
+            <MetricSubValue>
+              {Number(aiPerformance?.bad_inventory_sold_sku_count || 0).toLocaleString()} SKU /{" "}
+              {qtyFormat(aiPerformance?.bad_inventory_sold_qty)}
+            </MetricSubValue>
           </MetricRow>
         </TopMetricCard>
       </TopMetricGrid>
@@ -324,31 +325,21 @@ export default function Dashboard() {
         <Dot $color="#2563eb" />
         AI 전략 및 최저가
       </SectionLabel>
+      <SectionSubText>시장 가격을 비교해 조정이 필요한 상품을 확인하세요.</SectionSubText>
 
       <ContentGrid>
         <Card>
           <CardTopRow>
-            <SectionTitle>AI 가격변경 성과</SectionTitle>
-
-            <ToggleWrap>
-              <ToggleLabel>AI</ToggleLabel>
-              <ToggleButton
-                type="button"
-                $active={aiEnabled}
-                onClick={() => setAiEnabled((prev) => !prev)}
-              >
-                <ToggleThumb $active={aiEnabled} />
-              </ToggleButton>
-            </ToggleWrap>
+            <SectionTitle>AI 가격 전략 성과</SectionTitle>
           </CardTopRow>
 
           <TabsRow>
-            {tabs.map((tab) => (
+            {categories.map((tab) => (
               <TabButton
                 key={tab}
                 type="button"
                 $active={activeAiTab === tab}
-                onClick={() => setActiveAiTab(tab)}
+                onClick={() => handleAiTabClick(tab)}
               >
                 {tab}
               </TabButton>
@@ -373,15 +364,12 @@ export default function Dashboard() {
                   strokeWidth="4"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points={buildLinePoints(activeAiData.aiSales, 520, 250, 22)}
-                />
-                <polyline
-                  fill="none"
-                  stroke="#7aa2ff"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={buildLinePoints(activeAiData.aiProfit, 520, 250, 22)}
+                  points={buildLinePoints(
+                    aiTrend.map((item) => Number(item.ai_profit || 0)),
+                    520,
+                    250,
+                    22
+                  )}
                 />
                 <polyline
                   fill="none"
@@ -390,40 +378,29 @@ export default function Dashboard() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   points={buildLinePoints(
-                    activeAiData.manualSales,
+                    aiTrend.map((item) => Number(item.manual_profit || 0)),
                     520,
                     250,
-                    22,
-                  )}
-                />
-                <polyline
-                  fill="none"
-                  stroke="#f3a6a6"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={buildLinePoints(
-                    activeAiData.manualProfit,
-                    520,
-                    250,
-                    22,
+                    22
                   )}
                 />
               </ChartSvg>
 
               <XAxis>
-                {weekLabels.map((label) => (
-                  <span key={label}>{label}</span>
-                ))}
+                {(aiTrend.length ? aiTrend : weekLabels.map((label) => ({ label }))).map(
+                  (item, index) => (
+                    <span key={`${item.label}-${index}`}>{item.label}</span>
+                  )
+                )}
               </XAxis>
             </ChartCanvas>
 
             <AxisRight>
-              <span>5백</span>
-              <span>4백</span>
-              <span>3백</span>
-              <span>2백</span>
-              <span>1백</span>
+              <span>5천</span>
+              <span>4천</span>
+              <span>3천</span>
+              <span>2천</span>
+              <span>1천</span>
               <span>0</span>
             </AxisRight>
           </DualAxisChartWrap>
@@ -431,18 +408,10 @@ export default function Dashboard() {
           <LegendRow>
             <LegendItem>
               <Dot $color="#2563eb" />
-              AI 매출
-            </LegendItem>
-            <LegendItem>
-              <Dot $color="#7aa2ff" />
               AI 이익
             </LegendItem>
             <LegendItem>
               <Dot $color="#ef4444" />
-              수동 매출(예측)
-            </LegendItem>
-            <LegendItem>
-              <Dot $color="#f3a6a6" />
               수동 이익(예측)
             </LegendItem>
           </LegendRow>
@@ -450,176 +419,50 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader>
-            <SectionTitle>전략 수정 필요한 상품</SectionTitle>
+            <SectionTitle>가격 조정 필요 상품</SectionTitle>
             <Info size={14} />
           </CardHeader>
 
           <MiniTable>
             <thead>
               <tr>
-                <th>순위</th>
-                <th>상품코드</th>
                 <th>상품명</th>
+                <th>현재가</th>
+                <th>시장 최저가</th>
+                <th>AI 추천가</th>
+                <th>예상 효과</th>
                 <th>사유</th>
               </tr>
             </thead>
             <tbody>
-              {lowStrategyRows.map((row) => (
-                <tr key={`strategy-${row.rank}`}>
-                  <td>{row.rank}</td>
-                  <td>
-                    <CodeButton
-                      type="button"
-                      onClick={() =>
-                        navigate(`/admin/product-update/${row.productCode}`)
-                      }
-                    >
-                      {row.productCode}
-                    </CodeButton>
-                  </td>
+              {(dashboard?.adjustment_items || []).map((row) => (
+                <tr key={`adjust-${row.product_code}`}>
                   <td>
                     <ProductAnchor
-                      href={`/product-detail?productCode=${row.productCode}`}
+                      href={`/product-detail?productCode=${row.product_code}`}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      {row.productName}
+                      {row.product_name}
                     </ProductAnchor>
                   </td>
+                  <td>{numberFormat(row.current_price)}</td>
+                  <td>
+                    <NegativeText>
+                      {row.market_lowest_price ? numberFormat(row.market_lowest_price) : "-"}
+                    </NegativeText>
+                  </td>
+                  <td>
+                    <BlueText>
+                      {row.ai_recommended_price ? numberFormat(row.ai_recommended_price) : "-"}
+                    </BlueText>
+                  </td>
+                  <td>{row.expected_effect}</td>
                   <td>{row.reason}</td>
                 </tr>
               ))}
             </tbody>
           </MiniTable>
-        </Card>
-
-        <Card>
-          <SmallHeader>
-            <SectionTitle>🚨 현재 최저가가 아닌 상품</SectionTitle>
-            <HeaderLink>{"< 전략 수정 추천 >"}</HeaderLink>
-          </SmallHeader>
-
-          <MiniTable>
-            <thead>
-              <tr>
-                <th>상품코드</th>
-                <th>상품명</th>
-                <th>판매가</th>
-                <th>최저가</th>
-                <th>차이</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {notLowestRows.map((row, index) => (
-                <tr key={`not-lowest-${index}`}>
-                  <td>
-                    <CodeButton
-                      type="button"
-                      onClick={() =>
-                        navigate(`/admin/product-update/${row.productCode}`)
-                      }
-                    >
-                      {row.productCode}
-                    </CodeButton>
-                  </td>
-                  <td>
-                    <ProductAnchor
-                      href={`/product-detail?productCode=${row.productCode}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {row.productName}
-                    </ProductAnchor>
-                  </td>
-                  <td>{row.salePrice}</td>
-                  <td>{row.lowestPrice}</td>
-                  <td>{row.gap}</td>
-                  <td>
-                    <RateBadge $negative>{row.rate}</RateBadge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </MiniTable>
-        </Card>
-
-        <Card>
-          <CardTopRow>
-            <SectionTitle>경쟁사 최저가 추이</SectionTitle>
-
-            <SearchWrap>
-              <SearchInput
-                value={searchKeyword}
-                onChange={(e) => setSearchKeyword(e.target.value)}
-                placeholder="상품명, 상품코드로 검색"
-              />
-              <SearchIconWrap>
-                <Search size={15} />
-              </SearchIconWrap>
-            </SearchWrap>
-          </CardTopRow>
-
-          <InfoText>
-            선택된상품 : 9744302255　농심 신라면건면 114g, 1개
-          </InfoText>
-
-          <LegendRow>
-            <LegendItem>
-              <Dot $color="#2563eb" />내 상품
-            </LegendItem>
-            <LegendItem>
-              <Dot $color="#ef4444" />
-              경쟁사 상품
-            </LegendItem>
-          </LegendRow>
-
-          <DualAxisChartWrap>
-            <AxisLeft>
-              <span>5천</span>
-              <span>4천</span>
-              <span>3천</span>
-              <span>2천</span>
-              <span>1천</span>
-              <span>0</span>
-            </AxisLeft>
-
-            <ChartCanvas>
-              <ChartSvg viewBox="0 0 520 250" preserveAspectRatio="none">
-                <polyline
-                  fill="none"
-                  stroke="#2563eb"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={buildLinePoints(competitorTrend.my, 520, 250, 22)}
-                />
-                <polyline
-                  fill="none"
-                  stroke="#ef4444"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={buildLinePoints(competitorTrend.rival, 520, 250, 22)}
-                />
-              </ChartSvg>
-
-              <XAxis>
-                {weekLabels.map((label) => (
-                  <span key={label}>{label}</span>
-                ))}
-              </XAxis>
-            </ChartCanvas>
-
-            <AxisRight>
-              <span>5백</span>
-              <span>4백</span>
-              <span>3백</span>
-              <span>2백</span>
-              <span>1백</span>
-              <span>0</span>
-            </AxisRight>
-          </DualAxisChartWrap>
         </Card>
       </ContentGrid>
 
@@ -627,28 +470,42 @@ export default function Dashboard() {
         <Dot $color="#eab308" />
         공헌이익
       </SectionLabel>
+      <SectionSubText>수익성이 낮은 상품과 개선 대상을 점검하세요.</SectionSubText>
 
       <ContentGrid>
         <Card>
-          <SectionTitle>최저가 변동 및 공헌이익</SectionTitle>
-          <InfoText>상품코드 : 9744302255</InfoText>
+          <CardTopRow>
+            <SectionTitle>가격 변화에 따른 공헌이익</SectionTitle>
+            <SearchWrap>
+              <SearchInput
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                placeholder="상품명, 상품코드로 검색"
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              />
+              <SearchIconWrap role="button" onClick={handleSearch}>
+                <Search size={15} />
+              </SearchIconWrap>
+            </SearchWrap>
+          </CardTopRow>
+
+          <InfoText>
+            상품코드 : {dashboard?.contribution_product_code || "-"}{" "}
+            {dashboard?.contribution_product_name || ""}
+          </InfoText>
 
           <LegendRow>
             <LegendItem>
-              <Dot $color="#ef4444" />
-              최저가
+              <Dot $color="#ef4444" /> 최저가
             </LegendItem>
             <LegendItem>
-              <Dot $color="#22c55e" />
-              나의 판매가
+              <Dot $color="#22c55e" /> 나의 판매가
             </LegendItem>
             <LegendItem>
-              <Dot $color="#2563eb" />
-              판매량
+              <Dot $color="#2563eb" /> 판매량
             </LegendItem>
             <LegendItem>
-              <Dot $color="#eab308" />
-              공헌이익
+              <Dot $color="#eab308" /> 공헌이익
             </LegendItem>
           </LegendRow>
 
@@ -664,9 +521,9 @@ export default function Dashboard() {
 
             <ChartCanvas>
               <BarSvg viewBox="0 0 760 260" preserveAspectRatio="none">
-                {lowestSalesBars.map((bar, index) => (
+                {salesBars.map((bar, index) => (
                   <rect
-                    key={`sales-bar-${index}`}
+                    key={`sales-${index}`}
                     x={bar.x}
                     y={bar.y}
                     width={bar.width}
@@ -675,9 +532,10 @@ export default function Dashboard() {
                     fill="#2563eb"
                   />
                 ))}
-                {lowestProfitBars.map((bar, index) => (
+
+                {profitBars.map((bar, index) => (
                   <rect
-                    key={`profit-bar-${index}`}
+                    key={`profit-${index}`}
                     x={bar.x}
                     y={bar.y}
                     width={bar.width}
@@ -694,12 +552,13 @@ export default function Dashboard() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   points={buildLinePoints(
-                    lowestProfitTrend.lowest,
+                    contributionTrend.map((item) => Number(item.lowest_price || 0)),
                     760,
                     260,
-                    28,
+                    28
                   )}
                 />
+
                 <polyline
                   fill="none"
                   stroke="#22c55e"
@@ -707,17 +566,20 @@ export default function Dashboard() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   points={buildLinePoints(
-                    lowestProfitTrend.myPrice,
+                    contributionTrend.map((item) => Number(item.my_price || 0)),
                     760,
                     260,
-                    28,
+                    28
                   )}
                 />
               </BarSvg>
 
               <XAxisNine>
-                {hourLabels.map((label) => (
-                  <span key={label}>{label}</span>
+                {(contributionTrend.length
+                  ? contributionTrend
+                  : hourLabels.map((label) => ({ label }))
+                ).map((item, index) => (
+                  <span key={`${item.label}-${index}`}>{item.label}</span>
                 ))}
               </XAxisNine>
             </ChartCanvas>
@@ -735,8 +597,7 @@ export default function Dashboard() {
 
         <Card>
           <SmallHeader>
-            <SectionTitle>🚨 공헌이익률 낮은 상품</SectionTitle>
-            <HeaderLink>{"< 전략 수정 추천 >"}</HeaderLink>
+            <SectionTitle>🚨 수익성 개선 필요 상품</SectionTitle>
           </SmallHeader>
 
           <MiniTable>
@@ -747,34 +608,36 @@ export default function Dashboard() {
                 <th>상품명</th>
                 <th>평균이익</th>
                 <th>이익률</th>
+                <th>개선 제안</th>
               </tr>
             </thead>
             <tbody>
-              {lowMarginRows.map((row) => (
-                <tr key={`margin-${row.rank}`}>
+              {(dashboard?.low_profit_items || []).map((row) => (
+                <tr key={`low-profit-${row.rank}`}>
                   <td>{row.rank}</td>
                   <td>
                     <CodeButton
                       type="button"
-                      onClick={() =>
-                        navigate(`/admin/product-update/${row.productCode}`)
-                      }
+                      onClick={() => navigate(`/admin/product-update/${row.product_code}`)}
                     >
-                      {row.productCode}
+                      {row.product_code}
                     </CodeButton>
                   </td>
                   <td>
                     <ProductAnchor
-                      href={`/product-detail?productCode=${row.productCode}`}
+                      href={`/product-detail?productCode=${row.product_code}`}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      {row.productName}
+                      {row.product_name}
                     </ProductAnchor>
                   </td>
-                  <td>{row.avgProfit}</td>
+                  <td>{numberFormat(row.average_profit)}</td>
                   <td>
-                    <NegativeText>{row.profitRate}</NegativeText>
+                    <NegativeText>{percentText(row.profit_rate)}</NegativeText>
+                  </td>
+                  <td>
+                    <GreenText>{row.suggestion}</GreenText>
                   </td>
                 </tr>
               ))}
@@ -787,12 +650,12 @@ export default function Dashboard() {
         <Dot $color="#22c55e" />
         판매랭킹 및 비중
       </SectionLabel>
+      <SectionSubText>주요 판매 상품과 카테고리 비중을 확인하세요.</SectionSubText>
 
       <BottomGrid>
         <Card>
           <SmallHeader>
             <SectionTitle>판매랭킹 TOP 5</SectionTitle>
-            <HeaderLink>{"< 금일 판매량 >"}</HeaderLink>
           </SmallHeader>
 
           <MiniTable>
@@ -801,33 +664,31 @@ export default function Dashboard() {
                 <th>순위</th>
                 <th>상품코드</th>
                 <th>상품명</th>
-                <th>판매량</th>
+                <th>금일 판매량</th>
               </tr>
             </thead>
             <tbody>
-              {rankingRows.map((row) => (
+              {(dashboard?.ranking_items || []).map((row) => (
                 <tr key={`rank-${row.rank}`}>
                   <td>{row.rank}</td>
                   <td>
                     <CodeButton
                       type="button"
-                      onClick={() =>
-                        navigate(`/admin/product-update/${row.productCode}`)
-                      }
+                      onClick={() => navigate(`/admin/product-update/${row.product_code}`)}
                     >
-                      {row.productCode}
+                      {row.product_code}
                     </CodeButton>
                   </td>
                   <td>
                     <ProductAnchor
-                      href={`/product-detail?productCode=${row.productCode}`}
+                      href={`/product-detail?productCode=${row.product_code}`}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      {row.productName}
+                      {row.product_name}
                     </ProductAnchor>
                   </td>
-                  <td>{row.salesQty}</td>
+                  <td>{qtyFormat(row.sales_qty)}</td>
                 </tr>
               ))}
             </tbody>
@@ -838,12 +699,12 @@ export default function Dashboard() {
           <SectionTitle>상품별 판매 비중</SectionTitle>
 
           <TabsRow>
-            {tabs.map((tab) => (
+            {categories.map((tab) => (
               <TabButton
                 key={tab}
                 type="button"
                 $active={activeShareTab === tab}
-                onClick={() => setActiveShareTab(tab)}
+                onClick={() => handleShareTabClick(tab)}
               >
                 {tab}
               </TabButton>
@@ -852,7 +713,7 @@ export default function Dashboard() {
 
           <ChartCanvasOnly>
             <ChartSvg viewBox="0 0 520 250" preserveAspectRatio="none">
-              {activeShareBars.map((bar, index) => (
+              {shareBars.map((bar, index) => (
                 <g key={`share-${index}`}>
                   <rect
                     x={bar.orange.x}
@@ -883,8 +744,11 @@ export default function Dashboard() {
             </ChartSvg>
 
             <XAxis>
-              {weekLabels.map((label) => (
-                <span key={label}>{label}</span>
+              {(dashboard?.share_points?.length
+                ? dashboard.share_points
+                : weekLabels.map((label) => ({ label }))
+              ).map((item, index) => (
+                <span key={`${item.label}-${index}`}>{item.label}</span>
               ))}
             </XAxis>
           </ChartCanvasOnly>
@@ -900,6 +764,19 @@ const PageWrap = styled.div`
   min-height: 100%;
 `;
 
+const PageState = styled.div`
+  padding: 40px 24px;
+  color: #374151;
+  font-size: 15px;
+`;
+
+const ErrorText = styled.div`
+  margin-bottom: 14px;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 600;
+`;
+
 const PageTitle = styled.h2`
   margin: 0;
   color: #111827;
@@ -913,6 +790,13 @@ const DateText = styled.div`
   color: #374151;
   font-size: 18px;
   font-weight: 600;
+`;
+
+const SectionSubText = styled.div`
+  margin: -6px 0 16px 18px;
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 500;
 `;
 
 const TopMetricGrid = styled.div`
@@ -1022,173 +906,88 @@ const CardTopRow = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
 `;
 
 const CardHeader = styled(CardTopRow)``;
-
-const SmallHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-`;
-
-const HeaderLink = styled.button`
-  border: none;
-  background: transparent;
-  padding: 0;
-  color: #6b7280;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-`;
-
-const ToggleWrap = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const ToggleLabel = styled.div`
-  color: #111827;
-  font-size: 13px;
-  font-weight: 700;
-`;
-
-const ToggleButton = styled.button`
-  width: 38px;
-  height: 22px;
-  border: none;
-  border-radius: 999px;
-  background: ${({ $active }) => ($active ? "#2563eb" : "#d1d5db")};
-  padding: 0;
-  position: relative;
-  cursor: pointer;
-`;
-
-const ToggleThumb = styled.span`
-  position: absolute;
-  top: 50%;
-  left: ${({ $active }) => ($active ? "18px" : "2px")};
-  transform: translateY(-50%);
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  background: #ffffff;
-  transition: left 0.15s ease;
+const SmallHeader = styled(CardTopRow)`
+  margin-bottom: 10px;
 `;
 
 const TabsRow = styled.div`
   display: flex;
-  align-items: center;
   gap: 18px;
+  margin: 16px 0 8px;
   flex-wrap: wrap;
-  margin-bottom: 14px;
 `;
 
 const TabButton = styled.button`
-  position: relative;
   border: none;
   background: transparent;
-  padding: 0 0 10px;
-  color: ${({ $active }) => ($active ? "#111827" : "#6b7280")};
+  padding: 0 0 8px;
+  color: ${({ $active }) => ($active ? "#111827" : "#9ca3af")};
+  border-bottom: 2px solid ${({ $active }) => ($active ? "#3b5bfd" : "transparent")};
   font-size: 13px;
-  font-weight: ${({ $active }) => ($active ? 700 : 600)};
+  font-weight: 700;
   cursor: pointer;
-
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: ${({ $active }) => ($active ? "100%" : "0")};
-    height: 3px;
-    border-radius: 999px;
-    background: #2563eb;
-    transition: width 0.18s ease;
-  }
 `;
 
 const DualAxisChartWrap = styled.div`
   display: grid;
-  grid-template-columns: 34px 1fr 34px;
-  gap: 8px;
+  grid-template-columns: 38px 1fr 38px;
   align-items: stretch;
+  gap: 8px;
 `;
 
 const AxisLeft = styled.div`
-  height: 250px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: flex-end;
+  padding: 10px 0 28px;
   color: #9ca3af;
   font-size: 11px;
-  font-weight: 600;
-  text-align: right;
 `;
 
 const AxisRight = styled(AxisLeft)`
-  text-align: left;
+  align-items: flex-start;
 `;
 
 const ChartCanvas = styled.div`
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
 `;
 
-const ChartCanvasOnly = styled.div`
-  margin-top: 8px;
+const ChartCanvasOnly = styled(ChartCanvas)`
+  margin-top: 12px;
 `;
 
 const ChartSvg = styled.svg`
   width: 100%;
   height: 250px;
-  display: block;
+  overflow: visible;
 `;
 
 const XAxis = styled.div`
+  margin-top: 6px;
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  margin-top: 4px;
-
-  span {
-    color: #9ca3af;
-    font-size: 11px;
-    font-weight: 600;
-    text-align: center;
-  }
-`;
-
-const XAxisNine = styled.div`
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  margin-top: 4px;
-
-  span {
-    color: #9ca3af;
-    font-size: 11px;
-    font-weight: 600;
-    text-align: center;
-  }
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  color: #9ca3af;
+  font-size: 11px;
+  text-align: center;
 `;
 
 const LegendRow = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 14px;
   flex-wrap: wrap;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  gap: 14px;
+  margin-top: 12px;
 `;
 
 const LegendItem = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #374151;
+  color: #6b7280;
   font-size: 12px;
   font-weight: 600;
 `;
@@ -1197,27 +996,29 @@ const MiniTable = styled.table`
   width: 100%;
   border-collapse: collapse;
 
-  thead th {
-    padding: 10px 8px;
-    border-bottom: 1px solid #eef0f4;
-    color: #9ca3af;
-    font-size: 11px;
-    font-weight: 700;
-    text-align: center;
-    white-space: nowrap;
-  }
-
-  tbody td {
+  th,
+  td {
     padding: 12px 8px;
-    border-bottom: 1px solid #f3f4f6;
-    color: #374151;
+    border-bottom: 1px solid #f1f5f9;
     font-size: 12px;
-    text-align: center;
-    white-space: nowrap;
+    color: #374151;
+    text-align: left;
+    vertical-align: middle;
   }
 
-  tbody tr:last-child td {
-    border-bottom: none;
+  th {
+    color: #9ca3af;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+`;
+
+const ProductAnchor = styled.a`
+  color: #374151;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
 `;
 
@@ -1225,27 +1026,72 @@ const CodeButton = styled.button`
   border: none;
   background: transparent;
   padding: 0;
-  color: #111827;
+  color: #374151;
   font-size: 12px;
-  font-weight: 700;
   cursor: pointer;
-
-  &:hover {
-    color: #2563eb;
-    text-decoration: underline;
-  }
 `;
 
-const ProductAnchor = styled.a`
-  color: #111827;
-  font-size: 12px;
-  font-weight: 500;
-  text-decoration: none;
+const SearchWrap = styled.div`
+  width: 220px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+`;
 
-  &:hover {
-    color: #2563eb;
-    text-decoration: underline;
-  }
+const SearchInput = styled.input`
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 9px 10px;
+  font-size: 12px;
+  color: #374151;
+  background: transparent;
+`;
+
+const SearchIconWrap = styled.div`
+  width: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  cursor: pointer;
+`;
+
+const InfoText = styled.div`
+  margin: 10px 0 12px;
+  color: #6b7280;
+  font-size: 12px;
+`;
+
+const BarChartWrap = styled.div`
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  gap: 8px;
+`;
+
+const BarAxisLeft = styled(AxisLeft)`
+  padding-bottom: 28px;
+`;
+
+const BarAxisRight = styled(AxisRight)`
+  padding-bottom: 28px;
+`;
+
+const BarSvg = styled.svg`
+  width: 100%;
+  height: 260px;
+  overflow: visible;
+`;
+
+const XAxisNine = styled.div`
+  margin-top: 6px;
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  color: #9ca3af;
+  font-size: 11px;
+  text-align: center;
 `;
 
 const NegativeText = styled.span`
@@ -1253,86 +1099,81 @@ const NegativeText = styled.span`
   font-weight: 700;
 `;
 
-const RateBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 52px;
-  height: 24px;
-  padding: 0 8px;
-  border-radius: 8px;
-  background: ${({ $negative }) => ($negative ? "#fee2e2" : "#dcfce7")};
-  color: ${({ $negative }) => ($negative ? "#ef4444" : "#16a34a")};
-  font-size: 12px;
+const BlueText = styled.span`
+  color: #2563eb;
   font-weight: 700;
 `;
 
-const SearchWrap = styled.div`
+const GreenText = styled.span`
+  color: #16a34a;
+  font-weight: 700;
+`;
+
+const TooltipWrap = styled.div`
   position: relative;
-  min-width: 230px;
-`;
-
-const SearchInput = styled.input`
-  width: 100%;
-  height: 38px;
-  padding: 0 36px 0 12px;
-  border: 1px solid #edf0f4;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #374151;
-  font-size: 13px;
-  outline: none;
-
-  &:focus {
-    border-color: #cfd8e3;
-  }
-
-  &::placeholder {
-    color: #9ca3af;
-  }
-`;
-
-const SearchIconWrap = styled.div`
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
-  color: #9ca3af;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+
+  &:hover > div {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
 `;
 
-const InfoText = styled.div`
-  margin-bottom: 10px;
-  color: #4b5563;
-  font-size: 12px;
-  font-weight: 600;
-`;
-
-const BarChartWrap = styled.div`
-  display: grid;
-  grid-template-columns: 42px 1fr 42px;
-  gap: 8px;
-  align-items: stretch;
-`;
-
-const BarAxisLeft = styled.div`
-  height: 260px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+const InfoButton = styled.button`
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: #9ca3af;
-  font-size: 11px;
-  font-weight: 600;
-  text-align: right;
+  cursor: pointer;
 `;
 
-const BarAxisRight = styled(BarAxisLeft)`
-  text-align: left;
+const TooltipBox = styled.div`
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 320px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #111827;
+  color: #f9fafb;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.22);
+  z-index: 30;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    right: 10px;
+    width: 12px;
+    height: 12px;
+    background: #111827;
+    transform: rotate(45deg);
+  }
 `;
 
-const BarSvg = styled.svg`
-  width: 100%;
-  height: 260px;
-  display: block;
+const TooltipTitle = styled.div`
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+`;
+
+const TooltipLine = styled.div`
+  font-size: 12px;
+  line-height: 1.55;
+  color: #e5e7eb;
+
+  & + & {
+    margin-top: 6px;
+  }
 `;
