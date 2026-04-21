@@ -7,9 +7,17 @@ export default function SearchBar({
   onChange,
   placeholder = "Search...",
   variant = "default",
+  width,
+  border = false, // 기본값: 테두리 없음
+  shadow = true, // 기본값: 그림자 있음
 }) {
   return (
-    <SearchWrap $variant={variant}>
+    <SearchWrap
+      $variant={variant}
+      $width={width}
+      $border={border}
+      $shadow={shadow}
+    >
       <SearchInput
         $variant={variant}
         value={value}
@@ -26,10 +34,18 @@ export default function SearchBar({
 const SearchWrap = styled.div`
   position: relative;
   width: 100%;
-  max-width: ${({ $variant }) =>
-    $variant === "inventory" ? "224px" : "240px"};
-  box-shadow: var(--shadow);
+  max-width: ${({ $width, $variant }) =>
+    $width || ($variant === "inventory" ? "224px" : "240px")};
   border-radius: 10px;
+  transition: all 0.2s;
+
+  box-shadow: ${({ $shadow }) => ($shadow ? "var(--shadow)" : "none")};
+  border: ${({ $border }) =>
+    $border ? "1px solid var(--border)" : "1px solid transparent"};
+
+  &:focus-within {
+    border-color: var(--focus-border);
+  }
 
   @media (max-width: 900px) {
     max-width: 100%;
@@ -55,15 +71,11 @@ const SearchInput = styled.input`
   color: var(--font);
   font-size: 13px;
   outline: none;
-  border: 1px solid transparent;
+  border: none;
   transition: all 0.2s;
 
   &::placeholder {
     color: var(--placeholder);
-  }
-
-  &:focus {
-    border-color: var(--focus-border);
   }
 
   ${({ $variant }) =>

@@ -1,9 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { css, createGlobalStyle } from "styled-components";
 import { Search, Plus, Calendar } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import ReactQuill, { Quill } from "react-quill";
 import BlotFormatter from "quill-blot-formatter";
+import SearchBar from "../../../components/SearchBar";
+import SearchDate from "../../../components/SearchDate";
+import SelectBar from "../../../components/SelectBar";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import "react-quill/dist/quill.snow.css";
 
 import { getCategories } from "../../../api/category";
@@ -15,6 +20,28 @@ import {
   uploadAdminThumbnailImage,
 } from "../../../api/adminProduct";
 import ToggleSwitch from "../../../components/ToggleSwitch";
+
+const DatePickerStyle = createGlobalStyle`
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
+  .react-datepicker {
+    font-family: inherit;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  }
+  .react-datepicker__header {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+  .react-datepicker__day--selected {
+    background-color: var(--blue) !important;
+    border-radius: 8px;
+  }
+`;
 
 Quill.register("modules/blotFormatter", BlotFormatter);
 
@@ -72,6 +99,7 @@ export default function ProductUpdate() {
     useAiPrice: false,
     minPrice: "",
     maxPrice: "",
+    pricePerTime: "",
 
     stockQty: "",
     safetyStock: "",
@@ -449,6 +477,7 @@ export default function ProductUpdate() {
   if (isPageLoading) {
     return (
       <PageWrap>
+        <DatePickerStyle />
         <PageTitle>상품 수정</PageTitle>
         <LoadingBox>상품 정보를 불러오는 중입니다.</LoadingBox>
       </PageWrap>
@@ -517,12 +546,9 @@ export default function ProductUpdate() {
           ) : (
             <SearchCategoryPanel>
               <CategorySearchWrap>
-                <SearchIconWrap>
-                  <Search size={14} />
-                </SearchIconWrap>
-                <CategorySearchInput
+                <SearchBar
                   value={categoryKeyword}
-                  onChange={(e) => setCategoryKeyword(e.target.value)}
+                  onChange={setCategoryKeyword}
                   placeholder="카테고리 검색..."
                 />
               </CategorySearchWrap>
@@ -576,12 +602,19 @@ export default function ProductUpdate() {
             <FormRow>
               <FormLabel>상품명</FormLabel>
               <FormField>
-                <Input
-                  value={form.productName}
-                  onChange={(e) => handleChange("productName", e.target.value)}
-                  maxLength={100}
-                />
-                <HelperText>{form.productName.length}/100</HelperText>
+                <ProductNameWrap>
+                  <ProductNameInput
+                    value={form.productName}
+                    onChange={(e) =>
+                      handleChange("productName", e.target.value)
+                    }
+                    placeholder="상품명을 입력하세요"
+                    maxLength={100}
+                  />
+                  <InnerHelperText>
+                    {form.productName.length} / 100
+                  </InnerHelperText>
+                </ProductNameWrap>
               </FormField>
             </FormRow>
           </FormGrid>
@@ -594,16 +627,15 @@ export default function ProductUpdate() {
             <FormRow>
               <FormLabel>판매상태</FormLabel>
               <FormField>
-                <Select
+                <SelectBar
+                  options={saleStatusOptions}
                   value={form.saleStatus}
-                  onChange={(e) => handleChange("saleStatus", e.target.value)}
-                >
-                  {saleStatusOptions.map((item) => (
-                    <option key={item.value} value={item.value}>
-                      {item.label}
-                    </option>
-                  ))}
-                </Select>
+                  onChange={(val) => handleChange("saleStatus", val)}
+                  placeholder="판매상태 선택"
+                  width="220px"
+                  border
+                  shadow={false}
+                />
               </FormField>
             </FormRow>
           </FormGrid>
@@ -718,6 +750,23 @@ export default function ProductUpdate() {
                 </UnitInputWrap>
               </FormField>
             </FormRow>
+
+            <FormRow>
+              <FormLabel>회당 조정가</FormLabel>
+              <FormField>
+                <UnitInputWrap>
+                  <Input
+                    value={form.pricePerTime}
+                    onChange={(e) =>
+                      handleChange("pricePerTime", e.target.value)
+                    }
+                    placeholder="회당 조정가"
+                    disabled={!form.useAiPrice}
+                  />
+                  <UnitText>원</UnitText>
+                </UnitInputWrap>
+              </FormField>
+            </FormRow>
           </FormGrid>
         </Section>
 
@@ -757,14 +806,15 @@ export default function ProductUpdate() {
             <FormRow>
               <FormLabel>유통기한</FormLabel>
               <FormField>
-                <DateInputWrap>
-                  <Input
-                    type="date"
-                    value={form.expiryDate}
-                    onChange={(e) => handleChange("expiryDate", e.target.value)}
-                    readOnly
-                  />
-                </DateInputWrap>
+                <SearchDate
+                  type="single"
+                  selected={form.expiryDate}
+                  onChange={(date) => handleChange("expiryDate", date)}
+                  placeholderText="날짜 선택"
+                  width="220px"
+                  border={true}
+                  shadow={false}
+                />
               </FormField>
             </FormRow>
           </FormGrid>
@@ -934,72 +984,66 @@ export default function ProductUpdate() {
 }
 
 const PageWrap = styled.div`
-  padding: 24px;
-  background: #f6f8fb;
+  padding: 25px;
+  background: var(--background);
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
 `;
-
 const PageTitle = styled.h2`
-  margin: 0 0 18px;
-  color: #111827;
-  font-size: 28px;
-  font-weight: 800;
+  margin: 0;
+  font-size: var(--title);
+  font-weight: 700;
+  color: var(--font);
 `;
-
 const LoadingBox = styled.div`
   padding: 24px;
-  border: 1px solid #eef2f7;
+  border: 1px solid var(--border);
   border-radius: 16px;
-  background: #ffffff;
-  color: #6b7280;
-  font-size: 14px;
+  background: white;
+  color: var(--font2);
 `;
-
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 15px;
 `;
-
 const Section = styled.section`
   padding: 18px 20px;
-  border: 1px solid #eef2f7;
+  box-shadow: var(--shadow);
   border-radius: 16px;
-  background: #ffffff;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 `;
-
 const SectionTitle = styled.h3`
-  margin: 0 0 16px;
-  color: #111827;
-  font-size: 20px;
-  font-weight: 800;
+  color: var(--font);
+  font-size: 17px;
+  font-weight: 600;
 `;
-
 const CategoryTabs = styled.div`
   display: inline-flex;
-  margin-bottom: 12px;
+  width: 240px;
+  height: 35px;
   border-radius: 10px;
-  background: #f3f6fb;
-  padding: 4px;
+  background: var(--choice);
+  padding: 3px;
 `;
-
 const CategoryTabButton = styled.button`
-  min-width: 120px;
-  height: 34px;
-  border: none;
+  flex: 1;
   border-radius: 8px;
-  background: ${({ $active }) => ($active ? "#2563eb" : "transparent")};
-  color: ${({ $active }) => ($active ? "#ffffff" : "#6b7280")};
+  background: ${({ $active }) => ($active ? "var(--blue)" : "transparent")};
+  color: ${({ $active }) => ($active ? "white" : "var(--placeholder)")};
   font-size: 13px;
   font-weight: 700;
-  cursor: pointer;
+  box-shadow: ${({ $active }) => ($active ? "var(--shadow)" : "none")};
 `;
-
 const CategoryPanel = styled.div`
   display: grid;
   grid-template-columns: 220px 220px;
   gap: 12px;
-  margin-bottom: 12px;
 
   @media (max-width: 700px) {
     grid-template-columns: 1fr;
@@ -1007,8 +1051,8 @@ const CategoryPanel = styled.div`
 `;
 
 const CategoryColumn = styled.div`
-  min-height: 180px;
-  border: 1px solid #e8edf4;
+  min-height: 40px;
+  border: 1px solid var(--border);
   border-radius: 12px;
   background: #ffffff;
   overflow: hidden;
@@ -1016,12 +1060,12 @@ const CategoryColumn = styled.div`
 
 const CategoryItemButton = styled.button`
   width: 100%;
-  min-height: 42px;
+  min-height: 40px;
   padding: 0 14px;
   border: none;
-  border-bottom: 1px solid #f1f4f8;
-  background: ${({ $active }) => ($active ? "#f4f8ff" : "#ffffff")};
-  color: ${({ $active }) => ($active ? "#2563eb" : "#374151")};
+  border-bottom: 1px solid var(--border);
+  background: ${({ $active }) => ($active ? "var(--choice)" : "#ffffff")};
+  color: ${({ $active }) => ($active ? "var(--blue)" : "var(--font)")};
   font-size: 13px;
   font-weight: ${({ $active }) => ($active ? 700 : 500)};
   display: flex;
@@ -1033,62 +1077,30 @@ const CategoryItemButton = styled.button`
     border-bottom: none;
   }
 `;
-
 const SearchCategoryPanel = styled.div`
   margin-bottom: 12px;
 `;
-
 const CategorySearchWrap = styled.div`
   position: relative;
   max-width: 360px;
-  margin-bottom: 12px;
 `;
-
-const SearchIconWrap = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 12px;
-  transform: translateY(-50%);
-  color: #9ca3af;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const CategorySearchInput = styled.input`
-  width: 100%;
-  height: 40px;
-  padding: 0 14px 0 36px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #374151;
-  font-size: 13px;
-  outline: none;
-
-  &:focus {
-    border-color: #cfd8e3;
-  }
-`;
-
 const SearchResultList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: 12px;
 `;
-
 const SearchResultButton = styled.button`
   height: 34px;
-  padding: 0 12px;
-  border: 1px solid ${({ $active }) => ($active ? "#2563eb" : "#e5e7eb")};
+  padding: 0 14px;
   border-radius: 999px;
-  background: ${({ $active }) => ($active ? "#eff6ff" : "#ffffff")};
-  color: ${({ $active }) => ($active ? "#2563eb" : "#4b5563")};
+  border: 1px solid
+    ${({ $active }) => ($active ? "var(--blue)" : "var(--border)")};
+  background: ${({ $active }) => ($active ? "var(--choice)" : "white")};
+  color: ${({ $active }) => ($active ? "var(--blue)" : "var(--font2)")};
   font-size: 12px;
   font-weight: 600;
-  cursor: pointer;
 `;
-
 const SelectedCategoryRow = styled.div`
   display: flex;
   align-items: center;
@@ -1097,231 +1109,184 @@ const SelectedCategoryRow = styled.div`
 `;
 
 const MiniLabel = styled.div`
-  color: #6b7280;
+  color: var(--font);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
 `;
 
 const SelectedCategoryValue = styled.div`
   min-height: 40px;
   padding: 0 14px;
-  border: 1px solid #e5e7eb;
   border-radius: 10px;
-  background: #fafbfc;
-  color: #111827;
+  color: var(--font);
   font-size: 13px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
 `;
-
 const FormGrid = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
 `;
-
 const FormRow = styled.div`
   display: grid;
   grid-template-columns: 120px minmax(0, 1fr);
   gap: 14px;
   align-items: center;
-
   @media (max-width: 700px) {
     grid-template-columns: 1fr;
     gap: 8px;
   }
 `;
-
 const FormLabel = styled.label`
-  color: #374151;
+  color: var(--font);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
 `;
-
 const FormField = styled.div`
   min-width: 0;
 `;
-
 const Input = styled.input`
   width: 100%;
   height: 40px;
   padding: 0 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
   background: ${({ readOnly, disabled }) =>
-    disabled || readOnly ? "#f3f4f6" : "#ffffff"};
-  color: #111827;
+    disabled || readOnly ? "var(--read-only)" : "white"};
+  color: var(--font);
   font-size: 13px;
-  outline: none;
-  box-sizing: border-box;
-
   &:focus {
-    border-color: #cfd8e3;
+    border-color: var(--focus-border);
   }
 `;
 
-const Select = styled.select`
-  width: 180px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #111827;
-  font-size: 13px;
-  outline: none;
+const ProductNameWrap = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const ProductNameInput = styled(Input)`
+  padding-right: 70px;
+`;
+
+const InnerHelperText = styled.div`
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: var(--placeholder);
+  font-size: 11px;
+  pointer-events: none;
+  user-select: none;
 `;
 
 const HelperText = styled.div`
   margin-top: 6px;
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 12px;
   text-align: right;
 `;
-
 const UnitInputWrap = styled.div`
   position: relative;
   max-width: 220px;
 `;
-
 const UnitText = styled.span`
   position: absolute;
   top: 50%;
   right: 12px;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 12px;
   font-weight: 600;
 `;
-
-const DateInputWrap = styled.div`
-  position: relative;
-  max-width: 220px;
-`;
-
-const DateIconWrap = styled.div`
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
-  color: #9ca3af;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
 const ImageUploadArea = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
 `;
-
 const HiddenFileInput = styled.input`
   display: none;
 `;
-
 const ImagePreviewButton = styled.button`
   width: 160px;
   height: 160px;
-  border: 1px dashed #d1d5db;
+  border: 1px dashed var(--border);
   border-radius: 14px;
-  background: #fafbfc;
+  background: var(--choice);
   overflow: hidden;
   padding: 0;
-  cursor: pointer;
 `;
-
 const UploadPlaceholder = styled.div`
   width: 100%;
   height: 100%;
-  color: #9ca3af;
+  color: var(--placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
 `;
-
 const PreviewImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
 `;
-
 const ImageGuide = styled.div`
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 12px;
   line-height: 1.6;
 `;
-
 const EditorWrap = styled.div`
   .ql-toolbar.ql-snow {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border);
     border-top-left-radius: 14px;
     border-top-right-radius: 14px;
   }
-
   .ql-container.ql-snow {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border);
     border-top: none;
     border-bottom-left-radius: 14px;
     border-bottom-right-radius: 14px;
     min-height: 280px;
-    background: #ffffff;
+    background: white;
   }
-
   .ql-editor {
     min-height: 280px;
     font-size: 14px;
-    line-height: 1.7;
-    color: #111827;
+    color: var(--font);
   }
 `;
-
 const EditorNotice = styled.div`
   margin-top: 10px;
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 12px;
-  line-height: 1.7;
 `;
-
 const BottomButtonRow = styled.div`
-  padding: 8px 0 24px;
+  padding: 20px 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
 `;
-
 const CancelButton = styled.button`
   min-width: 96px;
   height: 40px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #ffffff;
-  color: #4b5563;
+  background: white;
+  color: var(--font2);
   font-size: 13px;
   font-weight: 700;
-  cursor: pointer;
 `;
-
 const SubmitButton = styled.button`
   min-width: 96px;
   height: 40px;
-  border: none;
+  background: var(--blue);
+  color: white;
   border-radius: 10px;
-  background: #2563eb;
-  color: #ffffff;
   font-size: 13px;
   font-weight: 700;
-  cursor: pointer;
-
   &:disabled {
     opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  &:hover:enabled {
-    background: #1d4ed8;
   }
 `;

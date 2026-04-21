@@ -12,47 +12,80 @@ const DatePickerGlobalStyle = createGlobalStyle`
 `;
 
 export default function SearchDate({
+  type = "range",
+  selected,
+  onChange,
   startDate,
   onStartDateChange,
   endDate,
   onEndDateChange,
   variant = "default",
+  width = "120px",
+  border = false, // 기본값: 테두리 없음
+  shadow = true, // 기본값: 그림자 있음
 }) {
   const sDate = startDate ? new Date(startDate) : null;
   const eDate = endDate ? new Date(endDate) : null;
+  const singleDate = selected ? new Date(selected) : null;
+
+  const containerProps = {
+    $variant: variant,
+    $width: width,
+    $border: border,
+    $shadow: shadow,
+  };
 
   return (
     <>
       <DatePickerGlobalStyle />
       <DateFilterGroup>
-        <DatePickerContainer $variant={variant}>
-          <DatePicker
-            selected={sDate}
-            onChange={(date) =>
-              onStartDateChange(date ? date.toISOString().split("T")[0] : "")
-            }
-            placeholderText="시작일"
-            dateFormat="yyyy-MM-dd"
-            className="custom-datepicker"
-          />
-          <Calendar size={14} className="calendar-icon" />
-        </DatePickerContainer>
+        {type === "single" ? (
+          <DatePickerContainer {...containerProps}>
+            <DatePicker
+              selected={singleDate}
+              onChange={(date) =>
+                onChange(date ? date.toISOString().split("T")[0] : "")
+              }
+              placeholderText="날짜 선택"
+              dateFormat="yyyy-MM-dd"
+              className="custom-datepicker"
+            />
+            <Calendar size={14} className="calendar-icon" />
+          </DatePickerContainer>
+        ) : (
+          <>
+            <DatePickerContainer {...containerProps}>
+              <DatePicker
+                selected={sDate}
+                onChange={(date) =>
+                  onStartDateChange(
+                    date ? date.toISOString().split("T")[0] : "",
+                  )
+                }
+                placeholderText="시작일"
+                dateFormat="yyyy-MM-dd"
+                className="custom-datepicker"
+              />
+              <Calendar size={14} className="calendar-icon" />
+            </DatePickerContainer>
 
-        <DateDivider>~</DateDivider>
+            <DateDivider>~</DateDivider>
 
-        <DatePickerContainer $variant={variant}>
-          <DatePicker
-            selected={eDate}
-            onChange={(date) =>
-              onEndDateChange(date ? date.toISOString().split("T")[0] : "")
-            }
-            placeholderText="종료일"
-            dateFormat="yyyy-MM-dd"
-            className="custom-datepicker"
-            minDate={sDate} // 시작일보다 앞선 날짜 선택 방지
-          />
-          <Calendar size={14} className="calendar-icon" />
-        </DatePickerContainer>
+            <DatePickerContainer {...containerProps}>
+              <DatePicker
+                selected={eDate}
+                onChange={(date) =>
+                  onEndDateChange(date ? date.toISOString().split("T")[0] : "")
+                }
+                placeholderText="종료일"
+                dateFormat="yyyy-MM-dd"
+                className="custom-datepicker"
+                minDate={sDate}
+              />
+              <Calendar size={14} className="calendar-icon" />
+            </DatePickerContainer>
+          </>
+        )}
       </DateFilterGroup>
     </>
   );
@@ -72,8 +105,20 @@ const DateDivider = styled.span`
 
 const DatePickerContainer = styled.div`
   position: relative;
-  box-shadow: var(--shadow);
   border-radius: 10px;
+  width: ${({ $width }) => $width || "auto"};
+  transition: all 0.2s;
+
+  box-shadow: ${({ $shadow }) => ($shadow ? "var(--shadow)" : "none")};
+  border: ${({ $border }) =>
+    $border ? "1px solid var(--border)" : "1px solid transparent"};
+
+  &:focus-within {
+    border-color: var(--focus-border);
+  }
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
 
   .calendar-icon {
     position: absolute;
@@ -86,19 +131,15 @@ const DatePickerContainer = styled.div`
   }
 
   .custom-datepicker {
-    width: 130px;
+    width: 100%;
     height: ${({ $variant }) => ($variant === "inventory" ? "44px" : "38px")};
     padding: 0 34px 0 12px;
     border-radius: 10px;
-    border: 1px solid transparent;
+    border: none;
     background: white;
     color: var(--font);
     font-size: 13px;
     outline: none;
     cursor: pointer;
-
-    &:focus {
-      border-color: var(--focus-border);
-    }
   }
 `;

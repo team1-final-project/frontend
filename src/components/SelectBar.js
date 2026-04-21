@@ -9,6 +9,8 @@ export default function SelectBar({
   placeholder,
   variant = "default",
   width,
+  border = false, // 기본값: 테두리 없음
+  shadow = true, // 기본값: 그림자 있음
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const selectedLabel = options.find(
@@ -23,6 +25,8 @@ export default function SelectBar({
       <SelectTrigger
         type="button"
         $variant={variant}
+        $border={border}
+        $shadow={shadow}
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className={!value ? "placeholder" : ""}>
@@ -75,15 +79,17 @@ const SelectTrigger = styled.button`
   justify-content: space-between;
   background: white;
   border-radius: 10px;
-  border: 1px solid transparent;
-  box-shadow: var(--shadow);
   font-size: 12px;
   font-weight: 500;
   padding: 0 12px;
   height: ${({ $variant }) => ($variant === "inventory" ? "44px" : "38px")};
   transition: all 0.2s;
 
-  &:focus {
+  box-shadow: ${({ $shadow }) => ($shadow ? "var(--shadow)" : "none")};
+  border: ${({ $border }) =>
+    $border ? "1px solid var(--border)" : "1px solid transparent"};
+
+  &:hover {
     border-color: var(--focus-border);
   }
 
@@ -98,7 +104,6 @@ const FilterIcon = styled.div`
   align-items: center;
   justify-content: center;
   color: var(--placeholder);
-
   transition: transform 0.2s ease;
   transform: ${({ $isOpen }) => ($isOpen ? "rotate(180deg)" : "rotate(0deg)")};
 `;

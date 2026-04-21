@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styled, { css } from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { CalendarDays, Search, ChevronDown, Info, TriangleAlert } from "lucide-react";
+import { CalendarDays, Search, ChevronDown, Info } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -13,164 +13,13 @@ import {
   Legend,
 } from "recharts";
 
+import { getAdminAIPriceStat } from "../../../api/adminAIPriceStat";
+
 const PERIOD_OPTIONS = [
   { value: "daily", label: "일간" },
   { value: "weekly", label: "주간" },
   { value: "monthly", label: "월간" },
 ];
-
-const CATEGORY_OPTIONS = ["라면", "소시지", "스낵과자", "즉석식품", "카레", "탄산음료"];
-
-const CATEGORY_COLORS = {
-  라면: "#2563eb",
-  소시지: "#60a5fa",
-  스낵과자: "#f59e0b",
-  즉석식품: "#ef4444",
-  카레: "#a855f7",
-  탄산음료: "#f59eae",
-};
-
-const PRODUCT_CATALOG = [
-  {
-    productCode: "9744302255",
-    productName: "농심 신라면컵 114g, 1개",
-    category: "라면",
-    categoryPath: "가공 / 간편식품 > 라면",
-    basePrice: 1250,
-    costPrice: 850,
-    initStock: 210,
-    safetyStock: 60,
-    minPriceLimit: 1150,
-    maxPriceLimit: 1390,
-    baseDailyQty: 27,
-  },
-  {
-    productCode: "9744302256",
-    productName: "오뚜기 진라면 매운맛 120g, 5개",
-    category: "라면",
-    categoryPath: "가공 / 간편식품 > 라면",
-    basePrice: 4200,
-    costPrice: 3100,
-    initStock: 180,
-    safetyStock: 55,
-    minPriceLimit: 3900,
-    maxPriceLimit: 4500,
-    baseDailyQty: 17,
-  },
-  {
-    productCode: "9744302257",
-    productName: "롯데 의성마늘 소시지 270g",
-    category: "소시지",
-    categoryPath: "냉장 / 육가공 > 소시지",
-    basePrice: 3980,
-    costPrice: 2800,
-    initStock: 120,
-    safetyStock: 35,
-    minPriceLimit: 3720,
-    maxPriceLimit: 4320,
-    baseDailyQty: 8,
-  },
-  {
-    productCode: "9744302258",
-    productName: "오리온 초코파이 12입",
-    category: "스낵과자",
-    categoryPath: "간식 / 음료 > 스낵과자",
-    basePrice: 4800,
-    costPrice: 3500,
-    initStock: 155,
-    safetyStock: 40,
-    minPriceLimit: 4500,
-    maxPriceLimit: 5200,
-    baseDailyQty: 14,
-  },
-  {
-    productCode: "9744302259",
-    productName: "CJ 비비고 사골곰탕 500g, 18개",
-    category: "즉석식품",
-    categoryPath: "가공 / 간편식품 > 즉석식품",
-    basePrice: 21400,
-    costPrice: 17500,
-    initStock: 90,
-    safetyStock: 22,
-    minPriceLimit: 19800,
-    maxPriceLimit: 22900,
-    baseDailyQty: 5,
-  },
-  {
-    productCode: "9744302260",
-    productName: "오뚜기 3분 카레 순한맛",
-    category: "카레",
-    categoryPath: "가공 / 간편식품 > 카레",
-    basePrice: 2300,
-    costPrice: 1500,
-    initStock: 165,
-    safetyStock: 38,
-    minPriceLimit: 2150,
-    maxPriceLimit: 2550,
-    baseDailyQty: 13,
-  },
-  {
-    productCode: "9744302261",
-    productName: "코카콜라 제로 1.5L, 12개",
-    category: "탄산음료",
-    categoryPath: "간식 / 음료 > 탄산음료",
-    basePrice: 2790,
-    costPrice: 2100,
-    initStock: 175,
-    safetyStock: 42,
-    minPriceLimit: 2610,
-    maxPriceLimit: 2950,
-    baseDailyQty: 19,
-  },
-  {
-    productCode: "9744302262",
-    productName: "코카콜라 클래식 1.5L, 12개",
-    category: "탄산음료",
-    categoryPath: "간식 / 음료 > 탄산음료",
-    basePrice: 2840,
-    costPrice: 2180,
-    initStock: 168,
-    safetyStock: 42,
-    minPriceLimit: 2680,
-    maxPriceLimit: 3020,
-    baseDailyQty: 18,
-  },
-];
-
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
-function addDays(date, days) {
-  const next = new Date(date);
-  next.setDate(next.getDate() + days);
-  return next;
-}
-
-function startOfDay(date) {
-  const next = new Date(date);
-  next.setHours(0, 0, 0, 0);
-  return next;
-}
-
-function startOfWeek(date) {
-  const next = startOfDay(date);
-  const day = next.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  next.setDate(next.getDate() + diff);
-  return next;
-}
-
-function startOfMonth(date) {
-  const next = startOfDay(date);
-  next.setDate(1);
-  return next;
-}
-
-function diffDays(start, end) {
-  const ms = startOfDay(end).getTime() - startOfDay(start).getTime();
-  return Math.floor(ms / (1000 * 60 * 60 * 24));
-}
 
 function formatNumber(value) {
   return Number(value || 0).toLocaleString("ko-KR");
@@ -192,475 +41,6 @@ function formatDeltaPercent(value) {
   const numeric = Number(value || 0);
   const sign = numeric > 0 ? "+" : "";
   return `${sign}${numeric.toFixed(1)}%`;
-}
-
-function formatShortDate(date) {
-  const d = new Date(date);
-  return `${d.getMonth() + 1}/${d.getDate()}`;
-}
-
-function formatMonth(date) {
-  const d = new Date(date);
-  return `${d.getMonth() + 1}월`;
-}
-
-function formatWeekLabel(date) {
-  const base = startOfWeek(date);
-  return `${base.getMonth() + 1}/${base.getDate()}주`;
-}
-
-function getCompareLabel(period) {
-  if (period === "daily") return "vs last day";
-  if (period === "monthly") return "vs last month";
-  return "vs last 7 days";
-}
-
-function resolveRange(startDate, endDate, period) {
-  const today = startOfDay(new Date());
-
-  if (startDate && endDate) {
-    return {
-      start: startOfDay(new Date(startDate)),
-      end: startOfDay(new Date(endDate)),
-    };
-  }
-
-  if (period === "daily") {
-    return { start: addDays(today, -6), end: today };
-  }
-
-  if (period === "monthly") {
-    return { start: addDays(today, -179), end: today };
-  }
-
-  return { start: addDays(today, -41), end: today };
-}
-
-function getPreviousRange(start, end) {
-  const days = diffDays(start, end) + 1;
-  const prevEnd = addDays(start, -1);
-  const prevStart = addDays(prevEnd, -(days - 1));
-  return { start: prevStart, end: prevEnd };
-}
-
-function inRange(date, start, end) {
-  const time = startOfDay(new Date(date)).getTime();
-  return time >= start.getTime() && time <= end.getTime();
-}
-
-function getBucketKey(date, period) {
-  const d = new Date(date);
-
-  if (period === "daily") {
-    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
-  }
-
-  if (period === "monthly") {
-    return `${d.getFullYear()}-${d.getMonth() + 1}`;
-  }
-
-  const weekStart = startOfWeek(d);
-  return `${weekStart.getFullYear()}-${weekStart.getMonth() + 1}-${weekStart.getDate()}`;
-}
-
-function getBucketLabel(date, period) {
-  if (period === "daily") return formatShortDate(date);
-  if (period === "monthly") return formatMonth(date);
-  return formatWeekLabel(date);
-}
-
-function bucketSortValue(key, period) {
-  if (period === "monthly") {
-    const [year, month] = key.split("-").map(Number);
-    return new Date(year, month - 1, 1).getTime();
-  }
-  const [year, month, day] = key.split("-").map(Number);
-  return new Date(year, month - 1, day).getTime();
-}
-
-function getReason({
-  appliedPrice,
-  previousPrice,
-  stockQty,
-  safetyStock,
-  minPriceLimit,
-  maxPriceLimit,
-}) {
-  if (appliedPrice <= minPriceLimit + 20) return "최저가 제한";
-  if (appliedPrice >= maxPriceLimit - 20) return "희망조정가 제한";
-  if (stockQty <= safetyStock * 1.1) {
-    return appliedPrice >= previousPrice ? "품절임박 가격인상" : "품절임박 가격인하";
-  }
-  return appliedPrice < previousPrice ? "최저가변동 가격인하" : "최저가변동 가격인상";
-}
-
-function generateAiMockDataset() {
-  const today = startOfDay(new Date());
-  const startDate = addDays(today, -89);
-
-  const records = [];
-  const historyEvents = [];
-
-  PRODUCT_CATALOG.forEach((product, productIndex) => {
-    let stock = product.initStock;
-
-    for (let dayIndex = 0; dayIndex < 90; dayIndex += 1) {
-      const currentDate = addDays(startDate, dayIndex);
-      const weekday = currentDate.getDay();
-      const weekendBoost = weekday === 0 || weekday === 6 ? 1.08 : 1.0;
-      const seasonality = 1 + Math.sin((dayIndex + productIndex) / 5) * 0.12;
-      const trend = 1 + (dayIndex / 90) * 0.08;
-
-      if (stock <= product.safetyStock && dayIndex % 9 === 0) {
-        stock += 60 + ((productIndex + dayIndex) % 3) * 25;
-      }
-
-      const previousPrice =
-        product.basePrice +
-        Math.round(Math.sin((dayIndex + productIndex) / 4) * 90);
-
-      const rawApplied =
-        product.basePrice +
-        Math.round(Math.sin((dayIndex + productIndex) / 6) * 120) +
-        ((dayIndex + productIndex) % 5 - 2) * 15;
-
-      const appliedPrice = clamp(
-        rawApplied,
-        product.minPriceLimit,
-        product.maxPriceLimit
-      );
-
-      const aiQty = Math.max(
-        1,
-        Math.round(product.baseDailyQty * weekendBoost * seasonality * trend)
-      );
-
-      const actualQty = Math.min(aiQty, stock);
-
-      const manualPredQty = Math.max(
-        1,
-        Math.round(actualQty * (0.88 + ((dayIndex + productIndex) % 5) * 0.04))
-      );
-
-      const manualPredPrice =
-        product.basePrice +
-        Math.round(Math.cos((dayIndex + productIndex) / 7) * 80);
-
-      const aiRevenue = actualQty * appliedPrice;
-      const aiProfit = actualQty * (appliedPrice - product.costPrice);
-
-      const manualRevenue = manualPredQty * manualPredPrice;
-      const manualProfit = manualPredQty * (manualPredPrice - product.costPrice);
-
-      const lowestShare = clamp(
-        28 +
-          Math.sin((dayIndex + productIndex) / 4) * 10 +
-          (appliedPrice <= manualPredPrice ? 6 : -4),
-        8,
-        78
-      );
-
-      const priceChangeCount =
-        (dayIndex + productIndex) % 6 === 0
-          ? 2
-          : (dayIndex + productIndex) % 4 === 0
-          ? 1
-          : 0;
-
-      stock = Math.max(0, stock - actualQty);
-
-      const reason = getReason({
-        appliedPrice,
-        previousPrice,
-        stockQty: stock,
-        safetyStock: product.safetyStock,
-        minPriceLimit: product.minPriceLimit,
-        maxPriceLimit: product.maxPriceLimit,
-      });
-
-      const record = {
-        date: currentDate,
-        productCode: product.productCode,
-        productName: product.productName,
-        category: product.category,
-        categoryPath: product.categoryPath,
-        aiEnabled: true,
-        aiRevenue,
-        aiProfit,
-        manualRevenue,
-        manualProfit,
-        salesQty: actualQty,
-        avgMargin: aiRevenue > 0 ? (aiProfit / aiRevenue) * 100 : 0,
-        lowestShare,
-        priceChangeCount,
-        avgPrice: appliedPrice,
-        previousPrice,
-        manualPredPrice,
-        stockQty: stock,
-        costPrice: product.costPrice,
-        minPriceLimit: product.minPriceLimit,
-        maxPriceLimit: product.maxPriceLimit,
-        safetyStock: product.safetyStock,
-        reason,
-      };
-
-      records.push(record);
-
-      if (priceChangeCount > 0) {
-        historyEvents.push({
-          occurredAt: new Date(currentDate.getTime() + 1000 * 60 * 60 * 9),
-          productCode: product.productCode,
-          productName: product.productName,
-          category: product.category,
-          reason,
-          direction:
-            appliedPrice < previousPrice
-              ? "down"
-              : appliedPrice > previousPrice
-              ? "up"
-              : "flat",
-        });
-      }
-    }
-  });
-
-  return { records, historyEvents };
-}
-
-function aggregateSummary(records, previousRecords) {
-  const revenue = records.reduce((acc, item) => acc + item.aiRevenue, 0);
-  const profit = records.reduce((acc, item) => acc + item.aiProfit, 0);
-  const averageLowestShare =
-    records.length > 0
-      ? records.reduce((acc, item) => acc + item.lowestShare, 0) / records.length
-      : 0;
-  const changeCount = records.reduce((acc, item) => acc + item.priceChangeCount, 0);
-
-  const previousRevenue = previousRecords.reduce((acc, item) => acc + item.aiRevenue, 0);
-  const previousProfit = previousRecords.reduce((acc, item) => acc + item.aiProfit, 0);
-  const previousLowestShare =
-    previousRecords.length > 0
-      ? previousRecords.reduce((acc, item) => acc + item.lowestShare, 0) /
-        previousRecords.length
-      : 0;
-  const previousChangeCount = previousRecords.reduce(
-    (acc, item) => acc + item.priceChangeCount,
-    0
-  );
-
-  const revenueChange =
-    previousRevenue > 0 ? ((revenue - previousRevenue) / previousRevenue) * 100 : 0;
-  const profitChange =
-    previousProfit > 0 ? ((profit - previousProfit) / previousProfit) * 100 : 0;
-  const lowestShareChange =
-    previousLowestShare > 0
-      ? ((averageLowestShare - previousLowestShare) / previousLowestShare) * 100
-      : 0;
-  const changeCountRate =
-    previousChangeCount > 0
-      ? ((changeCount - previousChangeCount) / previousChangeCount) * 100
-      : 0;
-
-  const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
-
-  return {
-    revenue,
-    profit,
-    averageLowestShare,
-    changeCount,
-    margin,
-    revenueChange,
-    profitChange,
-    lowestShareChange,
-    changeCountRate,
-  };
-}
-
-function aggregateSeriesByPeriod(records, period, mapper) {
-  const grouped = new Map();
-
-  records.forEach((item) => {
-    const key = getBucketKey(item.date, period);
-    const label = getBucketLabel(item.date, period);
-
-    if (!grouped.has(key)) {
-      grouped.set(key, {
-        key,
-        label,
-        aiRevenue: 0,
-        aiProfit: 0,
-        manualRevenue: 0,
-        manualProfit: 0,
-      });
-    }
-
-    const target = grouped.get(key);
-    target.aiRevenue += mapper(item).aiRevenue;
-    target.aiProfit += mapper(item).aiProfit;
-    target.manualRevenue += mapper(item).manualRevenue;
-    target.manualProfit += mapper(item).manualProfit;
-  });
-
-  return [...grouped.values()]
-    .sort((a, b) => bucketSortValue(a.key, period) - bucketSortValue(b.key, period))
-    .map((item) => ({
-      label: item.label,
-      aiRevenue: Math.round(item.aiRevenue),
-      aiProfit: Math.round(item.aiProfit),
-      manualRevenue: Math.round(item.manualRevenue),
-      manualProfit: Math.round(item.manualProfit),
-    }));
-}
-
-function aggregateCategoryComparison(currentRecords, previousRecords) {
-  return CATEGORY_OPTIONS.map((category) => {
-    const currentRows = currentRecords.filter((item) => item.category === category);
-    const previousRows = previousRecords.filter((item) => item.category === category);
-
-    const currentRevenue = currentRows.reduce((acc, item) => acc + item.aiRevenue, 0);
-    const currentProfit = currentRows.reduce((acc, item) => acc + item.aiProfit, 0);
-    const currentSales = currentRows.reduce((acc, item) => acc + item.salesQty, 0);
-    const currentMargin =
-      currentRevenue > 0 ? (currentProfit / currentRevenue) * 100 : 0;
-
-    const previousRevenue = previousRows.reduce((acc, item) => acc + item.aiRevenue, 0);
-    const previousProfit = previousRows.reduce((acc, item) => acc + item.aiProfit, 0);
-    const previousSales = previousRows.reduce((acc, item) => acc + item.salesQty, 0);
-    const previousMargin =
-      previousRevenue > 0 ? (previousProfit / previousRevenue) * 100 : 0;
-
-    const aiRevenue = currentRevenue;
-    const aiProfit = currentProfit;
-    const aiSales = currentSales;
-    const aiMargin = currentMargin;
-
-    const manualRevenue = currentRows.reduce((acc, item) => acc + item.manualRevenue, 0);
-    const manualProfit = currentRows.reduce((acc, item) => acc + item.manualProfit, 0);
-    const manualSales = currentRows.reduce(
-      (acc, item) =>
-        acc + Math.round(item.manualRevenue / Math.max(item.manualPredPrice || 1, 1)),
-      0
-    );
-    const manualMargin =
-      manualRevenue > 0 ? (manualProfit / manualRevenue) * 100 : 0;
-
-    return {
-      category,
-      performance: {
-        revenue: currentRevenue,
-        profit: currentProfit,
-        sales: currentSales,
-        margin: currentMargin,
-        revenueChange:
-          previousRevenue > 0
-            ? ((currentRevenue - previousRevenue) / previousRevenue) * 100
-            : 0,
-        profitChange:
-          previousProfit > 0
-            ? ((currentProfit - previousProfit) / previousProfit) * 100
-            : 0,
-        salesChange:
-          previousSales > 0 ? ((currentSales - previousSales) / previousSales) * 100 : 0,
-        marginChange: currentMargin - previousMargin,
-      },
-      ai: {
-        revenue: aiRevenue,
-        profit: aiProfit,
-        sales: aiSales,
-        margin: aiMargin,
-      },
-      manual: {
-        revenue: manualRevenue,
-        profit: manualProfit,
-        sales: manualSales,
-        margin: manualMargin,
-      },
-    };
-  });
-}
-
-function buildHistoryRows(events, start, end) {
-  return events
-    .filter((event) => inRange(event.occurredAt, start, end))
-    .sort((a, b) => new Date(b.occurredAt) - new Date(a.occurredAt))
-    .slice(0, 5)
-    .map((item, index) => ({
-      rank: index + 1,
-      ...item,
-    }));
-}
-
-function buildStrategyRows(currentRecords, previousRecords) {
-  const previousMap = new Map();
-
-  previousRecords.forEach((item) => {
-    if (!previousMap.has(item.productCode)) {
-      previousMap.set(item.productCode, []);
-    }
-    previousMap.get(item.productCode).push(item);
-  });
-
-  const grouped = new Map();
-
-  currentRecords.forEach((item) => {
-    if (!grouped.has(item.productCode)) {
-      grouped.set(item.productCode, {
-        productCode: item.productCode,
-        productName: item.productName,
-        category: item.categoryPath,
-        revenue: 0,
-        profit: 0,
-        salesQty: 0,
-        latestStock: item.stockQty,
-        avgPriceTotal: 0,
-        avgPriceCount: 0,
-        latestReason: item.reason,
-        limitReason: item.reason,
-      });
-    }
-
-    const target = grouped.get(item.productCode);
-    target.revenue += item.aiRevenue;
-    target.profit += item.aiProfit;
-    target.salesQty += item.salesQty;
-    target.latestStock = item.stockQty;
-    target.avgPriceTotal += item.avgPrice;
-    target.avgPriceCount += 1;
-    target.latestReason = item.reason;
-    target.limitReason = item.reason;
-  });
-
-  const rows = [...grouped.values()].map((item) => {
-    const previousItems = previousMap.get(item.productCode) || [];
-    const previousRevenue = previousItems.reduce((acc, row) => acc + row.aiRevenue, 0);
-    const compareRate =
-      previousRevenue > 0 ? ((item.revenue - previousRevenue) / previousRevenue) * 100 : 0;
-
-    const avgPrice =
-      item.avgPriceCount > 0 ? item.avgPriceTotal / item.avgPriceCount : 0;
-    const margin = item.revenue > 0 ? (item.profit / item.revenue) * 100 : 0;
-
-    return {
-      productCode: item.productCode,
-      productName: item.productName,
-      reason: item.limitReason,
-      salesQty: item.salesQty,
-      stock: item.latestStock,
-      compareRate,
-      salePrice: avgPrice,
-      profit: item.profit / Math.max(item.salesQty, 1),
-      margin,
-      category: item.category,
-    };
-  });
-
-  return rows
-    .sort((a, b) => a.compareRate - b.compareRate || a.stock - b.stock)
-    .slice(0, 5)
-    .map((item, index) => ({
-      rank: index + 1,
-      ...item,
-    }));
 }
 
 function getChangeMeta(value) {
@@ -700,6 +80,19 @@ function SummaryCard({
   );
 }
 
+function MetricCell({ primary, change }) {
+  const { isPositive, text } = getChangeMeta(change);
+
+  return (
+    <MetricWrap>
+      <MetricPrimary>{primary}</MetricPrimary>
+      <MetricChange $positive={isPositive}>
+        {isPositive ? "↑" : "↓"} {text.replace("+", "")}
+      </MetricChange>
+    </MetricWrap>
+  );
+}
+
 export default function AIPriceStat() {
   const navigate = useNavigate();
 
@@ -712,122 +105,112 @@ export default function AIPriceStat() {
   const [simulationPeriod, setSimulationPeriod] = useState("weekly");
 
   const [comparePeriod, setComparePeriod] = useState("weekly");
-  const [performanceCategory, setPerformanceCategory] = useState("소시지");
+  const [performanceCategory, setPerformanceCategory] = useState("");
 
-  const { records, historyEvents } = useMemo(() => generateAiMockDataset(), []);
+  const [isLoading, setIsLoading] = useState(false);
+  const [dashboard, setDashboard] = useState(null);
 
-  const currentRange = useMemo(
-    () => resolveRange(startDate, endDate, period),
-    [startDate, endDate, period]
-  );
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        setIsLoading(true);
 
-  const previousRange = useMemo(
-    () => getPreviousRange(currentRange.start, currentRange.end),
-    [currentRange]
-  );
+        const data = await getAdminAIPriceStat({
+          start_date: startDate || undefined,
+          end_date: endDate || undefined,
+          period,
+          simulation_keyword: simulationKeyword || undefined,
+          simulation_category: simulationCategory,
+          simulation_period: simulationPeriod,
+          compare_period: comparePeriod,
+          performance_category: performanceCategory || undefined,
+        });
 
-  const currentRecords = useMemo(
-    () =>
-      records.filter((item) => inRange(item.date, currentRange.start, currentRange.end)),
-    [records, currentRange]
-  );
+        setDashboard(data);
 
-  const previousRecords = useMemo(
-    () =>
-      records.filter((item) => inRange(item.date, previousRange.start, previousRange.end)),
-    [records, previousRange]
-  );
+        const options = data?.category_options || [];
+        if (options.length > 0 && (!performanceCategory || !options.includes(performanceCategory))) {
+          setPerformanceCategory(options[0]);
+        }
+      } catch (error) {
+        console.error(error);
+        alert(error?.response?.data?.detail || "AI 가격변경 분석 조회에 실패했습니다.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const summary = useMemo(
-    () => aggregateSummary(currentRecords, previousRecords),
-    [currentRecords, previousRecords]
-  );
+    fetchDashboard();
+  }, [
+    startDate,
+    endDate,
+    period,
+    simulationKeyword,
+    simulationCategory,
+    simulationPeriod,
+    comparePeriod,
+    performanceCategory,
+  ]);
 
-  const compareLabel = useMemo(() => getCompareLabel(period), [period]);
+  const categoryOptions = dashboard?.category_options || [];
 
-  const simulationRange = useMemo(
-    () => resolveRange(startDate, endDate, simulationPeriod),
-    [startDate, endDate, simulationPeriod]
-  );
+  const summary = dashboard?.summary || {
+    compare_label: "전주 대비",
+    ai_revenue: 0,
+    ai_revenue_change_rate: 0,
+    ai_profit: 0,
+    ai_profit_margin: 0,
+    ai_profit_change_rate: 0,
+    lowest_price_share: 0,
+    lowest_price_share_change_rate: 0,
+    price_change_count: 0,
+    price_change_count_change_rate: 0,
+  };
 
-  const simulationFilteredRecords = useMemo(() => {
-    const keyword = simulationKeyword.trim().toLowerCase();
-
-    return records.filter((item) => {
-      const inDate = inRange(item.date, simulationRange.start, simulationRange.end);
-      const inCategory =
-        simulationCategory === "전체" ? true : item.category === simulationCategory;
-      const inKeyword =
-        !keyword ||
-        item.productCode.toLowerCase().includes(keyword) ||
-        item.productName.toLowerCase().includes(keyword);
-
-      return inDate && inCategory && inKeyword;
-    });
-  }, [records, simulationRange, simulationCategory, simulationKeyword]);
-
-  const simulationChartData = useMemo(() => {
-    return aggregateSeriesByPeriod(simulationFilteredRecords, simulationPeriod, (item) => ({
-      aiRevenue: item.aiRevenue,
-      aiProfit: item.aiProfit,
-      manualRevenue: item.manualRevenue,
-      manualProfit: item.manualProfit,
-    }));
-  }, [simulationFilteredRecords, simulationPeriod]);
-
-  const compareRange = useMemo(
-    () => resolveRange(startDate, endDate, comparePeriod),
-    [startDate, endDate, comparePeriod]
-  );
-
-  const comparePrevRange = useMemo(
-    () => getPreviousRange(compareRange.start, compareRange.end),
-    [compareRange]
-  );
-
-  const compareCurrentRecords = useMemo(
-    () => records.filter((item) => inRange(item.date, compareRange.start, compareRange.end)),
-    [records, compareRange]
-  );
-
-  const comparePreviousRecords = useMemo(
-    () => records.filter((item) => inRange(item.date, comparePrevRange.start, comparePrevRange.end)),
-    [records, comparePrevRange]
-  );
-
-  const categoryComparisonRows = useMemo(
-    () => aggregateCategoryComparison(compareCurrentRecords, comparePreviousRecords),
-    [compareCurrentRecords, comparePreviousRecords]
-  );
-
-  const performanceChartData = useMemo(() => {
-    const targetRows = currentRecords.filter(
-      (item) => item.category === performanceCategory
-    );
-
-    return aggregateSeriesByPeriod(targetRows, period, (item) => ({
-      aiRevenue: item.aiRevenue,
-      aiProfit: item.aiProfit,
-      manualRevenue: item.manualRevenue,
-      manualProfit: item.manualProfit,
-    }));
-  }, [currentRecords, performanceCategory, period]);
-
-  const historyRows = useMemo(
-    () => buildHistoryRows(historyEvents, currentRange.start, currentRange.end),
-    [historyEvents, currentRange]
-  );
-
-  const strategyRows = useMemo(
-    () => buildStrategyRows(currentRecords, previousRecords),
-    [currentRecords, previousRecords]
-  );
+  const simulationChartData = dashboard?.simulation?.items || [];
+  const categoryComparisonRows = dashboard?.category_comparison?.items || [];
+  const categoryCompareLabel =
+    dashboard?.category_comparison?.compare_label || "전주 대비";
+  const performanceChartData = dashboard?.performance?.items || [];
+  const historyRows = dashboard?.history?.items || [];
+  const strategyRows = dashboard?.strategy?.items || [];
+  const strategyCompareLabel =
+    dashboard?.strategy?.compare_label || "전주 대비";
 
   const handleProductClick = (productCode) => {
     navigate(`/admin/product-update/${productCode}`, {
       state: { focusSection: "ai-pricing" },
     });
   };
+
+  const summaryCards = useMemo(
+    () => [
+      {
+        title: "AI 창출 매출액",
+        mainValue: formatNumber(summary.ai_revenue),
+        mainSuffix: "원",
+        change: summary.ai_revenue_change_rate,
+      },
+      {
+        title: "AI 창출 공헌이익",
+        mainValue: formatPercent(summary.ai_profit_margin),
+        subValue: `/ ${formatCurrency(summary.ai_profit)}`,
+        change: summary.ai_profit_change_rate,
+      },
+      {
+        title: "최저가 점유율",
+        mainValue: formatPercent(summary.lowest_price_share),
+        change: summary.lowest_price_share_change_rate,
+      },
+      {
+        title: "AI 가격변경 횟수",
+        mainValue: formatNumber(summary.price_change_count),
+        mainSuffix: "회",
+        change: summary.price_change_count_change_rate,
+      },
+    ],
+    [summary]
+  );
 
   return (
     <PageWrap>
@@ -870,34 +253,20 @@ export default function AIPriceStat() {
         </SelectWrap>
       </TopFilterRow>
 
+      {isLoading ? <LoadingText>데이터를 불러오는 중입니다.</LoadingText> : null}
+
       <SummaryGrid>
-        <SummaryCard
-          title="AI 창출 매출액"
-          mainValue={formatNumber(summary.revenue)}
-          mainSuffix="원"
-          change={summary.revenueChange}
-          compareLabel={compareLabel}
-        />
-        <SummaryCard
-          title="AI 창출 공헌이익"
-          mainValue={formatPercent(summary.margin)}
-          subValue={`/ ${formatCurrency(summary.profit)}`}
-          change={summary.profitChange}
-          compareLabel={compareLabel}
-        />
-        <SummaryCard
-          title="최저가 점유율"
-          mainValue={formatPercent(summary.averageLowestShare)}
-          change={summary.lowestShareChange}
-          compareLabel={compareLabel}
-        />
-        <SummaryCard
-          title="AI 가격변경 횟수"
-          mainValue={formatNumber(summary.changeCount)}
-          mainSuffix="회"
-          change={summary.changeCountRate}
-          compareLabel={compareLabel}
-        />
+        {summaryCards.map((card) => (
+          <SummaryCard
+            key={card.title}
+            title={card.title}
+            mainValue={card.mainValue}
+            mainSuffix={card.mainSuffix}
+            subValue={card.subValue}
+            change={card.change}
+            compareLabel={summary.compare_label}
+          />
+        ))}
       </SummaryGrid>
 
       <LargePanel>
@@ -922,7 +291,7 @@ export default function AIPriceStat() {
                 onChange={(e) => setSimulationCategory(e.target.value)}
               >
                 <option value="전체">카테고리</option>
-                {CATEGORY_OPTIONS.map((category) => (
+                {categoryOptions.map((category) => (
                   <option key={category} value={category}>
                     {category}
                   </option>
@@ -975,7 +344,7 @@ export default function AIPriceStat() {
               />
               <Line
                 type="monotone"
-                dataKey="aiRevenue"
+                dataKey="ai_revenue"
                 name="AI 매출"
                 stroke="#2563eb"
                 strokeWidth={3}
@@ -983,7 +352,7 @@ export default function AIPriceStat() {
               />
               <Line
                 type="monotone"
-                dataKey="aiProfit"
+                dataKey="ai_profit"
                 name="AI 이익"
                 stroke="#7aa2ff"
                 strokeWidth={3}
@@ -991,7 +360,7 @@ export default function AIPriceStat() {
               />
               <Line
                 type="monotone"
-                dataKey="manualRevenue"
+                dataKey="manual_revenue"
                 name="수동 매출(예측)"
                 stroke="#ef5350"
                 strokeWidth={3}
@@ -999,7 +368,7 @@ export default function AIPriceStat() {
               />
               <Line
                 type="monotone"
-                dataKey="manualProfit"
+                dataKey="manual_profit"
                 name="수동 이익(예측)"
                 stroke="#f3a5a5"
                 strokeWidth={3}
@@ -1044,7 +413,7 @@ export default function AIPriceStat() {
                 <th>매출액</th>
                 <th>공헌이익</th>
                 <th>판매량</th>
-                <th>이익률</th>
+                <th>{categoryCompareLabel}</th>
                 <th>매출액</th>
                 <th>공헌이익</th>
                 <th>판매량</th>
@@ -1063,25 +432,25 @@ export default function AIPriceStat() {
                   <td>
                     <MetricCell
                       primary={formatCurrency(row.performance.revenue)}
-                      change={row.performance.revenueChange}
+                      change={row.performance.revenue_change}
                     />
                   </td>
                   <td>
                     <MetricCell
                       primary={formatCurrency(row.performance.profit)}
-                      change={row.performance.profitChange}
+                      change={row.performance.profit_change}
                     />
                   </td>
                   <td>
                     <MetricCell
                       primary={formatCount(row.performance.sales)}
-                      change={row.performance.salesChange}
+                      change={row.performance.sales_change}
                     />
                   </td>
                   <td>
                     <MetricCell
                       primary={formatPercent(row.performance.margin)}
-                      change={row.performance.marginChange}
+                      change={row.performance.margin_change}
                     />
                   </td>
 
@@ -1125,7 +494,7 @@ export default function AIPriceStat() {
           </LegendGuide>
 
           <CategoryTabRow>
-            {CATEGORY_OPTIONS.map((category) => (
+            {categoryOptions.map((category) => (
               <CategoryTabButton
                 key={category}
                 type="button"
@@ -1156,7 +525,7 @@ export default function AIPriceStat() {
                 />
                 <Line
                   type="monotone"
-                  dataKey="aiRevenue"
+                  dataKey="ai_revenue"
                   name="AI 매출"
                   stroke="#2563eb"
                   strokeWidth={3}
@@ -1164,7 +533,7 @@ export default function AIPriceStat() {
                 />
                 <Line
                   type="monotone"
-                  dataKey="aiProfit"
+                  dataKey="ai_profit"
                   name="AI 이익"
                   stroke="#7aa2ff"
                   strokeWidth={3}
@@ -1172,7 +541,7 @@ export default function AIPriceStat() {
                 />
                 <Line
                   type="monotone"
-                  dataKey="manualRevenue"
+                  dataKey="manual_revenue"
                   name="수동 매출(예측)"
                   stroke="#ef5350"
                   strokeWidth={3}
@@ -1180,7 +549,7 @@ export default function AIPriceStat() {
                 />
                 <Line
                   type="monotone"
-                  dataKey="manualProfit"
+                  dataKey="manual_profit"
                   name="수동 이익(예측)"
                   stroke="#f3a5a5"
                   strokeWidth={3}
@@ -1208,14 +577,14 @@ export default function AIPriceStat() {
             </thead>
             <tbody>
               {historyRows.map((row) => (
-                <tr key={`${row.productCode}-${row.rank}`}>
+                <tr key={`${row.product_code}-${row.rank}`}>
                   <td>{row.rank}</td>
                   <td>
-                    <CodeButton type="button" onClick={() => handleProductClick(row.productCode)}>
-                      {row.productCode}
+                    <CodeButton type="button" onClick={() => handleProductClick(row.product_code)}>
+                      {row.product_code}
                     </CodeButton>
                   </td>
-                  <td>{row.productName}</td>
+                  <td>{row.product_name}</td>
                   <td>
                     <ReasonText $type={row.direction === "up" ? "up" : "down"}>
                       {row.direction === "up" ? "▲" : "▼"} {row.reason}
@@ -1246,7 +615,7 @@ export default function AIPriceStat() {
                 <th>사유</th>
                 <th>판매량</th>
                 <th>재고</th>
-                <th>전일대비</th>
+                <th>{strategyCompareLabel}</th>
                 <th>판매가</th>
                 <th>이익</th>
                 <th>이익률</th>
@@ -1255,25 +624,25 @@ export default function AIPriceStat() {
             </thead>
             <tbody>
               {strategyRows.map((row) => (
-                <tr key={`${row.productCode}-${row.rank}`}>
+                <tr key={`${row.product_code}-${row.rank}`}>
                   <td>{row.rank}</td>
                   <td>
-                    <CodeButton type="button" onClick={() => handleProductClick(row.productCode)}>
-                      {row.productCode}
+                    <CodeButton type="button" onClick={() => handleProductClick(row.product_code)}>
+                      {row.product_code}
                     </CodeButton>
                   </td>
-                  <td>{row.productName}</td>
+                  <td>{row.product_name}</td>
                   <td>
                     <StrategyReason>{row.reason}</StrategyReason>
                   </td>
-                  <td>{formatCount(row.salesQty)}</td>
+                  <td>{formatCount(row.sales_qty)}</td>
                   <td>{formatCount(row.stock)}</td>
                   <td>
-                    <DeltaBadge $negative={row.compareRate < 0}>
-                      {formatDeltaPercent(row.compareRate)}
+                    <DeltaBadge $negative={row.compare_rate < 0}>
+                      {formatDeltaPercent(row.compare_rate)}
                     </DeltaBadge>
                   </td>
-                  <td>{formatCurrency(row.salePrice)}</td>
+                  <td>{formatCurrency(row.sale_price)}</td>
                   <td>{formatCurrency(row.profit)}</td>
                   <td>{formatPercent(row.margin)}</td>
                   <td>{row.category}</td>
@@ -1284,19 +653,6 @@ export default function AIPriceStat() {
         </WideTableScroll>
       </LargePanel>
     </PageWrap>
-  );
-}
-
-function MetricCell({ primary, change }) {
-  const { isPositive, text } = getChangeMeta(change);
-
-  return (
-    <MetricWrap>
-      <MetricPrimary>{primary}</MetricPrimary>
-      <MetricChange $positive={isPositive}>
-        {isPositive ? "↑" : "↓"} {text.replace("+", "")}
-      </MetricChange>
-    </MetricWrap>
   );
 }
 
@@ -1319,6 +675,13 @@ const TopFilterRow = styled.div`
   gap: 10px;
   margin-bottom: 22px;
   flex-wrap: wrap;
+`;
+
+const LoadingText = styled.div`
+  margin-bottom: 12px;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
 `;
 
 const sharedField = css`

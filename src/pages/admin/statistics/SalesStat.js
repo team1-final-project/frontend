@@ -597,7 +597,7 @@ export default function SalesStat() {
                   <th>상품코드</th>
                   <th>상품명</th>
                   <th>판매가</th>
-                  <th>재고일수</th>
+                  <th>재고량</th>
                 </tr>
               </thead>
               <tbody>
@@ -614,7 +614,7 @@ export default function SalesStat() {
                     </td>
                     <td>{row.product_name}</td>
                     <td>{formatCurrency(row.sale_price)}</td>
-                    <td>{row.stock_days}일</td>
+                    <td>{row.stock_days}개</td>
                   </tr>
                 ))}
               </tbody>

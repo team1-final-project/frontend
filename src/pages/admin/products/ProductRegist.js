@@ -1,10 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { css, createGlobalStyle } from "styled-components";
 import { Search, Plus, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ReactQuill, { Quill } from "react-quill";
 import BlotFormatter from "quill-blot-formatter";
 import "react-quill/dist/quill.snow.css";
+import SearchBar from "../../../components/SearchBar";
+import SearchDate from "../../../components/SearchDate";
+import SelectBar from "../../../components/SelectBar";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import { getCategories } from "../../../api/category";
 import {
@@ -14,6 +19,28 @@ import {
   uploadAdminThumbnailImage,
 } from "../../../api/adminProduct";
 import ToggleSwitch from "../../../components/ToggleSwitch";
+
+const DatePickerStyle = createGlobalStyle`
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
+  .react-datepicker {
+    font-family: inherit;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  }
+  .react-datepicker__header {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+  .react-datepicker__day--selected {
+    background-color: var(--blue) !important;
+    border-radius: 8px;
+  }
+`;
 
 Quill.register("modules/blotFormatter", BlotFormatter);
 const saleStatusOptions = [
@@ -65,6 +92,7 @@ export default function ProductRegist() {
     useAiPrice: false,
     minPrice: "",
     maxPrice: "",
+    pricePerTime: "",
 
     stockQty: "",
     safetyStock: "",
@@ -433,13 +461,10 @@ export default function ProductRegist() {
           ) : (
             <SearchCategoryPanel>
               <CategorySearchWrap>
-                <SearchIconWrap>
-                  <Search size={14} />
-                </SearchIconWrap>
-                <CategorySearchInput
+                <SearchBar
                   value={categoryKeyword}
-                  onChange={(e) => setCategoryKeyword(e.target.value)}
-                  placeholder="카테고리 검색..."
+                  onChange={setCategoryKeyword}
+                  placeholder="검색할 카테고리명을 입력하세요"
                 />
               </CategorySearchWrap>
 
@@ -497,12 +522,19 @@ export default function ProductRegist() {
             <FormRow>
               <FormLabel>상품명</FormLabel>
               <FormField>
-                <Input
-                  value={form.productName}
-                  onChange={(e) => handleChange("productName", e.target.value)}
-                  placeholder="상품명을 입력하세요"
-                  maxLength={100}
-                />
+                <ProductNameWrap>
+                  <ProductNameInput
+                    value={form.productName}
+                    onChange={(e) =>
+                      handleChange("productName", e.target.value)
+                    }
+                    placeholder="상품명을 입력하세요"
+                    maxLength={100}
+                  />
+                  <InnerHelperText>
+                    {form.productName.length} / 100
+                  </InnerHelperText>
+                </ProductNameWrap>
               </FormField>
             </FormRow>
           </FormGrid>
@@ -515,16 +547,15 @@ export default function ProductRegist() {
             <FormRow>
               <FormLabel>판매상태</FormLabel>
               <FormField>
-                <Select
+                <SelectBar
+                  options={saleStatusOptions}
                   value={form.saleStatus}
-                  onChange={(e) => handleChange("saleStatus", e.target.value)}
-                >
-                  {saleStatusOptions.map((item) => (
-                    <option key={item.value} value={item.value}>
-                      {item.label}
-                    </option>
-                  ))}
-                </Select>
+                  onChange={(value) => handleChange("saleStatus", value)}
+                  placeholder="판매상태 선택"
+                  width="220px"
+                  border="true"
+                  shadow={false}
+                />
               </FormField>
             </FormRow>
           </FormGrid>
@@ -643,6 +674,23 @@ export default function ProductRegist() {
                 </UnitInputWrap>
               </FormField>
             </FormRow>
+
+            <FormRow>
+              <FormLabel>회당 조정가</FormLabel>
+              <FormField>
+                <UnitInputWrap>
+                  <Input
+                    value={form.pricePerTime}
+                    onChange={(e) =>
+                      handleChange("pricePerTime", e.target.value)
+                    }
+                    placeholder="회당 조정가"
+                    disabled={!form.useAiPrice}
+                  />
+                  <UnitText>원</UnitText>
+                </UnitInputWrap>
+              </FormField>
+            </FormRow>
           </FormGrid>
         </Section>
 
@@ -683,16 +731,15 @@ export default function ProductRegist() {
             <FormRow>
               <FormLabel>유통기한</FormLabel>
               <FormField>
-                <DateInputWrap>
-                  <Input
-                    type="date"
-                    value={form.expiryDate}
-                    onChange={(e) => handleChange("expiryDate", e.target.value)}
-                  />
-                  <DateIconWrap>
-                    <Calendar size={14} />
-                  </DateIconWrap>
-                </DateInputWrap>
+                <SearchDate
+                  type="single"
+                  selected={form.expiryDate}
+                  onChange={(date) => handleChange("expiryDate", date)}
+                  placeholderText="날짜 선택"
+                  width="220px"
+                  border={true}
+                  shadow={false}
+                />
               </FormField>
             </FormRow>
           </FormGrid>
@@ -908,18 +955,16 @@ const CategoryTabs = styled.div`
   height: 35px;
   border-radius: 10px;
   background: var(--choice);
+  padding: 3px;
 `;
-
 const CategoryTabButton = styled.button`
-  min-width: 120px;
-  height: 35px;
-  border: none;
+  flex: 1;
   border-radius: 8px;
   background: ${({ $active }) => ($active ? "var(--blue)" : "transparent")};
-  color: ${({ $active }) => ($active ? "#ffffff" : "var(--placeholder)")};
+  color: ${({ $active }) => ($active ? "white" : "var(--placeholder)")};
   font-size: 13px;
   font-weight: 700;
-  cursor: pointer;
+  box-shadow: ${({ $active }) => ($active ? "var(--shadow)" : "none")};
 `;
 
 const CategoryPanel = styled.div`
@@ -1090,6 +1135,26 @@ const Input = styled.input`
   }
 `;
 
+const ProductNameWrap = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const ProductNameInput = styled(Input)`
+  padding-right: 70px;
+`;
+
+const InnerHelperText = styled.div`
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: var(--placeholder);
+  font-size: 11px;
+  pointer-events: none;
+  user-select: none;
+`;
+
 const Select = styled.select`
   width: 180px;
   height: 40px;
@@ -1127,6 +1192,29 @@ const UnitText = styled.span`
 const DateInputWrap = styled.div`
   position: relative;
   max-width: 220px;
+`;
+
+const SingleDateWrap = styled.div`
+  position: relative;
+  max-width: 220px;
+  box-shadow: var(--shadow);
+  border-radius: 10px;
+
+  .custom-datepicker {
+    width: 100%;
+    height: 40px;
+    padding: 0 34px 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: white;
+    font-size: var(--td);
+    cursor: pointer;
+    outline: none;
+
+    &:focus {
+      border-color: var(--blue);
+    }
+  }
 `;
 
 const DateIconWrap = styled.div`
