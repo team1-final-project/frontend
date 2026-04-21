@@ -318,8 +318,8 @@ export default function InventoryHistory() {
     Number(summaryData.inbound_qty_diff || 0) >= 0;
 
   const isOutboundUp =
-    Number(summaryData.outbound_sku_diff || 0) <= 0 &&
-    Number(summaryData.outbound_qty_diff || 0) <= 0;
+    Number(summaryData.outbound_sku_diff || 0) >= 0 &&
+    Number(summaryData.outbound_qty_diff || 0) >= 0;
 
   const handleChartMouseMove = (e) => {
     if (!chartAreaRef.current) return;
