@@ -368,6 +368,10 @@ export default function ProductRegist() {
           form.useAiPrice && form.minPrice ? Number(form.minPrice) : null,
         max_price_limit:
           form.useAiPrice && form.maxPrice ? Number(form.maxPrice) : null,
+        price_per_time:
+          form.useAiPrice && form.pricePerTime
+            ? Number(form.pricePerTime)
+            : null,
 
         stock_qty: Number(form.stockQty || 0),
         safety_stock_qty: Number(form.safetyStock || 0),
