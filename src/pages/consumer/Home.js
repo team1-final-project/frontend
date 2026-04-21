@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import herosectionImg from "../../assets/herosection.png";
+import herosectionImg from "../../assets/sinramyeon banner.png";
 import * as S from "./HomeStyles";
 import { getHomeAiRanking } from "../../api/stats";
 
