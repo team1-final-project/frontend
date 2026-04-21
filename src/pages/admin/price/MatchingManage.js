@@ -14,8 +14,8 @@ import {
 
 const saleStatusLabelMap = {
   ON_SALE: "판매중",
-  READY: "판매대기",
-  STOPPED: "임시중지",
+  READY: "판매예정",
+  STOPPED: "판매중지",
   SOLD_OUT: "품절",
   ENDED: "판매종료",
 };
@@ -373,25 +373,45 @@ export default function MatchingManage() {
       <SummaryGrid>
         <SummaryCard
           title="전체 상품 수"
-          value={`${summaryData?.total_count ?? summary.totalCount} SKU`}
+          value={
+            <>
+              {summaryData?.total_count ?? summary.totalCount}
+              <span>SKU</span>
+            </>
+          }
           change={`${Math.abs(summaryData?.total_diff ?? 0)} SKU`}
           up={(summaryData?.total_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="카탈로그 매칭 상품"
-          value={`${summaryData?.matched_count ?? summary.matchedCount} SKU`}
+          value={
+            <>
+              {summaryData?.matched_count ?? summary.matchedCount}
+              <span>SKU</span>
+            </>
+          }
           change={`${Math.abs(summaryData?.matched_diff ?? 0)} SKU`}
           up={(summaryData?.matched_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="카탈로그 미매칭 상품"
-          value={`${summaryData?.unmatched_count ?? summary.unmatchedCount} SKU`}
+          value={
+            <>
+              {summaryData?.unmatched_count ?? summary.unmatchedCount}
+              <span>SKU</span>
+            </>
+          }
           change={`${Math.abs(summaryData?.unmatched_diff ?? 0)} SKU`}
           up={(summaryData?.unmatched_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="AI 가격변경 상품"
-          value={`${summaryData?.ai_price_count ?? summary.aiPriceCount} SKU`}
+          value={
+            <>
+              {summaryData?.ai_price_count ?? summary.aiPriceCount}
+              <span>SKU</span>
+            </>
+          }
           change={`${Math.abs(summaryData?.ai_price_diff ?? 0)} SKU`}
           up={(summaryData?.ai_price_diff ?? 0) >= 0}
         />
@@ -494,7 +514,6 @@ const Title = styled.h2`
 `;
 
 const SummaryGrid = styled.div`
-  margin-bottom: 18px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
