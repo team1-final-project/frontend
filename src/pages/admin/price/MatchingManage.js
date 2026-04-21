@@ -22,10 +22,10 @@ const saleStatusLabelMap = {
 
 const saleStatusStyleMap = {
   판매중: { label: "판매중", variant: "success" },
-  판매대기: { label: "판매대기", variant: "warning" },
-  임시중지: { label: "임시중지", variant: "warning" },
-  품절: { label: "품절", variant: "purple" },
-  판매종료: { label: "판매종료", variant: "info" },
+  판매예정: { label: "판매예정", variant: "info" },
+  판매중지: { label: "판매중지", variant: "warning" },
+  품절: { label: "품절", variant: "danger" },
+  판매종료: { label: "판매종료", variant: "purple" },
 };
 
 const matchStatusOptions = [
@@ -64,6 +64,16 @@ function formatDateTimeDisplay(value) {
   return `${year}/${month}/${day} ${hours}:${minutes}`;
 }
 
+function formatDateOnly(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 const mapMatchingRow = (item) => {
   const catalogNo = item.catalog_external_id ?? "-";
   const matched = Boolean(item.catalog_external_id);
@@ -79,6 +89,7 @@ const mapMatchingRow = (item) => {
     price: formatPrice(item.sale_price),
     useAiPrice: Boolean(item.ai_pricing_enabled),
     saleStatus: saleStatusLabelMap[item.sale_status] ?? item.sale_status ?? "-",
+    updatedDate: formatDateOnly(item.updated_at),
     updatedAt: formatDateTimeDisplay(item.updated_at),
   };
 };
@@ -171,13 +182,12 @@ export default function MatchingManage() {
       const matchesCategory = categoryValue
         ? item.category === categoryValue
         : true;
-
       const matchesMatchStatus = matchFilter
         ? item.matchStatus === matchFilter
         : true;
 
-      const matchesStartDate = startDate ? itemDate >= startDate : true;
-      const matchesEndDate = endDate ? itemDate <= endDate : true;
+      const matchesStartDate = startDate ? item.updatedDate >= startDate : true;
+      const matchesEndDate = endDate ? item.updatedDate <= endDate : true;
 
       return (
         matchesSearch &&
@@ -235,15 +245,16 @@ export default function MatchingManage() {
         );
       },
     },
-    {
-      key: "matchYn",
-      title: "매칭상태",
-      width: "80px",
-      sortable: false,
-      render: (value) => (
-        <MatchYnText $matched={value === "Y"}>{value}</MatchYnText>
-      ),
-    },
+    // 하린 : 위 매칭여부 Status에서 매칭 상태를 알 수 있어서 아래 매칭상태는 굳이 필요 없을 것 같아 주석처리함
+    // {
+    //   key: "matchYn",
+    //   title: "매칭상태",
+    //   width: "80px",
+    //   sortable: false,
+    //   render: (value) => (
+    //     <MatchYnText $matched={value === "Y"}>{value}</MatchYnText>
+    //   ),
+    // },
     {
       key: "catalogNo",
       title: "카탈로그번호",
@@ -423,69 +434,42 @@ export default function MatchingManage() {
         rowKey="id"
         headerAlign="center"
         cellAlign="center"
+        // 1. SearchBar 설정
         searchValue={searchValue}
-        onSearchChange={(value) => {
-          setSearchValue(value);
+        onSearchChange={(val) => {
+          setSearchValue(val);
           setPage(1);
         }}
         searchPlaceholder="상품명, 상품코드로 검색"
-        filterValue={categoryValue}
-        onFilterChange={(value) => {
-          setCategoryValue(value);
+        // 2. SearchDate 설정
+        startDate={startDate}
+        onStartDateChange={(val) => {
+          setStartDate(val);
           setPage(1);
         }}
-        filterPlaceholder="카테고리"
+        endDate={endDate}
+        onEndDateChange={(val) => {
+          setEndDate(val);
+          setPage(1);
+        }}
+        // 3. SelectBar 1 (카테고리)
+        filterValue={categoryValue}
+        onFilterChange={(val) => {
+          setCategoryValue(val);
+          setPage(1);
+        }}
+        filterPlaceholder="카테고리 전체"
         filterOptions={categoryOptions}
-        extraToolbar={
-          <ExtraToolbarWrap>
-            <DateInput
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                setPage(1);
-              }}
-            />
-            <DateDivider>~</DateDivider>
-            <DateInput
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                setPage(1);
-              }}
-            />
-            <MatchSelectWrap>
-              <MatchSelect
-                value={matchFilter}
-                onChange={(e) => {
-                  setMatchFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">매칭상태</option>
-                {matchStatusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </MatchSelect>
-            </MatchSelectWrap>
-            <ResetButton
-              type="button"
-              onClick={() => {
-                setSearchValue("");
-                setCategoryValue("");
-                setMatchFilter("");
-                setStartDate("");
-                setEndDate("");
-                setPage(1);
-              }}
-            >
-              초기화
-            </ResetButton>
-          </ExtraToolbarWrap>
-        }
+        // 4. SelectBar 2 (매칭상태) - [NEW]
+        filterValue2={matchFilter}
+        onFilterChange2={(val) => {
+          setMatchFilter(val);
+          setPage(1);
+        }}
+        filterPlaceholder2="매칭상태 전체"
+        filterOptions2={matchStatusOptions}
+        // [CHANGE] 초기화 버튼 삭제 (extraToolbar 비움)
+        extraToolbar={null}
         page={page}
         pageSize={pageSize}
         onPageChange={setPage}
