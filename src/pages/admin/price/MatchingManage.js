@@ -373,25 +373,45 @@ export default function MatchingManage() {
       <SummaryGrid>
         <SummaryCard
           title="전체 상품 수"
-          value={`${summaryData?.total_count ?? summary.totalCount} SKU`}
+          value={
+            <>
+              {summaryData.total_count ?? summary.totalCount}
+              <span>SKU</span>
+            </>
+          }
           change={`${Math.abs(summaryData?.total_diff ?? 0)} SKU`}
           up={(summaryData?.total_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="카탈로그 매칭 상품"
-          value={`${summaryData?.matched_count ?? summary.matchedCount} SKU`}
+          value={
+            <>
+              {summaryData.matched_count ?? summary.matchedCount}
+              <span>SKU</span>
+            </>
+          }
           change={`${Math.abs(summaryData?.matched_diff ?? 0)} SKU`}
           up={(summaryData?.matched_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="카탈로그 미매칭 상품"
-          value={`${summaryData?.unmatched_count ?? summary.unmatchedCount} SKU`}
+          value={
+            <>
+              {summaryData.unmatched_count ?? summary.unmatchedCount}
+              <span>SKU</span>
+            </>
+          }
           change={`${Math.abs(summaryData?.unmatched_diff ?? 0)} SKU`}
           up={(summaryData?.unmatched_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="AI 가격변경 상품"
-          value={`${summaryData?.ai_price_count ?? summary.aiPriceCount} SKU`}
+          value={
+            <>
+              {summaryData.ai_price_count ?? summary.aiPriceCount}
+              <span>SKU</span>
+            </>
+          }
           change={`${Math.abs(summaryData?.ai_price_diff ?? 0)} SKU`}
           up={(summaryData?.ai_price_diff ?? 0) >= 0}
         />
@@ -479,16 +499,18 @@ export default function MatchingManage() {
 }
 
 const PageWrap = styled.div`
-  padding: 24px;
-  background: #f8fafc;
+  padding: 25px;
+  background: var(--background);
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
 `;
 
 const Title = styled.h2`
-  margin: 0 0 18px;
-  color: #111827;
-  font-size: 22px;
-  font-weight: 800;
+  margin: 0;
+  font-size: var(--title);
+  font-weight: 700;
 `;
 
 const SummaryGrid = styled.div`
