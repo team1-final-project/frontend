@@ -10,6 +10,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { getAdminPriceHistory } from "../../../api/adminPrice";
+import RateBadge from "../../../components/RateBadge";
 
 export default function AIHistory() {
   const [filters, setFilters] = useState({
@@ -73,7 +74,8 @@ export default function AIHistory() {
       setSearched(true);
       setPage(1);
       setErrorMessage(
-        error?.response?.data?.detail || "AI 가격변경 이력 조회에 실패했습니다."
+        error?.response?.data?.detail ||
+          "AI 가격변경 이력 조회에 실패했습니다.",
       );
     } finally {
       setIsLoading(false);
@@ -104,7 +106,9 @@ export default function AIHistory() {
           <InfoRow>
             <InfoLabel>상품코드</InfoLabel>
             <InfoValueBox $compact>
-              <InternalLink to={`/admin/product-update/${product.product_code}`}>
+              <InternalLink
+                to={`/admin/product-update/${product.product_code}`}
+              >
                 {product.product_code}
               </InternalLink>
             </InfoValueBox>
@@ -113,15 +117,15 @@ export default function AIHistory() {
           <InfoRow>
             <InfoLabel>상품명</InfoLabel>
             <InfoValueBox>
-              <ExternalAnchor href="#">
-                {product.product_name}
-              </ExternalAnchor>
+              <ExternalAnchor href="#">{product.product_name}</ExternalAnchor>
             </InfoValueBox>
           </InfoRow>
 
           <InfoRow>
             <InfoLabel>판매가</InfoLabel>
-            <InfoValueBox $compact>{formatWon(product.sale_price)}</InfoValueBox>
+            <InfoValueBox $compact>
+              {formatWon(product.sale_price)}
+            </InfoValueBox>
           </InfoRow>
         </InfoGrid>
       </SectionCard>
@@ -133,16 +137,16 @@ export default function AIHistory() {
             <InfoLabel>카탈로그 ID</InfoLabel>
             <InfoValueBox $compact>
               {catalog?.external_catalog_id ? (
-              <ExternalAnchor
-                href={`https://search.shopping.naver.com/catalog/${catalog.external_catalog_id}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {catalog.external_catalog_id}
-              </ExternalAnchor>
-            ) : (
-              "-"
-            )}
+                <ExternalAnchor
+                  href={`https://search.shopping.naver.com/catalog/${catalog.external_catalog_id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {catalog.external_catalog_id}
+                </ExternalAnchor>
+              ) : (
+                "-"
+              )}
             </InfoValueBox>
           </InfoRow>
 
@@ -195,7 +199,9 @@ export default function AIHistory() {
                       <td>{formatWon(item.applied_sale_price)}</td>
                       <td>{formatQty(item.sales_qty)}</td>
                       <td>{formatPerHour(item.sales_per_hour)}</td>
-                      <LowestTextCell $isLowest={item.is_lowest_price ? "Y" : "N"}>
+                      <LowestTextCell
+                        $isLowest={item.is_lowest_price ? "Y" : "N"}
+                      >
                         {item.is_lowest_price ? "Y" : "N"}
                       </LowestTextCell>
                       <td>{formatWon(item.market_lowest_price)}</td>
@@ -206,13 +212,10 @@ export default function AIHistory() {
                               ? "-"
                               : formatWon(item.market_gap_amount)}
                           </div>
-                          {priceRate ? (
-                            <RateBadge $negative={isNegative}>
-                              {priceRate}
-                            </RateBadge>
-                          ) : (
-                            <RateBadge $negative={false}>-</RateBadge>
-                          )}
+                          <RateBadge
+                            value={priceRate || "-"}
+                            isGood={isNegative}
+                          />
                         </GapWrap>
                       </td>
                       <td>{formatWon(item.min_price_limit)}</td>
@@ -328,7 +331,9 @@ export default function AIHistory() {
           </KeywordWrap>
         </FilterBar>
 
-        {searched && result && rows.length > 0 ? renderResult() : renderEmptyState()}
+        {searched && result && rows.length > 0
+          ? renderResult()
+          : renderEmptyState()}
       </PageInner>
     </PageSection>
   );
@@ -404,57 +409,6 @@ const PageTitle = styled.h1`
   font-size: 24px;
   font-weight: 800;
   color: #1f2430;
-`;
-
-const TopActions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 18px;
-`;
-
-const BellWrap = styled.div`
-  position: relative;
-  color: #6b7280;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const Badge = styled.span`
-  position: absolute;
-  top: -7px;
-  right: -8px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 999px;
-  background: #ef4444;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const ProfileCircle = styled.div`
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  background: #8b7cf6;
-  position: relative;
-
-  &::after {
-    content: "";
-    position: absolute;
-    right: 1px;
-    bottom: 1px;
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    background: #22c55e;
-    border: 2px solid #f5f6f8;
-  }
 `;
 
 const FilterBar = styled.div`
@@ -688,27 +642,14 @@ const StyledTable = styled.table`
 
 const LowestTextCell = styled.td`
   font-weight: 700 !important;
-  color: ${({ $isLowest }) => ($isLowest === "Y" ? "#18b663" : "#ef5350")} !important;
+  color: ${({ $isLowest }) =>
+    $isLowest === "Y" ? "#18b663" : "#ef5350"} !important;
 `;
 
 const GapWrap = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 8px;
-`;
-
-const RateBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 54px;
-  height: 24px;
-  padding: 0 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  background: ${({ $negative }) => ($negative ? "#dcf7e8" : "#ffe7e7")};
-  color: ${({ $negative }) => ($negative ? "#18b663" : "#ef5350")};
 `;
 
 const PaginationRow = styled.div`

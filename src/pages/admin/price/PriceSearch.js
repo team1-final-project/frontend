@@ -10,6 +10,7 @@ import {
   getAdminMatchingSummary,
   patchAdminPriceSearchRow,
 } from "../../../api/adminPrice.js";
+import RateBadge from "../../../components/RateBadge.jsx";
 
 const STATUS_PALETTE = {
   success: { color: "#1EB564", bg: "#EEFBF4" }, // 판매중
@@ -401,9 +402,10 @@ export default function PriceSearch() {
       render: (value, row) => (
         <PriceGapWrap>
           <div>{value}</div>
-          <RateBadge $negative={String(row.priceRate).startsWith("-")}>
-            {row.priceRate}
-          </RateBadge>
+          <RateBadge
+            value={row.priceRate}
+            isGood={String(row.priceRate).startsWith("-")}
+          />
         </PriceGapWrap>
       ),
     },
@@ -483,7 +485,13 @@ export default function PriceSearch() {
     <PageWrap>
       <Title>가격 관리</Title>
 
+<<<<<<< HEAD
       {isLoading && <PageStatusText>목록을 불러오는 중입니다.</PageStatusText>}
+=======
+      {isLoading && (
+        <PageStatusText>가격 조회 목록을 불러오는 중입니다.</PageStatusText>
+      )}
+>>>>>>> hyunsu
       {!isLoading && errorMessage && (
         <PageStatusText $error>{errorMessage}</PageStatusText>
       )}
@@ -652,6 +660,7 @@ const PriceGapWrap = styled.div`
   gap: 6px;
 `;
 
+<<<<<<< HEAD
 const RateBadge = styled.span`
   display: inline-flex;
   align-items: center;
@@ -666,6 +675,8 @@ const RateBadge = styled.span`
   color: ${({ $negative }) => ($negative ? "var(--green)" : "var(--red)")};
 `;
 
+=======
+>>>>>>> hyunsu
 const CodeLink = styled.button`
   border: none;
   background: transparent;
