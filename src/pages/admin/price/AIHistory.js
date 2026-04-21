@@ -183,7 +183,7 @@ export default function AIHistory() {
                   <th>최저가대비</th>
                   <th>최저가제한</th>
                   <th>최고가제한</th>
-                  <th>희망조정가 제한</th>
+                  <th>회당조정가 제한</th>
                   <th>재고</th>
                 </tr>
               </thead>
@@ -220,7 +220,7 @@ export default function AIHistory() {
                       </td>
                       <td>{formatWon(item.min_price_limit)}</td>
                       <td>{formatWon(item.max_price_limit)}</td>
-                      <td>-</td>
+                      <td>{formatWon(item.price_per_time)}</td>
                       <td>{formatQty(item.remaining_stock)}</td>
                     </tr>
                   );
