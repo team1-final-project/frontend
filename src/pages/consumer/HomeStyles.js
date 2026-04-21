@@ -18,7 +18,7 @@ export const HeroSection = styled.section`
   width: 100%;
   background: #e7dccd;
   overflow: hidden;
-  height: 600px;
+  height: 100%;
 `;
 
 export const HeroCanvas = styled.div`
@@ -39,7 +39,7 @@ export const HeroBaseImage = styled.img`
 export const HeroOverlay = styled.div`
   position: absolute;
   left: 4.1%;
-  top: 30%;
+  top: 10%;
   width: 29.2%;
   z-index: 2;
 
