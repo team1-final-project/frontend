@@ -56,11 +56,17 @@ export default function ProductList() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  const [reloadTick, setReloadTick] = useState(0);
+
   const [summary, setSummary] = useState({
     totalCount: 0,
     saleCount: 0,
     soldOutCount: 0,
     aiEnabledCount: 0,
+    totalDiff: 0,
+    saleDiff: 0,
+    soldOutDiff: 0,
+    aiEnabledDiff: 0,
   });
 
   const nav = useNavigate();
@@ -122,6 +128,10 @@ export default function ProductList() {
           saleCount: data.summary?.sale_count || 0,
           soldOutCount: data.summary?.sold_out_count || 0,
           aiEnabledCount: data.summary?.ai_enabled_count || 0,
+          totalDiff: data.summary?.total_diff || 0,
+          saleDiff: data.summary?.sale_diff || 0,
+          soldOutDiff: data.summary?.sold_out_diff || 0,
+          aiEnabledDiff: data.summary?.ai_enabled_diff || 0,
         });
 
         setTotal(data.total || 0);
@@ -137,7 +147,7 @@ export default function ProductList() {
     };
 
     fetchProducts();
-  }, [searchValue, categoryValue, startDate, endDate, page, pageSize]);
+  }, [searchValue, categoryValue, startDate, endDate, page, pageSize, reloadTick]);
 
   const handleToggleAiPricing = async (id, nextChecked) => {
     const previousProducts = products;
@@ -148,27 +158,12 @@ export default function ProductList() {
       ),
     );
 
-    setSummary((prev) => ({
-      ...prev,
-      aiEnabledCount: nextChecked
-        ? prev.aiEnabledCount + 1
-        : Math.max(0, prev.aiEnabledCount - 1),
-    }));
-
     try {
       await updateAdminProductAiPricing(id, nextChecked);
+      setReloadTick((prev) => prev + 1);
     } catch (error) {
       console.error(error);
-
       setProducts(previousProducts);
-
-      setSummary((prev) => ({
-        ...prev,
-        aiEnabledCount: nextChecked
-          ? Math.max(0, prev.aiEnabledCount - 1)
-          : prev.aiEnabledCount + 1,
-      }));
-
       alert(
         error?.response?.data?.detail ||
           "AI 가격변경 상태 변경에 실패했습니다.",
@@ -194,6 +189,7 @@ export default function ProductList() {
 
     try {
       await updateAdminProductSaleStatus(id, nextStatusCode);
+      setReloadTick((prev) => prev + 1);
     } catch (error) {
       console.error(error);
       setProducts(previousProducts);
@@ -314,9 +310,10 @@ export default function ProductList() {
               <span>SKU</span>
             </>
           }
-          change="6 SKU"
-          up
+          change={`${Math.abs(summary.totalDiff)} SKU`}
+          up={summary.totalDiff >= 0}
         />
+
         <SummaryCard
           title="판매 중"
           value={
@@ -325,9 +322,10 @@ export default function ProductList() {
               <span>SKU</span>
             </>
           }
-          change="1 SKU"
-          up={false}
+          change={`${Math.abs(summary.saleDiff)} SKU`}
+          up={summary.saleDiff >= 0}
         />
+
         <SummaryCard
           title="품절"
           value={
@@ -336,9 +334,10 @@ export default function ProductList() {
               <span>SKU</span>
             </>
           }
-          change="1 SKU"
-          up
+          change={`${Math.abs(summary.soldOutDiff)} SKU`}
+          up={summary.soldOutDiff >= 0}
         />
+
         <SummaryCard
           title="AI 가격변경"
           value={
@@ -347,8 +346,8 @@ export default function ProductList() {
               <span>SKU</span>
             </>
           }
-          change="0 SKU"
-          up
+          change={`${Math.abs(summary.aiEnabledDiff)} SKU`}
+          up={summary.aiEnabledDiff >= 0}
         />
       </SummaryGrid>
 
