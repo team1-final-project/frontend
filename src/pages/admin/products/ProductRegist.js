@@ -521,12 +521,19 @@ export default function ProductRegist() {
             <FormRow>
               <FormLabel>상품명</FormLabel>
               <FormField>
-                <Input
-                  value={form.productName}
-                  onChange={(e) => handleChange("productName", e.target.value)}
-                  placeholder="상품명을 입력하세요"
-                  maxLength={100}
-                />
+                <ProductNameWrap>
+                  <ProductNameInput
+                    value={form.productName}
+                    onChange={(e) =>
+                      handleChange("productName", e.target.value)
+                    }
+                    placeholder="상품명을 입력하세요"
+                    maxLength={100}
+                  />
+                  <InnerHelperText>
+                    {form.productName.length} / 100
+                  </InnerHelperText>
+                </ProductNameWrap>
               </FormField>
             </FormRow>
           </FormGrid>
@@ -545,7 +552,7 @@ export default function ProductRegist() {
                   onChange={(value) => handleChange("saleStatus", value)}
                   placeholder="판매상태 선택"
                   width="220px"
-                  border
+                  border="true"
                 />
               </FormField>
             </FormRow>
@@ -929,18 +936,16 @@ const CategoryTabs = styled.div`
   height: 35px;
   border-radius: 10px;
   background: var(--choice);
+  padding: 3px;
 `;
-
 const CategoryTabButton = styled.button`
-  min-width: 120px;
-  height: 35px;
-  border: none;
+  flex: 1;
   border-radius: 8px;
   background: ${({ $active }) => ($active ? "var(--blue)" : "transparent")};
-  color: ${({ $active }) => ($active ? "#ffffff" : "var(--placeholder)")};
+  color: ${({ $active }) => ($active ? "white" : "var(--placeholder)")};
   font-size: 13px;
   font-weight: 700;
-  cursor: pointer;
+  box-shadow: ${({ $active }) => ($active ? "var(--shadow)" : "none")};
 `;
 
 const CategoryPanel = styled.div`
@@ -1109,6 +1114,26 @@ const Input = styled.input`
   &::placeholder {
     color: var(--placeholder);
   }
+`;
+
+const ProductNameWrap = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const ProductNameInput = styled(Input)`
+  padding-right: 70px;
+`;
+
+const InnerHelperText = styled.div`
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: var(--placeholder);
+  font-size: 11px;
+  pointer-events: none;
+  user-select: none;
 `;
 
 const Select = styled.select`
