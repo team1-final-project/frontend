@@ -1,10 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { css, createGlobalStyle } from "styled-components";
 import { Search, Plus, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ReactQuill, { Quill } from "react-quill";
 import BlotFormatter from "quill-blot-formatter";
 import "react-quill/dist/quill.snow.css";
+import SearchBar from "../../../components/SearchBar";
+import SearchDate from "../../../components/SearchDate";
+import SelectBar from "../../../components/SelectBar";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import { getCategories } from "../../../api/category";
 import {
@@ -14,6 +19,28 @@ import {
   uploadAdminThumbnailImage,
 } from "../../../api/adminProduct";
 import ToggleSwitch from "../../../components/ToggleSwitch";
+
+const DatePickerStyle = createGlobalStyle`
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
+  .react-datepicker {
+    font-family: inherit;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  }
+  .react-datepicker__header {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+  .react-datepicker__day--selected {
+    background-color: var(--blue) !important;
+    border-radius: 8px;
+  }
+`;
 
 Quill.register("modules/blotFormatter", BlotFormatter);
 const saleStatusOptions = [
@@ -433,13 +460,10 @@ export default function ProductRegist() {
           ) : (
             <SearchCategoryPanel>
               <CategorySearchWrap>
-                <SearchIconWrap>
-                  <Search size={14} />
-                </SearchIconWrap>
-                <CategorySearchInput
+                <SearchBar
                   value={categoryKeyword}
-                  onChange={(e) => setCategoryKeyword(e.target.value)}
-                  placeholder="카테고리 검색..."
+                  onChange={setCategoryKeyword}
+                  placeholder="검색할 카테고리명을 입력하세요"
                 />
               </CategorySearchWrap>
 
@@ -515,16 +539,14 @@ export default function ProductRegist() {
             <FormRow>
               <FormLabel>판매상태</FormLabel>
               <FormField>
-                <Select
+                <SelectBar
+                  options={saleStatusOptions}
                   value={form.saleStatus}
-                  onChange={(e) => handleChange("saleStatus", e.target.value)}
-                >
-                  {saleStatusOptions.map((item) => (
-                    <option key={item.value} value={item.value}>
-                      {item.label}
-                    </option>
-                  ))}
-                </Select>
+                  onChange={(value) => handleChange("saleStatus", value)}
+                  placeholder="판매상태 선택"
+                  width="220px"
+                  border
+                />
               </FormField>
             </FormRow>
           </FormGrid>
@@ -683,16 +705,15 @@ export default function ProductRegist() {
             <FormRow>
               <FormLabel>유통기한</FormLabel>
               <FormField>
-                <DateInputWrap>
-                  <Input
-                    type="date"
-                    value={form.expiryDate}
-                    onChange={(e) => handleChange("expiryDate", e.target.value)}
-                  />
-                  <DateIconWrap>
-                    <Calendar size={14} />
-                  </DateIconWrap>
-                </DateInputWrap>
+                <SearchDate
+                  type="single"
+                  selected={form.expiryDate}
+                  onChange={(date) => handleChange("expiryDate", date)}
+                  placeholderText="날짜 선택"
+                  width="220px"
+                  border={true}
+                  shadow={false}
+                />
               </FormField>
             </FormRow>
           </FormGrid>
@@ -1127,6 +1148,29 @@ const UnitText = styled.span`
 const DateInputWrap = styled.div`
   position: relative;
   max-width: 220px;
+`;
+
+const SingleDateWrap = styled.div`
+  position: relative;
+  max-width: 220px;
+  box-shadow: var(--shadow);
+  border-radius: 10px;
+
+  .custom-datepicker {
+    width: 100%;
+    height: 40px;
+    padding: 0 34px 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: white;
+    font-size: var(--td);
+    cursor: pointer;
+    outline: none;
+
+    &:focus {
+      border-color: var(--blue);
+    }
+  }
 `;
 
 const DateIconWrap = styled.div`
