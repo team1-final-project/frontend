@@ -135,6 +135,8 @@ const aiPerformanceTooltipLines = [
   "악성재고(재고 보유일수 90일 초과)의 감가상각 및 폐기비용으로 인한 손실을 줄이기 위해 AI가 판매가를 인하하여 판매를 촉진함",
 ];
 
+const priceAdjustmentInfoLines = ["가격조정 필요 상품"];
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [dashboard, setDashboard] = useState(null);
@@ -452,7 +454,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader>
             <SectionTitle>가격 조정 필요 상품</SectionTitle>
-            <Info size={14} />
+            <InfoTooltip title="가격 조정 필요 상품" lines={priceAdjustmentInfoLines} />
           </CardHeader>
 
           <MiniTable>
