@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import styled, { css } from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { CalendarDays, Search, ChevronDown, Info } from "lucide-react";
+import { CalendarDays, Search, ChevronDown } from "lucide-react";
+import InfoTooltip from "../../../components/InfoTooltip";
 import {
   ResponsiveContainer,
   LineChart,
@@ -90,6 +91,41 @@ function MetricCell({ primary, change }) {
         {isPositive ? "↑" : "↓"} {text.replace("+", "")}
       </MetricChange>
     </MetricWrap>
+  );
+}
+
+function getDiffMeta(aiValue, manualValue, type = "currency") {
+  const diff = Number(aiValue || 0) - Number(manualValue || 0);
+  const abs = Math.abs(diff);
+  const isPositive = diff >= 0;
+
+  if (type === "count") {
+    return {
+      isPositive,
+      text: `${formatNumber(abs)}개`,
+    };
+  }
+
+  if (type === "percent") {
+    return {
+      isPositive,
+      text: `${abs.toFixed(1)}%`,
+    };
+  }
+
+  return {
+    isPositive,
+    text: `${formatNumber(Math.round(abs))}원`,
+  };
+}
+
+function PerformanceDiffCell({ aiValue, manualValue, type = "currency" }) {
+  const { isPositive, text } = getDiffMeta(aiValue, manualValue, type);
+
+  return (
+    <PerformanceDiff $positive={isPositive}>
+      {isPositive ? "↑" : "↓"} {text}
+    </PerformanceDiff>
   );
 }
 
@@ -413,7 +449,7 @@ export default function AIPriceStat() {
                 <th>매출액</th>
                 <th>공헌이익</th>
                 <th>판매량</th>
-                <th>{categoryCompareLabel}</th>
+                <th>이익률</th>
                 <th>매출액</th>
                 <th>공헌이익</th>
                 <th>판매량</th>
@@ -430,27 +466,31 @@ export default function AIPriceStat() {
                   <td>{row.category}</td>
 
                   <td>
-                    <MetricCell
-                      primary={formatCurrency(row.performance.revenue)}
-                      change={row.performance.revenue_change}
+                    <PerformanceDiffCell
+                      aiValue={row.ai.revenue}
+                      manualValue={row.manual.revenue}
+                      type="currency"
                     />
                   </td>
                   <td>
-                    <MetricCell
-                      primary={formatCurrency(row.performance.profit)}
-                      change={row.performance.profit_change}
+                    <PerformanceDiffCell
+                      aiValue={row.ai.profit}
+                      manualValue={row.manual.profit}
+                      type="currency"
                     />
                   </td>
                   <td>
-                    <MetricCell
-                      primary={formatCount(row.performance.sales)}
-                      change={row.performance.sales_change}
+                    <PerformanceDiffCell
+                      aiValue={row.ai.sales}
+                      manualValue={row.manual.sales}
+                      type="count"
                     />
                   </td>
                   <td>
-                    <MetricCell
-                      primary={formatPercent(row.performance.margin)}
-                      change={row.performance.margin_change}
+                    <PerformanceDiffCell
+                      aiValue={row.ai.margin}
+                      manualValue={row.manual.margin}
+                      type="percent"
                     />
                   </td>
 
@@ -601,7 +641,15 @@ export default function AIPriceStat() {
         <PanelHeaderRow>
           <PanelTitle>전략 수정 필요한 상품</PanelTitle>
           <InfoIconWrap>
-            <Info size={15} />
+            <InfoTooltip
+              title="사유 기준 안내"
+              ariaLabel="전략 수정 필요한 상품 사유 안내"
+              width={300}
+              lines={[
+                "최저가 제한: 현재 판매가가 최소 허용 가격에 도달했거나 근접해 추가 인하 여지가 거의 없는 상태입니다.",
+                "회당 조정가 제한: 현재 판매가가 시장 최저가보다 높아 추가 조정이 필요하지만, 한 번에 조정 가능한 가격 범위를 고려해야 하는 상태입니다.",
+              ]}
+            />
           </InfoIconWrap>
         </PanelHeaderRow>
 
@@ -888,15 +936,21 @@ const WideTableScroll = styled.div`
 const CompareTable = styled.table`
   width: 100%;
   min-width: 1180px;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #dfe5ee;
+  border-radius: 14px;
+  background: #ffffff;
+  overflow: hidden;
 
   th,
   td {
     padding: 14px 12px;
-    border-bottom: 1px solid #eef2f7;
     text-align: center;
     white-space: nowrap;
     font-size: 13px;
+    border-right: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
   }
 
   thead th {
@@ -907,6 +961,20 @@ const CompareTable = styled.table`
 
   tbody td {
     color: #1f2937;
+    font-weight: 500;
+  }
+
+  th:last-child,
+  td:last-child {
+    border-right: none;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  thead tr:last-child th {
+    border-bottom: 1px solid #dfe5ee;
   }
 `;
 
@@ -1081,4 +1149,14 @@ const InfoIconWrap = styled.div`
   color: #9aa3b2;
   display: flex;
   align-items: center;
+`;
+
+const PerformanceDiff = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: ${({ $positive }) => ($positive ? "#22c55e" : "#ef4444")};
+  font-size: 14px;
+  font-weight: 700;
 `;
