@@ -92,6 +92,7 @@ export default function ProductRegist() {
     useAiPrice: false,
     minPrice: "",
     maxPrice: "",
+    pricePerTime: "",
 
     stockQty: "",
     safetyStock: "",
@@ -667,6 +668,23 @@ export default function ProductRegist() {
                     value={form.maxPrice}
                     onChange={(e) => handleChange("maxPrice", e.target.value)}
                     placeholder="최대가 제한"
+                    disabled={!form.useAiPrice}
+                  />
+                  <UnitText>원</UnitText>
+                </UnitInputWrap>
+              </FormField>
+            </FormRow>
+
+            <FormRow>
+              <FormLabel>회당 조정가</FormLabel>
+              <FormField>
+                <UnitInputWrap>
+                  <Input
+                    value={form.pricePerTime}
+                    onChange={(e) =>
+                      handleChange("pricePerTime", e.target.value)
+                    }
+                    placeholder="회당 조정가"
                     disabled={!form.useAiPrice}
                   />
                   <UnitText>원</UnitText>
