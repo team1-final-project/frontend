@@ -8,7 +8,7 @@ import { ChevronDown } from "lucide-react";
 export const Page = styled.div`
   width: 100%;
   background: #efefef;
-  padding: 50px 30px 200px;
+  padding: 0px 0px 200px;
 `;
 
 /* =========================
@@ -18,7 +18,7 @@ export const HeroSection = styled.section`
   width: 100%;
   background: #e7dccd;
   overflow: hidden;
-  height: 450px;
+  height: 600px;
 `;
 
 export const HeroCanvas = styled.div`
@@ -39,9 +39,14 @@ export const HeroBaseImage = styled.img`
 export const HeroOverlay = styled.div`
   position: absolute;
   left: 4.1%;
-  top: 16.4%;
+  top: 30%;
   width: 29.2%;
   z-index: 2;
+
+  padding: 28px 26px 24px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(3px);
 
   @media (max-width: 900px) {
     width: 31%;
