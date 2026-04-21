@@ -11,6 +11,14 @@ import {
   patchAdminPriceSearchRow,
 } from "../../../api/adminPrice.js";
 
+const STATUS_PALETTE = {
+  success: { color: "#1EB564", bg: "#EEFBF4" }, // 판매중
+  info: { color: "#0FB7FF", bg: "#F0FAFF" }, // 판매예정
+  warning: { color: "#FFC600", bg: "#FFF6D6" }, // 판매중지
+  danger: { color: "#BD00FF", bg: "#F9E7FF" }, // 품절
+  purple: { color: "#33189D", bg: "#EFECFA" }, // 판매종료
+};
+
 const saleStatusOptions = [
   { value: "ON_SALE", label: "판매중" },
   { value: "READY", label: "판매예정" },
@@ -25,6 +33,23 @@ const saleStatusLabelMap = {
   STOPPED: "판매중지",
   SOLD_OUT: "품절",
   ENDED: "판매종료",
+};
+
+const getStatusVariant = (label) => {
+  switch (label) {
+    case "판매중":
+      return "success";
+    case "판매예정":
+      return "info";
+    case "판매중지":
+      return "warning";
+    case "품절":
+      return "danger";
+    case "판매종료":
+      return "purple";
+    default:
+      return "warning";
+  }
 };
 
 const lowestStyleMap = {
@@ -162,7 +187,7 @@ export default function PriceSearch() {
 
       const items = Array.isArray(listResponse)
         ? listResponse
-        : listResponse?.items ?? [];
+        : (listResponse?.items ?? []);
 
       setRows(items.map(mapPriceRow));
       setSummaryData(summaryResponse?.summary ?? defaultSummaryData);
@@ -172,7 +197,7 @@ export default function PriceSearch() {
       setSummaryData(defaultSummaryData);
       setErrorMessage(
         error?.response?.data?.detail ||
-        "가격 조회 목록을 불러오지 못했습니다.",
+          "가격 조회 목록을 불러오지 못했습니다.",
       );
     } finally {
       setIsLoading(false);
@@ -242,8 +267,7 @@ export default function PriceSearch() {
       console.error(error);
       setRows(previousRows);
       alert(
-        error?.response?.data?.detail ||
-        "AI 가격 설정 변경에 실패했습니다.",
+        error?.response?.data?.detail || "AI 가격 설정 변경에 실패했습니다.",
       );
     } finally {
       setPendingActionKey("");
@@ -260,10 +284,10 @@ export default function PriceSearch() {
         prev.map((item) =>
           item.productCode === productCode
             ? {
-              ...item,
-              statusCode: nextStatusCode,
-              status: saleStatusLabelMap[nextStatusCode] ?? nextStatusCode,
-            }
+                ...item,
+                statusCode: nextStatusCode,
+                status: saleStatusLabelMap[nextStatusCode] ?? nextStatusCode,
+              }
             : item,
         ),
       );
@@ -276,10 +300,7 @@ export default function PriceSearch() {
     } catch (error) {
       console.error(error);
       setRows(previousRows);
-      alert(
-        error?.response?.data?.detail ||
-        "판매상태 변경에 실패했습니다.",
-      );
+      alert(error?.response?.data?.detail || "판매상태 변경에 실패했습니다.");
     } finally {
       setPendingActionKey("");
     }
@@ -428,20 +449,17 @@ export default function PriceSearch() {
       sortable: false,
       render: (value, row) => (
         <CenterCell>
-          <SaleStatusSelect
-            $status={value}
-            value={row.statusCode}
+          <StatusBadge
+            mode="select"
+            value={value}
+            variant={getStatusVariant(value)}
+            options={saleStatusOptions}
+            width="96px"
             disabled={pendingActionKey === `${row.productCode}:status`}
-            onChange={(e) =>
-              handleChangeSaleStatus(row.productCode, e.target.value)
+            onChange={(nextValue) =>
+              handleChangeSaleStatus(row.productCode, nextValue)
             }
-          >
-            {saleStatusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </SaleStatusSelect>
+          />
         </CenterCell>
       ),
     },
@@ -463,11 +481,9 @@ export default function PriceSearch() {
 
   return (
     <PageWrap>
-      <HeaderRow>
-        <Title>가격 조회</Title>
-      </HeaderRow>
+      <Title>가격 관리</Title>
 
-      {isLoading && <PageStatusText>가격 조회 목록을 불러오는 중입니다.</PageStatusText>}
+      {isLoading && <PageStatusText>목록을 불러오는 중입니다.</PageStatusText>}
       {!isLoading && errorMessage && (
         <PageStatusText $error>{errorMessage}</PageStatusText>
       )}
@@ -475,8 +491,12 @@ export default function PriceSearch() {
       <SummaryGrid>
         <SummaryCard
           title="전체 상품 수"
-          subText="가격 조회 대상"
-          value={`${summaryData.total_products.value} SKU`}
+          value={
+            <>
+              {summaryData.total_products.value}
+              <span>SKU</span>
+            </>
+          }
           change={formatSummaryChange(
             summaryData.total_products.change,
             summaryData.total_products.change_label,
@@ -485,8 +505,12 @@ export default function PriceSearch() {
         />
         <SummaryCard
           title="AI 가격변경 상품"
-          subText="자동 조정 대상"
-          value={`${summaryData.ai_pricing_products.value} SKU`}
+          value={
+            <>
+              {summaryData.ai_pricing_products.value}
+              <span>SKU</span>
+            </>
+          }
           change={formatSummaryChange(
             summaryData.ai_pricing_products.change,
             summaryData.ai_pricing_products.change_label,
@@ -495,8 +519,12 @@ export default function PriceSearch() {
         />
         <SummaryCard
           title="최저가 유지 상품"
-          subText="현재 최저가 일치"
-          value={`${summaryData.matched_products.value} SKU`}
+          value={
+            <>
+              {summaryData.matched_products.value}
+              <span>SKU</span>
+            </>
+          }
           change={formatSummaryChange(
             summaryData.matched_products.change,
             summaryData.matched_products.change_label,
@@ -505,8 +533,12 @@ export default function PriceSearch() {
         />
         <SummaryCard
           title="최저가 아닌 상품"
-          subText="재조정 필요"
-          value={`${summaryData.unmatched_products.value} SKU`}
+          value={
+            <>
+              {summaryData.unmatched_products.value}
+              <span>SKU</span>
+            </>
+          }
           change={formatSummaryChange(
             summaryData.unmatched_products.change,
             summaryData.unmatched_products.change_label,
@@ -514,7 +546,6 @@ export default function PriceSearch() {
           up={summaryData.unmatched_products.up}
         />
       </SummaryGrid>
-
       <TableComponent
         variant="price"
         columns={columns}
@@ -522,78 +553,39 @@ export default function PriceSearch() {
         headerAlign="center"
         cellAlign="center"
         rowKey="id"
-        customToolbar={
-          <CustomToolbar>
-            <DateInput
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                setPage(1);
-              }}
-            />
-
-            <DateDivider>~</DateDivider>
-
-            <DateInput
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                setPage(1);
-              }}
-            />
-
-            <KeywordInput
-              type="text"
-              placeholder="상품명, 상품코드로 검색"
-              value={searchValue}
-              onChange={(e) => {
-                setSearchValue(e.target.value);
-                setPage(1);
-              }}
-            />
-
-            <FilterSelect
-              value={categoryValue}
-              onChange={(e) => {
-                setCategoryValue(e.target.value);
-                setPage(1);
-              }}
-            >
-              <option value="">카테고리</option>
-              {categoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </FilterSelect>
-
-            <FilterSelect
-              value={lowestYn}
-              onChange={(e) => {
-                setLowestYn(e.target.value);
-                setPage(1);
-              }}
-            >
-              <option value="">최저가여부</option>
-              <option value="Y">Y</option>
-              <option value="N">N</option>
-            </FilterSelect>
-
-            <SecondaryButton type="button" onClick={handleReset}>
-              초기화
-            </SecondaryButton>
-
-            <RefreshButton
-              type="button"
-              onClick={fetchRows}
-              disabled={isLoading}
-            >
-              새로고침
-            </RefreshButton>
-          </CustomToolbar>
-        }
+        searchValue={searchValue}
+        onSearchChange={(val) => {
+          setSearchValue(val);
+          setPage(1);
+        }}
+        searchPlaceholder="상품명, 상품코드로 검색"
+        startDate={startDate}
+        onStartDateChange={(val) => {
+          setStartDate(val);
+          setPage(1);
+        }}
+        endDate={endDate}
+        onEndDateChange={(val) => {
+          setEndDate(val);
+          setPage(1);
+        }}
+        filterValue={categoryValue}
+        onFilterChange={(val) => {
+          setCategoryValue(val);
+          setPage(1);
+        }}
+        filterOptions={categoryOptions}
+        filterPlaceholder="카테고리 전체"
+        filterValue2={lowestYn}
+        onFilterChange2={(val) => {
+          setLowestYn(val);
+          setPage(1);
+        }}
+        filterOptions2={[
+          { label: "최저가(Y)", value: "Y" },
+          { label: "미달(N)", value: "N" },
+        ]}
+        filterPlaceholder2="최저가 여부"
         page={page}
         pageSize={pageSize}
         onPageChange={setPage}
@@ -607,36 +599,28 @@ export default function PriceSearch() {
 }
 
 const PageWrap = styled.div`
-  padding: 24px;
-  background: #f8fafc;
+  padding: 25px;
+  background: var(--background);
   min-height: 100%;
-`;
-
-const HeaderRow = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-  margin-top: 5px;
+  flex-direction: column;
+  gap: 25px;
 `;
 
 const Title = styled.h2`
   margin: 0;
-  color: #111827;
-  font-size: 22px;
-  font-weight: 800;
+  font-size: var(--title);
+  font-weight: 700;
 `;
 
 const PageStatusText = styled.div`
   margin-bottom: 14px;
-  color: ${({ $error }) => ($error ? "#dc2626" : "#475569")};
+  color: ${({ $error }) => ($error ? "var(--red)" : "var(--placeholder)")};
   font-size: 13px;
   font-weight: 600;
 `;
 
 const SummaryGrid = styled.div`
-  margin-bottom: 18px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
@@ -650,103 +634,8 @@ const SummaryGrid = styled.div`
   }
 `;
 
-const CustomToolbar = styled.div`
-  width: 100%;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-`;
-
-const DateInput = styled.input`
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid #edf0f4;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #374151;
-  font-size: 13px;
-  outline: none;
-
-  &:focus {
-    border-color: #cfd8e3;
-  }
-`;
-
-const DateDivider = styled.span`
-  color: #9ca3af;
-  font-size: 13px;
-  font-weight: 600;
-`;
-
-const KeywordInput = styled.input`
-  height: 38px;
-  min-width: 260px;
-  padding: 0 12px;
-  border: 1px solid #edf0f4;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #374151;
-  font-size: 13px;
-  outline: none;
-
-  &:focus {
-    border-color: #cfd8e3;
-  }
-
-  &::placeholder {
-    color: #9ca3af;
-  }
-`;
-
-const FilterSelect = styled.select`
-  height: 38px;
-  min-width: 130px;
-  padding: 0 12px;
-  border: 1px solid #edf0f4;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #374151;
-  font-size: 13px;
-  outline: none;
-  cursor: pointer;
-
-  &:focus {
-    border-color: #cfd8e3;
-  }
-`;
-
-const SecondaryButton = styled.button`
-  height: 38px;
-  padding: 0 14px;
-  border: none;
-  border-radius: 10px;
-  background: #e8edf5;
-  color: #1f2430;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-`;
-
-const RefreshButton = styled.button`
-  height: 38px;
-  padding: 0 14px;
-  border: none;
-  border-radius: 10px;
-  background: #2563eb;
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: default;
-  }
-`;
-
 const SubText = styled.span`
-  color: #6b7280;
+  color: var(--placeholder);
   font-size: 12px;
 `;
 
@@ -757,9 +646,9 @@ const CenterCell = styled.div`
 `;
 
 const PriceGapWrap = styled.div`
-  display: inline-flex;
-  flex-direction: column;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 6px;
 `;
 
@@ -774,44 +663,50 @@ const RateBadge = styled.span`
   font-size: 12px;
   font-weight: 700;
   background: ${({ $negative }) => ($negative ? "#dcf7e8" : "#ffe7e7")};
-  color: ${({ $negative }) => ($negative ? "#18b663" : "#ef5350")};
+  color: ${({ $negative }) => ($negative ? "var(--green)" : "var(--red)")};
 `;
 
 const CodeLink = styled.button`
   border: none;
   background: transparent;
   padding: 0;
-  color: #111827;
-  font-size: 13px;
+  color: var(--font);
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
 
   &:hover {
-    color: #2563eb;
+    color: var(--blue);
     text-decoration: underline;
   }
 `;
 
 const CatalogLink = styled.a`
-  color: #111827;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
 
   &:hover {
-    color: #2563eb;
+    color: var(--blue);
     text-decoration: underline;
   }
 `;
 
 const ProductNameLink = styled.a`
-  color: #111827;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
 
   &:hover {
-    color: #2563eb;
+    color: var(--blue);
     text-decoration: underline;
   }
 `;

@@ -338,14 +338,6 @@ export default function ProductList() {
           setSearchValue(value);
           setPage(1);
         }}
-        searchPlaceholder="상품명, 상품코드로 검색"
-        filterValue={categoryValue}
-        onFilterChange={(value) => {
-          setCategoryValue(value);
-          setPage(1);
-        }}
-        filterPlaceholder="전체"
-        filterOptions={categoryOptions}
         startDate={startDate}
         onStartDateChange={(val) => {
           setStartDate(val);
@@ -356,6 +348,14 @@ export default function ProductList() {
           setEndDate(val);
           setPage(1);
         }}
+        searchPlaceholder="상품명, 상품코드로 검색"
+        filterValue={categoryValue}
+        onFilterChange={(value) => {
+          setCategoryValue(value);
+          setPage(1);
+        }}
+        filterPlaceholder="전체"
+        filterOptions={categoryOptions}
         toolbarRight={
           <PrimaryButton
             type="button"

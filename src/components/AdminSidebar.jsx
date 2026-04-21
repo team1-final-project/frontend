@@ -38,7 +38,7 @@ export default function AdminSidebar() {
         title: "PRICE",
         defaultOpen: true,
         items: [
-          { label: "가격 조회", to: "/admin/price-search", icon: Search },
+          { label: "가격 관리", to: "/admin/price-search", icon: Search },
           {
             label: "매칭 관리",
             to: "/admin/matching-manage",

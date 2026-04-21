@@ -3,22 +3,25 @@ import { createPortal } from "react-dom";
 import styled from "styled-components";
 import { ChevronDown, Check } from "lucide-react";
 
-const STATUS_VARIANT_MAP = {
-  Pending: "warning",
-  Completed: "success",
-  Cancelled: "danger",
-  Review: "purple",
-  Active: "info",
+/* 1. 하린님이 지정하신 상태별 색상 팔레트 고정 */
+const STATUS_PALETTE = {
+  판매종료: { color: "#33189D", bg: "#EFECFA", variant: "purple" },
+  판매중지: { color: "#FFC600", bg: "#FFF6D6", variant: "warning" },
+  판매중: { color: "#1EB564", bg: "#EEFBF4", variant: "success" },
+  품절: { color: "#BD00FF", bg: "#F9E7FF", variant: "danger" },
+  판매예정: { color: "#0FB7FF", bg: "#F0FAFF", variant: "info" },
 };
 
-const DEFAULT_OPTIONS = [
-  { label: "Pending", value: "Pending" },
-  { label: "Completed", value: "Completed" },
-  { label: "Cancelled", value: "Cancelled" },
-  { label: "Review", value: "Review" },
-  { label: "Active", value: "Active" },
-];
+/* 영문 variant와 색상 매핑 (fallback용) */
+const VARIANT_COLOR_MAP = {
+  success: { color: "#1EB564", bg: "#EEFBF4" },
+  info: { color: "#0FB7FF", bg: "#F0FAFF" },
+  warning: { color: "#FFC600", bg: "#FFF6D6" },
+  danger: { color: "#BD00FF", bg: "#F9E7FF" },
+  purple: { color: "#33189D", bg: "#EFECFA" },
+};
 
+/* 2. 메뉴 위치 계산을 위한 상수 (기존 코드 유지) */
 const MENU_WIDTH = 180;
 const MENU_GAP = 6;
 const VIEWPORT_GAP = 8;
@@ -28,7 +31,7 @@ export default function StatusBadge({
   children,
   variant,
   mode = "view",
-  options = DEFAULT_OPTIONS,
+  options = [],
   onChange,
   width = "110px",
   disabled = false,
@@ -45,9 +48,14 @@ export default function StatusBadge({
   });
 
   const displayValue = value ?? children ?? "";
-  const currentVariant =
-    variant || STATUS_VARIANT_MAP[displayValue] || "warning";
 
+  /* [LOGIC] 현재 텍스트(한글)에 맞는 색상 추출, 없으면 variant 기준 추출 */
+  const currentStyle =
+    STATUS_PALETTE[displayValue] ||
+    VARIANT_COLOR_MAP[variant] ||
+    VARIANT_COLOR_MAP.warning;
+
+  /* 3. 메뉴 위치 자동 계산 함수 (기존 로직 유지) */
   const updateMenuPosition = () => {
     if (!triggerRef.current) return;
 
@@ -57,10 +65,7 @@ export default function StatusBadge({
     let left = rect.right - menuWidth;
     let top = rect.bottom + MENU_GAP;
 
-    if (left < VIEWPORT_GAP) {
-      left = VIEWPORT_GAP;
-    }
-
+    if (left < VIEWPORT_GAP) left = VIEWPORT_GAP;
     if (left + menuWidth > window.innerWidth - VIEWPORT_GAP) {
       left = window.innerWidth - menuWidth - VIEWPORT_GAP;
     }
@@ -68,52 +73,34 @@ export default function StatusBadge({
     const estimatedMenuHeight = Math.max(options.length * 38 + 12, 80);
     if (top + estimatedMenuHeight > window.innerHeight - VIEWPORT_GAP) {
       top = rect.top - estimatedMenuHeight - MENU_GAP;
-      if (top < VIEWPORT_GAP) {
-        top = VIEWPORT_GAP;
-      }
+      if (top < VIEWPORT_GAP) top = VIEWPORT_GAP;
     }
 
-    setMenuStyle({
-      top,
-      left,
-      width: menuWidth,
-    });
+    setMenuStyle({ top, left, width: menuWidth });
   };
 
   useEffect(() => {
     if (!open) return;
-
     updateMenuPosition();
 
     const handleOutsideClick = (event) => {
-      const target = event.target;
-
-      if (rootRef.current?.contains(target)) return;
-      if (menuRef.current?.contains(target)) return;
-
+      if (rootRef.current?.contains(event.target)) return;
+      if (menuRef.current?.contains(event.target)) return;
       setOpen(false);
     };
 
     const handleEscape = (event) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
+      if (event.key === "Escape") setOpen(false);
     };
 
-    const handleReposition = () => {
-      updateMenuPosition();
-    };
-
+    window.addEventListener("resize", updateMenuPosition);
     document.addEventListener("mousedown", handleOutsideClick);
     document.addEventListener("keydown", handleEscape);
-    window.addEventListener("resize", handleReposition);
-    window.addEventListener("scroll", handleReposition, true);
 
     return () => {
+      window.removeEventListener("resize", updateMenuPosition);
       document.removeEventListener("mousedown", handleOutsideClick);
       document.removeEventListener("keydown", handleEscape);
-      window.removeEventListener("resize", handleReposition);
-      window.removeEventListener("scroll", handleReposition, true);
     };
   }, [open, options.length]);
 
@@ -125,12 +112,15 @@ export default function StatusBadge({
   const handleToggle = (event) => {
     event.stopPropagation();
     if (disabled) return;
-
-    if (!open) {
-      updateMenuPosition();
-    }
+    if (!open) updateMenuPosition();
     setOpen((prev) => !prev);
   };
+
+  /* 공용 스타일 헬퍼 */
+  const badgeStyle = `
+    background: ${currentStyle.bg};
+    color: ${currentStyle.color};
+  `;
 
   if (mode === "select") {
     return (
@@ -139,12 +129,11 @@ export default function StatusBadge({
           <TriggerButton
             ref={triggerRef}
             type="button"
-            $variant={currentVariant}
+            $customStyle={badgeStyle}
             disabled={disabled}
             onClick={handleToggle}
           >
             <TriggerText>{displayValue}</TriggerText>
-
             <TriggerIcon $open={open}>
               <ChevronDown size={14} />
             </TriggerIcon>
@@ -163,9 +152,9 @@ export default function StatusBadge({
               onClick={(e) => e.stopPropagation()}
             >
               {options.map((option) => {
-                const optionVariant =
-                  STATUS_VARIANT_MAP[option.value] || "warning";
-                const isSelected = option.value === displayValue;
+                const optionStyle =
+                  STATUS_PALETTE[option.label] || VARIANT_COLOR_MAP.warning;
+                const isSelected = option.label === displayValue;
 
                 return (
                   <MenuItem
@@ -175,10 +164,9 @@ export default function StatusBadge({
                     onClick={() => handleSelect(option.value)}
                   >
                     <ItemLeft>
-                      <ColorDot $variant={optionVariant} />
+                      <ColorDot $color={optionStyle.color} />
                       <ItemLabel>{option.label}</ItemLabel>
                     </ItemLeft>
-
                     {isSelected && (
                       <SelectedIcon>
                         <Check size={14} />
@@ -195,71 +183,26 @@ export default function StatusBadge({
   }
 
   return (
-    <Badge $variant={currentVariant} $width={width}>
+    <Badge $customStyle={badgeStyle} $width={width}>
       {displayValue}
     </Badge>
   );
 }
 
-const getVariantStyle = ($variant) => {
-  switch ($variant) {
-    case "success":
-      return `
-        background: #ecfdf3;
-        color: #16a34a;
-      `;
-    case "danger":
-      return `
-        background: #fef2f2;
-        color: #dc2626;
-      `;
-    case "purple":
-      return `
-        background: #f3e8ff;
-        color: #7c3aed;
-      `;
-    case "info":
-      return `
-        background: #eff6ff;
-        color: #2563eb;
-      `;
-    case "warning":
-    default:
-      return `
-        background: #fff7e6;
-        color: #d97706;
-      `;
-  }
-};
-
-const getDotColor = ($variant) => {
-  switch ($variant) {
-    case "success":
-      return "#16a34a";
-    case "danger":
-      return "#dc2626";
-    case "purple":
-      return "#7c3aed";
-    case "info":
-      return "#2563eb";
-    case "warning":
-    default:
-      return "#d97706";
-  }
-};
+/* --- Styled Components --- */
 
 const Badge = styled.span`
   min-width: ${({ $width }) => $width};
   height: 28px;
-  padding: 0 10px;
+  padding: 0 12px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
-  ${({ $variant }) => getVariantStyle($variant)}
+  ${({ $customStyle }) => $customStyle}
 `;
 
 const DropdownRoot = styled.div`
@@ -280,27 +223,19 @@ const TriggerButton = styled.button`
   justify-content: center;
   white-space: nowrap;
   cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
-  transition: box-shadow 0.15s ease;
-  ${({ $variant }) => getVariantStyle($variant)}
+  transition: all 0.15s ease;
+  ${({ $customStyle }) => $customStyle}
 
   &:disabled {
-    opacity: 0.7;
-  }
-
-  &:not(:disabled):hover {
-    box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.06) inset;
+    opacity: 0.6;
   }
 `;
 
 const TriggerText = styled.span`
   display: block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1;
-  text-align: center;
 `;
 
 const TriggerIcon = styled.span`
@@ -310,15 +245,12 @@ const TriggerIcon = styled.span`
   transform: translateY(-50%)
     rotate(${({ $open }) => ($open ? "180deg" : "0deg")});
   display: flex;
-  align-items: center;
-  justify-content: center;
   transition: transform 0.18s ease;
 `;
 
 const PortalMenu = styled.div`
   position: fixed;
   z-index: 9999;
-  box-sizing: border-box;
   padding: 6px;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
@@ -338,7 +270,6 @@ const MenuItem = styled.button`
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  transition: background 0.15s ease;
 
   &:hover {
     background: #f8fafc;
@@ -346,8 +277,6 @@ const MenuItem = styled.button`
 `;
 
 const ItemLeft = styled.span`
-  width: 100%;
-  min-width: 0;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -357,20 +286,13 @@ const ColorDot = styled.span`
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  flex-shrink: 0;
-  background: ${({ $variant }) => getDotColor($variant)};
+  background: ${({ $color }) => $color};
 `;
 
 const ItemLabel = styled.span`
-  flex: 1;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-size: 12px;
   font-weight: 600;
   color: #374151;
-  text-align: left;
 `;
 
 const SelectedIcon = styled.span`
@@ -380,6 +302,4 @@ const SelectedIcon = styled.span`
   transform: translateY(-50%);
   color: #111827;
   display: flex;
-  align-items: center;
-  justify-content: center;
 `;
