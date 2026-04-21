@@ -7,14 +7,17 @@ function formatPrice(value) {
   return `${value.toLocaleString()}원`;
 }
 
+// 0원을 하단 기준으로 두고, 최고가를 상단 기준으로 잡아
+// 선이 축과 자연스럽게 맞도록 좌표를 계산
 function getTrendPoints(points) {
-  const min = Math.min(...points);
   const max = Math.max(...points);
+  const min = 0;
   const range = Math.max(max - min, 1);
 
   return points.map((value, index, array) => {
     const x = array.length === 1 ? 0 : (index / (array.length - 1)) * 100;
-    const y = 34 - ((value - min) / range) * 24;
+    // 위아래 여백 확보
+    const y = 36 - ((value - min) / range) * 28;
     return { x, y };
   });
 }
@@ -42,8 +45,9 @@ export default function AILowestPricePage() {
     result = [...result].sort((a, b) => {
       if (sortType === "priceLow") return a.currentPrice - b.currentPrice;
       if (sortType === "lowest") return a.lowestPrice - b.lowestPrice;
-      if (sortType === "recommend")
+      if (sortType === "recommend") {
         return a.badgeType.localeCompare(b.badgeType);
+      }
       return b.dropAmount - a.dropAmount;
     });
 
@@ -126,43 +130,52 @@ export default function AILowestPricePage() {
                   .map((point) => `${point.x},${point.y}`)
                   .join(" ");
 
+                const leftMaxPrice = Math.max(...product.trendPoints);
+
                 return (
                   <S.ProductCard key={product.id}>
-                    <S.ProductThumb>
-                      <S.ProductImage src={product.image} alt={product.name} />
-                    </S.ProductThumb>
+                    <S.ProductTop>
+                      <S.ProductThumb>
+                        <S.ProductImage
+                          src={product.image}
+                          alt={product.name}
+                        />
+                      </S.ProductThumb>
 
-                    <S.ProductBody>
-                      <S.BrandText>{product.brand}</S.BrandText>
-                      <S.ProductName>{product.name}</S.ProductName>
+                      <S.ProductMain>
+                        <S.BrandText>{product.brand}</S.BrandText>
+                        <S.ProductName>{product.name}</S.ProductName>
 
-                      <S.AITag $tone={product.badgeType}>
-                        {product.aiRecommendation}
-                      </S.AITag>
+                        <S.AITag $tone={product.badgeType}>
+                          {product.aiRecommendation}
+                        </S.AITag>
 
-                      <S.PriceSummary>
-                        <S.InfoCard>
-                          <S.InfoLabel>현재가</S.InfoLabel>
-                          <S.InfoValue>
-                            {formatPrice(product.currentPrice)}
-                          </S.InfoValue>
-                        </S.InfoCard>
+                        <S.PriceSummary>
+                          <S.InfoCard>
+                            <S.InfoLabel>현재가</S.InfoLabel>
+                            <S.InfoValue>
+                              {formatPrice(product.currentPrice)}
+                            </S.InfoValue>
+                          </S.InfoCard>
 
-                        <S.InfoCard>
-                          <S.InfoLabel>최근 최저가</S.InfoLabel>
-                          <S.InfoValue>
-                            {formatPrice(product.lowestPrice)}
-                          </S.InfoValue>
-                        </S.InfoCard>
+                          <S.InfoCard>
+                            <S.InfoLabel>최근 최저가</S.InfoLabel>
+                            <S.InfoValue>
+                              {formatPrice(product.lowestPrice)}
+                            </S.InfoValue>
+                          </S.InfoCard>
 
-                        <S.InfoCard>
-                          <S.InfoLabel>하락폭</S.InfoLabel>
-                          <S.DropValue>
-                            -{formatPrice(product.dropAmount)}
-                          </S.DropValue>
-                        </S.InfoCard>
-                      </S.PriceSummary>
+                          <S.InfoCard>
+                            <S.InfoLabel>하락폭</S.InfoLabel>
+                            <S.DropValue>
+                              -{formatPrice(product.dropAmount)}
+                            </S.DropValue>
+                          </S.InfoCard>
+                        </S.PriceSummary>
+                      </S.ProductMain>
+                    </S.ProductTop>
 
+                    <S.ProductBottom>
                       <S.AIBox>
                         <S.AIBoxTitle>AI 추천 코멘트</S.AIBoxTitle>
                         <S.AIBoxDescription>
@@ -173,60 +186,80 @@ export default function AILowestPricePage() {
                       <S.TrendSection>
                         <S.TrendHeaderRow>
                           <S.TrendLabel>최근 가격 추이</S.TrendLabel>
-                          <S.TrendCurrentPrice>
-                            {formatPrice(product.currentPrice)}
-                          </S.TrendCurrentPrice>
+
+                          <S.PeriodTabRow>
+                            <S.PeriodChip $active>1개월</S.PeriodChip>
+                            <S.PeriodChip>3개월</S.PeriodChip>
+                            <S.PeriodChip>6개월</S.PeriodChip>
+                          </S.PeriodTabRow>
                         </S.TrendHeaderRow>
 
-                        <S.SimpleTrendChart>
-                          <S.SimpleTrendSvg
-                            viewBox="0 0 100 40"
-                            preserveAspectRatio="none"
-                          >
-                            <polyline
-                              fill="none"
-                              stroke="#2f6fd6"
-                              strokeWidth="2.5"
-                              points={polylinePoints}
-                            />
+                        <S.TrendChartWrap>
+                          <S.TrendYAxis>
+                            <S.TrendYAxisValue>
+                              {leftMaxPrice.toLocaleString()}원
+                            </S.TrendYAxisValue>
+                            <S.TrendYAxisValue>&nbsp;</S.TrendYAxisValue>
+                            <S.TrendYAxisValue>
+                              {product.currentPrice.toLocaleString()}원
+                            </S.TrendYAxisValue>
+                            <S.TrendYAxisValue>&nbsp;</S.TrendYAxisValue>
+                            <S.TrendYAxisValue>0원</S.TrendYAxisValue>
+                          </S.TrendYAxis>
 
-                            {chartPoints.map((point, index) => (
-                              <circle
-                                key={index}
-                                cx={point.x}
-                                cy={point.y}
-                                r="1.8"
-                                fill="#ffffff"
-                                stroke="#2f6fd6"
-                                strokeWidth="1.4"
-                              />
-                            ))}
-                          </S.SimpleTrendSvg>
-                        </S.SimpleTrendChart>
+                          <S.ChartArea>
+                            <S.SimpleTrendChart>
+                              <S.ChartGuideLine $top="0%" />
+                              <S.ChartGuideLine $top="25%" />
+                              <S.ChartGuideLine $top="50%" />
+                              <S.ChartGuideLine $top="75%" />
+                              <S.ChartGuideLine $top="100%" />
 
-                        <S.TrendDateRow>
-                          {product.trendLabels.map((label) => (
-                            <S.TrendDate key={label}>{label}</S.TrendDate>
-                          ))}
-                        </S.TrendDateRow>
+                              <S.SimpleTrendSvg
+                                viewBox="0 0 100 40"
+                                preserveAspectRatio="none"
+                              >
+                                <polyline
+                                  fill="none"
+                                  stroke="#2f6fd6"
+                                  strokeWidth="1.4"
+                                  strokeLinejoin="round"
+                                  strokeLinecap="round"
+                                  points={polylinePoints}
+                                />
 
-                        <S.PeriodTabRow>
-                          <S.PeriodChip $active>1개월</S.PeriodChip>
-                          <S.PeriodChip>3개월</S.PeriodChip>
-                          <S.PeriodChip>6개월</S.PeriodChip>
-                          <S.PeriodChip>12개월</S.PeriodChip>
-                        </S.PeriodTabRow>
+                                {chartPoints.map((point, index) => (
+                                  <circle
+                                    key={index}
+                                    cx={point.x}
+                                    cy={point.y}
+                                    r="1.6"
+                                    fill="#ffffff"
+                                    stroke="#2f6fd6"
+                                    strokeWidth="1.2"
+                                    vectorEffect="non-scaling-stroke"
+                                  />
+                                ))}
+                              </S.SimpleTrendSvg>
+                            </S.SimpleTrendChart>
+
+                            <S.TrendBottomWrap>
+                              <S.TrendDateRow>
+                                {product.trendLabels.map((label) => (
+                                  <S.TrendDate key={label}>{label}</S.TrendDate>
+                                ))}
+                              </S.TrendDateRow>
+                            </S.TrendBottomWrap>
+                          </S.ChartArea>
+                        </S.TrendChartWrap>
                       </S.TrendSection>
 
                       <S.ButtonRow>
                         <S.DetailButton to={`/products/${product.id}`}>
                           상세 보기
                         </S.DetailButton>
-                        <S.AlertButton type="button">
-                          가격 알림받기
-                        </S.AlertButton>
                       </S.ButtonRow>
-                    </S.ProductBody>
+                    </S.ProductBottom>
                   </S.ProductCard>
                 );
               })}
