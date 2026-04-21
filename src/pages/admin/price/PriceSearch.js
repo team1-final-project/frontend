@@ -10,6 +10,7 @@ import {
   getAdminMatchingSummary,
   patchAdminPriceSearchRow,
 } from "../../../api/adminPrice.js";
+import RateBadge from "../../../components/RateBadge.jsx";
 
 const saleStatusOptions = [
   { value: "ON_SALE", label: "판매중" },
@@ -162,7 +163,7 @@ export default function PriceSearch() {
 
       const items = Array.isArray(listResponse)
         ? listResponse
-        : listResponse?.items ?? [];
+        : (listResponse?.items ?? []);
 
       setRows(items.map(mapPriceRow));
       setSummaryData(summaryResponse?.summary ?? defaultSummaryData);
@@ -172,7 +173,7 @@ export default function PriceSearch() {
       setSummaryData(defaultSummaryData);
       setErrorMessage(
         error?.response?.data?.detail ||
-        "가격 조회 목록을 불러오지 못했습니다.",
+          "가격 조회 목록을 불러오지 못했습니다.",
       );
     } finally {
       setIsLoading(false);
@@ -242,8 +243,7 @@ export default function PriceSearch() {
       console.error(error);
       setRows(previousRows);
       alert(
-        error?.response?.data?.detail ||
-        "AI 가격 설정 변경에 실패했습니다.",
+        error?.response?.data?.detail || "AI 가격 설정 변경에 실패했습니다.",
       );
     } finally {
       setPendingActionKey("");
@@ -260,10 +260,10 @@ export default function PriceSearch() {
         prev.map((item) =>
           item.productCode === productCode
             ? {
-              ...item,
-              statusCode: nextStatusCode,
-              status: saleStatusLabelMap[nextStatusCode] ?? nextStatusCode,
-            }
+                ...item,
+                statusCode: nextStatusCode,
+                status: saleStatusLabelMap[nextStatusCode] ?? nextStatusCode,
+              }
             : item,
         ),
       );
@@ -276,10 +276,7 @@ export default function PriceSearch() {
     } catch (error) {
       console.error(error);
       setRows(previousRows);
-      alert(
-        error?.response?.data?.detail ||
-        "판매상태 변경에 실패했습니다.",
-      );
+      alert(error?.response?.data?.detail || "판매상태 변경에 실패했습니다.");
     } finally {
       setPendingActionKey("");
     }
@@ -380,9 +377,10 @@ export default function PriceSearch() {
       render: (value, row) => (
         <PriceGapWrap>
           <div>{value}</div>
-          <RateBadge $negative={String(row.priceRate).startsWith("-")}>
-            {row.priceRate}
-          </RateBadge>
+          <RateBadge
+            value={row.priceRate}
+            isGood={String(row.priceRate).startsWith("-")}
+          />
         </PriceGapWrap>
       ),
     },
@@ -467,7 +465,9 @@ export default function PriceSearch() {
         <Title>가격 조회</Title>
       </HeaderRow>
 
-      {isLoading && <PageStatusText>가격 조회 목록을 불러오는 중입니다.</PageStatusText>}
+      {isLoading && (
+        <PageStatusText>가격 조회 목록을 불러오는 중입니다.</PageStatusText>
+      )}
       {!isLoading && errorMessage && (
         <PageStatusText $error>{errorMessage}</PageStatusText>
       )}
@@ -761,20 +761,6 @@ const PriceGapWrap = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 6px;
-`;
-
-const RateBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 54px;
-  height: 24px;
-  padding: 0 8px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  background: ${({ $negative }) => ($negative ? "#dcf7e8" : "#ffe7e7")};
-  color: ${({ $negative }) => ($negative ? "#18b663" : "#ef5350")};
 `;
 
 const CodeLink = styled.button`
