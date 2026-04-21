@@ -9,229 +9,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import ToggleSwitch from "../../../components/ToggleSwitch";
-
-const MOCK_PRODUCT = {
-  productCode: "9744302255",
-  productName: "농심 신라면컵 114g, 1개",
-  salePrice: "1,100원",
-  catalogId: "53390091166",
-  catalogName: "농심 신라면 114g, 1개",
-  lowestPrice: "1,200원",
-};
-
-
-const MOCK_ROWS = [
-  {
-    id: 1,
-    datetime: "26/04/05 09:07",
-    aiChanged: true,
-    salePrice: "1,250원",
-    salesQty: "30개",
-    salesPerHour: "0.6개",
-    isLowest: "N",
-    lowestPrice: "1,110원",
-    priceGap: "140원",
-    priceRate: "+12.6%",
-    minPrice: "900원",
-    maxPrice: "1,500원",
-    adjustmentLimit: "500원",
-    stock: "5,000개",
-    date: "2026-04-05",
-  },
-  {
-    id: 2,
-    datetime: "26/04/07 09:07",
-    aiChanged: true,
-    salePrice: "1,010원",
-    salesQty: "900개",
-    salesPerHour: "60개",
-    isLowest: "Y",
-    lowestPrice: "1,110원",
-    priceGap: "100원",
-    priceRate: "-9%",
-    minPrice: "900원",
-    maxPrice: "1,500원",
-    adjustmentLimit: "500원",
-    stock: "4,100개",
-    date: "2026-04-07",
-  },
-  {
-    id: 3,
-    datetime: "26/04/08 00:07",
-    aiChanged: true,
-    salePrice: "1,110원",
-    salesQty: "800개",
-    salesPerHour: "25개",
-    isLowest: "Y",
-    lowestPrice: "1,210원",
-    priceGap: "100원",
-    priceRate: "-8.2%",
-    minPrice: "900원",
-    maxPrice: "1,500원",
-    adjustmentLimit: "500원",
-    stock: "3,300개",
-    date: "2026-04-08",
-  },
-  {
-    id: 4,
-    datetime: "26/04/09 08:00",
-    aiChanged: true,
-    salePrice: "990원",
-    salesQty: "3,000개",
-    salesPerHour: "298.5개",
-    isLowest: "Y",
-    lowestPrice: "1,010원",
-    priceGap: "100원",
-    priceRate: "-8.2%",
-    minPrice: "900원",
-    maxPrice: "1,500원",
-    adjustmentLimit: "500원",
-    stock: "300개",
-    date: "2026-04-09",
-  },
-  {
-    id: 5,
-    datetime: "26/04/09 18:03",
-    aiChanged: false,
-    salePrice: "1,330원",
-    salesQty: "30개",
-    salesPerHour: "-",
-    isLowest: "N",
-    lowestPrice: "1,110원",
-    priceGap: "220원",
-    priceRate: "+19.8%",
-    minPrice: "900원",
-    maxPrice: "1,500원",
-    adjustmentLimit: "500원",
-    stock: "30개",
-    date: "2026-04-09",
-  },
-  {
-    id: 6,
-    datetime: "26/04/09 18:03",
-    aiChanged: false,
-    salePrice: "1,330원",
-    salesQty: "30개",
-    salesPerHour: "-",
-    isLowest: "N",
-    lowestPrice: "1,110원",
-    priceGap: "220원",
-    priceRate: "+19.8%",
-    minPrice: "900원",
-    maxPrice: "1,500원",
-    adjustmentLimit: "500원",
-    stock: "30개",
-    date: "2026-04-09",
-  },
-  {
-    id: 7,
-    datetime: "26/04/09 18:03",
-    aiChanged: false,
-    salePrice: "1,330원",
-    salesQty: "30개",
-    salesPerHour: "-",
-    isLowest: "N",
-    lowestPrice: "1,110원",
-    priceGap: "220원",
-    priceRate: "+19.8%",
-    minPrice: "900원",
-    maxPrice: "1,500원",
-    adjustmentLimit: "500원",
-    stock: "30개",
-    date: "2026-04-09",
-  },
-  {
-    id: 8,
-    datetime: "26/04/09 18:03",
-    aiChanged: false,
-    salePrice: "1,330원",
-    salesQty: "30개",
-    salesPerHour: "-",
-    isLowest: "N",
-    lowestPrice: "1,110원",
-    priceGap: "220원",
-    priceRate: "+19.8%",
-    minPrice: "900원",
-    maxPrice: "1,500원",
-    adjustmentLimit: "500원",
-    stock: "30개",
-    date: "2026-04-09",
-  },
-  {
-    id: 9,
-    datetime: "26/04/09 18:03",
-    aiChanged: false,
-    salePrice: "1,330원",
-    salesQty: "30개",
-    salesPerHour: "-",
-    isLowest: "N",
-    lowestPrice: "1,110원",
-    priceGap: "220원",
-    priceRate: "+19.8%",
-    minPrice: "900원",
-    maxPrice: "1,500원",
-    adjustmentLimit: "500원",
-    stock: "30개",
-    date: "2026-04-09",
-  },
-  {
-    id: 10,
-    datetime: "26/04/09 18:03",
-    aiChanged: false,
-    salePrice: "1,330원",
-    salesQty: "30개",
-    salesPerHour: "-",
-    isLowest: "N",
-    lowestPrice: "1,110원",
-    priceGap: "220원",
-    priceRate: "+19.8%",
-    minPrice: "900원",
-    maxPrice: "1,500원",
-    adjustmentLimit: "500원",
-    stock: "30개",
-    date: "2026-04-09",
-  },
-  {
-    id: 11,
-    datetime: "26/04/10 09:00",
-    aiChanged: true,
-    salePrice: "1,180원",
-    salesQty: "250개",
-    salesPerHour: "12개",
-    isLowest: "Y",
-    lowestPrice: "1,210원",
-    priceGap: "30원",
-    priceRate: "-2.4%",
-    minPrice: "900원",
-    maxPrice: "1,500원",
-    adjustmentLimit: "500원",
-    stock: "280개",
-    date: "2026-04-10",
-  },
-  {
-    id: 12,
-    datetime: "26/04/10 12:30",
-    aiChanged: false,
-    salePrice: "1,290원",
-    salesQty: "40개",
-    salesPerHour: "2개",
-    isLowest: "N",
-    lowestPrice: "1,110원",
-    priceGap: "180원",
-    priceRate: "+16.2%",
-    minPrice: "900원",
-    maxPrice: "1,500원",
-    adjustmentLimit: "500원",
-    stock: "240개",
-    date: "2026-04-10",
-  },
-];
-
+import { getAdminPriceHistory } from "../../../api/adminPrice";
 
 export default function AIHistory() {
-  const [rows, setRows] = useState(MOCK_ROWS);
-
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
@@ -242,50 +22,62 @@ export default function AIHistory() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const normalizedKeyword = filters.keyword.trim().toLowerCase();
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [result, setResult] = useState(null);
 
-  const filteredRows = useMemo(() => {
-    return rows.filter((item) => {
-      const matchKeyword =
-        !normalizedKeyword ||
-        MOCK_PRODUCT.productCode.toLowerCase().includes(normalizedKeyword) ||
-        MOCK_PRODUCT.productName.toLowerCase().includes(normalizedKeyword);
+  const rows = result?.histories ?? [];
+  const product = result?.product ?? null;
+  const catalog = result?.catalog ?? null;
 
-      const matchStartDate =
-        !filters.startDate || item.date >= filters.startDate;
-
-      const matchEndDate = !filters.endDate || item.date <= filters.endDate;
-
-      return matchKeyword && matchStartDate && matchEndDate;
-    });
-  }, [rows, filters.startDate, filters.endDate, normalizedKeyword]);
-
-  const totalCount = filteredRows.length;
+  const totalCount = rows.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const pagedRows = useMemo(() => {
     const startIndex = (page - 1) * pageSize;
-    return filteredRows.slice(startIndex, startIndex + pageSize);
-  }, [filteredRows, page, pageSize]);
-
-
-
-  const handleToggleAiChanged = (id, nextChecked) => {
-    setRows((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, aiChanged: nextChecked } : item
-      )
-    );
-  };
+    return rows.slice(startIndex, startIndex + pageSize);
+  }, [rows, page, pageSize]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSearch = () => {
-    setSearched(true);
-    setPage(1);
+  const handleSearch = async () => {
+    const keyword = filters.keyword.trim();
+
+    if (!keyword) {
+      setSearched(true);
+      setResult(null);
+      setErrorMessage("상품명 또는 상품코드를 입력해주세요.");
+      setPage(1);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setErrorMessage("");
+
+      const data = await getAdminPriceHistory({
+        keyword,
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+      });
+
+      setResult(data);
+      setSearched(true);
+      setPage(1);
+    } catch (error) {
+      console.error(error);
+      setResult(null);
+      setSearched(true);
+      setPage(1);
+      setErrorMessage(
+        error?.response?.data?.detail || "AI 가격변경 이력 조회에 실패했습니다."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePageChange = (nextPage) => {
@@ -298,7 +90,9 @@ export default function AIHistory() {
       <EmptyIconWrap>
         <AlertTriangle size={54} strokeWidth={1.8} />
       </EmptyIconWrap>
-      <EmptyText>상품을 검색하세요</EmptyText>
+      <EmptyText>
+        {isLoading ? "조회 중입니다..." : errorMessage || "상품을 검색하세요"}
+      </EmptyText>
     </EmptyStateWrap>
   );
 
@@ -310,8 +104,8 @@ export default function AIHistory() {
           <InfoRow>
             <InfoLabel>상품코드</InfoLabel>
             <InfoValueBox $compact>
-              <InternalLink to={`/admin/product-update/${MOCK_PRODUCT.productCode}`}>
-                {MOCK_PRODUCT.productCode}
+              <InternalLink to={`/admin/product-update/${product.product_code}`}>
+                {product.product_code}
               </InternalLink>
             </InfoValueBox>
           </InfoRow>
@@ -320,14 +114,14 @@ export default function AIHistory() {
             <InfoLabel>상품명</InfoLabel>
             <InfoValueBox>
               <ExternalAnchor href="#">
-                {MOCK_PRODUCT.productName}
+                {product.product_name}
               </ExternalAnchor>
             </InfoValueBox>
           </InfoRow>
 
           <InfoRow>
             <InfoLabel>판매가</InfoLabel>
-            <InfoValueBox $compact>{MOCK_PRODUCT.salePrice}</InfoValueBox>
+            <InfoValueBox $compact>{formatWon(product.sale_price)}</InfoValueBox>
           </InfoRow>
         </InfoGrid>
       </SectionCard>
@@ -338,24 +132,32 @@ export default function AIHistory() {
           <InfoRow>
             <InfoLabel>카탈로그 ID</InfoLabel>
             <InfoValueBox $compact>
+              {catalog?.external_catalog_id ? (
               <ExternalAnchor
-                href={`https://search.shopping.naver.com/catalog/${MOCK_PRODUCT.catalogId}`}
+                href={`https://search.shopping.naver.com/catalog/${catalog.external_catalog_id}`}
                 target="_blank"
                 rel="noreferrer"
               >
-                {MOCK_PRODUCT.catalogId}
+                {catalog.external_catalog_id}
               </ExternalAnchor>
+            ) : (
+              "-"
+            )}
             </InfoValueBox>
           </InfoRow>
 
           <InfoRow>
             <InfoLabel>카탈로그명</InfoLabel>
-            <InfoValueBox>{MOCK_PRODUCT.catalogName}</InfoValueBox>
+            <InfoValueBox>{catalog?.catalog_name || "-"}</InfoValueBox>
           </InfoRow>
 
           <InfoRow>
             <InfoLabel>최저가</InfoLabel>
-            <InfoValueBox $compact>{MOCK_PRODUCT.lowestPrice}</InfoValueBox>
+            <InfoValueBox $compact>
+              {catalog?.market_lowest_price != null
+                ? formatWon(catalog.market_lowest_price)
+                : "-"}
+            </InfoValueBox>
           </InfoRow>
         </InfoGrid>
       </SectionCard>
@@ -383,30 +185,43 @@ export default function AIHistory() {
               </thead>
 
               <tbody>
-                {pagedRows.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.datetime}</td>
-                    <td>{item.salePrice}</td>
-                    <td>{item.salesQty}</td>
-                    <td>{item.salesPerHour}</td>
-                    <LowestTextCell $isLowest={item.isLowest}>
-                      {item.isLowest}
-                    </LowestTextCell>
-                    <td>{item.lowestPrice}</td>
-                    <td>
-                      <GapWrap>
-                        <div>{item.priceGap}</div>
-                        <RateBadge $negative={item.priceRate.startsWith("-")}>
-                          {item.priceRate}
-                        </RateBadge>
-                      </GapWrap>
-                    </td>
-                    <td>{item.minPrice}</td>
-                    <td>{item.maxPrice}</td>
-                    <td>{item.adjustmentLimit}</td>
-                    <td>{item.stock}</td>
-                  </tr>
-                ))}
+                {pagedRows.map((item, index) => {
+                  const priceRate = formatRate(item.market_gap_rate);
+                  const isNegative = Number(item.market_gap_rate ?? 0) < 0;
+
+                  return (
+                    <tr key={`${item.logged_at}-${index}`}>
+                      <td>{formatDateTime(item.logged_at)}</td>
+                      <td>{formatWon(item.applied_sale_price)}</td>
+                      <td>{formatQty(item.sales_qty)}</td>
+                      <td>{formatPerHour(item.sales_per_hour)}</td>
+                      <LowestTextCell $isLowest={item.is_lowest_price ? "Y" : "N"}>
+                        {item.is_lowest_price ? "Y" : "N"}
+                      </LowestTextCell>
+                      <td>{formatWon(item.market_lowest_price)}</td>
+                      <td>
+                        <GapWrap>
+                          <div>
+                            {item.market_gap_amount == null
+                              ? "-"
+                              : formatWon(item.market_gap_amount)}
+                          </div>
+                          {priceRate ? (
+                            <RateBadge $negative={isNegative}>
+                              {priceRate}
+                            </RateBadge>
+                          ) : (
+                            <RateBadge $negative={false}>-</RateBadge>
+                          )}
+                        </GapWrap>
+                      </td>
+                      <td>{formatWon(item.min_price_limit)}</td>
+                      <td>{formatWon(item.max_price_limit)}</td>
+                      <td>-</td>
+                      <td>{formatQty(item.remaining_stock)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </StyledTable>
           </TableScroll>
@@ -467,14 +282,6 @@ export default function AIHistory() {
       <PageInner>
         <TopBar>
           <PageTitle>AI 가격변경 이력 조회</PageTitle>
-
-          <TopActions>
-            <BellWrap>
-              <Bell size={20} />
-              <Badge>4</Badge>
-            </BellWrap>
-            <ProfileCircle />
-          </TopActions>
         </TopBar>
 
         <FilterBar>
@@ -521,10 +328,55 @@ export default function AIHistory() {
           </KeywordWrap>
         </FilterBar>
 
-        {searched && totalCount > 0 ? renderResult() : renderEmptyState()}
+        {searched && result && rows.length > 0 ? renderResult() : renderEmptyState()}
       </PageInner>
     </PageSection>
   );
+}
+
+function formatNumber(value) {
+  const num = Number(value ?? 0);
+  if (Number.isNaN(num)) return "0";
+  return num.toLocaleString("ko-KR");
+}
+
+function formatWon(value) {
+  if (value === null || value === undefined) return "-";
+  return `${formatNumber(value)}원`;
+}
+
+function formatQty(value) {
+  if (value === null || value === undefined) return "-";
+  return `${formatNumber(value)}개`;
+}
+
+function formatPerHour(value) {
+  if (value === null || value === undefined) return "-";
+  const num = Number(value);
+  if (Number.isNaN(num)) return "-";
+  return `${num.toLocaleString("ko-KR")}개`;
+}
+
+function formatRate(value) {
+  if (value === null || value === undefined) return null;
+  const num = Number(value);
+  if (Number.isNaN(num)) return null;
+  return `${num > 0 ? "+" : ""}${num}%`;
+}
+
+function formatDateTime(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  const yy = String(date.getFullYear()).slice(-2);
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mi = String(date.getMinutes()).padStart(2, "0");
+
+  return `${yy}/${mm}/${dd} ${hh}:${mi}`;
 }
 
 const PageSection = styled.main`

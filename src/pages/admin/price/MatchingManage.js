@@ -33,12 +33,10 @@ const matchStatusOptions = [
   { label: "미매칭", value: "미매칭" },
 ];
 
-
 const matchingStyleMap = {
   매칭: { label: "매칭", variant: "success" },
   미매칭: { label: "미매칭", variant: "danger" },
 };
-
 
 function toDateValue(dateTimeText = "") {
   return dateTimeText.split(" ")[0].replace(/\//g, "-");
@@ -117,14 +115,16 @@ export default function MatchingManage() {
       setErrorMessage("");
 
       const response = await getAdminMatchingList();
-      const items = Array.isArray(response) ? response : response?.items ?? [];
+      const items = Array.isArray(response)
+        ? response
+        : (response?.items ?? []);
       setRows(items.map(mapMatchingRow));
     } catch (error) {
       console.error(error);
       setRows([]);
       setErrorMessage(
         error?.response?.data?.detail ||
-        "카탈로그 매칭 목록을 불러오지 못했습니다.",
+          "카탈로그 매칭 목록을 불러오지 못했습니다.",
       );
     } finally {
       setIsLoading(false);
@@ -207,8 +207,7 @@ export default function MatchingManage() {
       console.error(error);
       setRows(previousRows);
       alert(
-        error?.response?.data?.detail ||
-        "AI 가격 설정 변경에 실패했습니다.",
+        error?.response?.data?.detail || "AI 가격 설정 변경에 실패했습니다.",
       );
     } finally {
       setPendingActionKey("");
@@ -374,30 +373,26 @@ export default function MatchingManage() {
       <SummaryGrid>
         <SummaryCard
           title="전체 상품 수"
-          subText="최근 7일 기준"
-          value={`${summaryData?.total_count ?? summary.totalCount}SKU`}
-          change={`${Math.abs(summaryData?.total_diff ?? 0)}SKU`}
+          value={`${summaryData?.total_count ?? summary.totalCount} SKU`}
+          change={`${Math.abs(summaryData?.total_diff ?? 0)} SKU`}
           up={(summaryData?.total_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="카탈로그 매칭 상품"
-          subText="최근 7일 기준"
-          value={`${summaryData?.matched_count ?? summary.matchedCount}SKU`}
-          change={`${Math.abs(summaryData?.matched_diff ?? 0)}SKU`}
+          value={`${summaryData?.matched_count ?? summary.matchedCount} SKU`}
+          change={`${Math.abs(summaryData?.matched_diff ?? 0)} SKU`}
           up={(summaryData?.matched_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="카탈로그 미매칭 상품"
-          subText="최근 7일 기준"
-          value={`${summaryData?.unmatched_count ?? summary.unmatchedCount}SKU`}
-          change={`${Math.abs(summaryData?.unmatched_diff ?? 0)}SKU`}
+          value={`${summaryData?.unmatched_count ?? summary.unmatchedCount} SKU`}
+          change={`${Math.abs(summaryData?.unmatched_diff ?? 0)} SKU`}
           up={(summaryData?.unmatched_diff ?? 0) >= 0}
         />
         <SummaryCard
           title="AI 가격변경 상품"
-          subText="최근 7일 기준"
-          value={`${summaryData?.ai_price_count ?? summary.aiPriceCount}SKU`}
-          change={`${Math.abs(summaryData?.ai_price_diff ?? 0)}SKU`}
+          value={`${summaryData?.ai_price_count ?? summary.aiPriceCount} SKU`}
+          change={`${Math.abs(summaryData?.ai_price_diff ?? 0)} SKU`}
           up={(summaryData?.ai_price_diff ?? 0) >= 0}
         />
       </SummaryGrid>

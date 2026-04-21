@@ -6,6 +6,7 @@ export default function SummaryCard({
   title,
   subText,
   value,
+
   change,
   up = true,
 }) {
@@ -24,43 +25,48 @@ export default function SummaryCard({
 }
 
 const Card = styled.div`
-  background: #fff;
+  background: white;
   border-radius: 16px;
   padding: 18px;
   min-height: 118px;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
+  box-shadow: var(--shadow);
 `;
 
 const Title = styled.div`
-  color: #111827;
-  font-size: 14px;
+  color: var(--font);
+  font-size: 15px;
   font-weight: 700;
 `;
 
 const SubText = styled.div`
-  margin-top: 4px;
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 12px;
 `;
 
 const Value = styled.div`
-  margin-top: 14px;
-  color: #111827;
-  font-size: 34px;
+  margin-top: 10px;
+  color: var(--font);
+  font-size: 28px;
   font-weight: 800;
+
+  span {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--font);
+    margin-left: 4px;
+  }
 `;
 
 const Footer = styled.div`
-  margin-top: 10px;
   display: flex;
   align-items: center;
   gap: 4px;
-  color: ${({ $up }) => ($up ? "#22c55e" : "#ef4444")};
+  color: ${({ $up }) => ($up ? "var(--green)" : "var(--red)")};
   font-size: 12px;
   font-weight: 700;
 
   span {
-    color: #9ca3af;
+    color: var(--placeholder);
     font-weight: 500;
     margin-left: 2px;
   }

@@ -278,36 +278,50 @@ export default function ProductList() {
 
   return (
     <PageWrap>
-      <HeaderRow>
-        <Title>상품 목록</Title>
-      </HeaderRow>
+      <Title>상품 목록</Title>
 
       <SummaryGrid>
         <SummaryCard
           title="전체 상품 수"
-          subText="전체 등록 상품"
-          value={`${summary.totalCount} SKU`}
+          value={
+            <>
+              {summary.totalCount}
+              <span>SKU</span>
+            </>
+          }
           change="6 SKU"
           up
         />
         <SummaryCard
           title="판매 중"
-          subText="현재 판매중 상품"
-          value={`${summary.saleCount} SKU`}
+          value={
+            <>
+              {summary.saleCount}
+              <span>SKU</span>
+            </>
+          }
           change="1 SKU"
           up={false}
         />
         <SummaryCard
           title="품절"
-          subText="재고 소진 상품"
-          value={`${summary.soldOutCount} SKU`}
+          value={
+            <>
+              {summary.soldOutCount}
+              <span>SKU</span>
+            </>
+          }
           change="1 SKU"
           up
         />
         <SummaryCard
           title="AI 가격변경"
-          subText="AI 가격변경 사용 상품"
-          value={`${summary.aiEnabledCount} SKU`}
+          value={
+            <>
+              {summary.aiEnabledCount}
+              <span>SKU</span>
+            </>
+          }
           change="0 SKU"
           up
         />
@@ -332,33 +346,22 @@ export default function ProductList() {
         }}
         filterPlaceholder="전체"
         filterOptions={categoryOptions}
-        extraToolbar={
-          <DateFilterGroup>
-            <DateInput
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                setPage(1);
-              }}
-            />
-            <DateDivider>~</DateDivider>
-            <DateInput
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                setPage(1);
-              }}
-            />
-          </DateFilterGroup>
-        }
+        startDate={startDate}
+        onStartDateChange={(val) => {
+          setStartDate(val);
+          setPage(1);
+        }}
+        endDate={endDate}
+        onEndDateChange={(val) => {
+          setEndDate(val);
+          setPage(1);
+        }}
         toolbarRight={
           <PrimaryButton
             type="button"
             onClick={() => nav("/admin/product-regist")}
           >
-            <Plus size={14} />
+            <Plus size={15} />
             상품등록
           </PrimaryButton>
         }
@@ -375,49 +378,44 @@ export default function ProductList() {
 }
 
 const PageWrap = styled.div`
-  padding: 24px;
-  background: #f8fafc;
+  padding: 25px;
+  background: var(--background);
   min-height: 100%;
-`;
-
-const HeaderRow = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 20px;
-  margin-top: 5px;
+  flex-direction: column;
+  gap: 25px;
 `;
 
 const Title = styled.h2`
   margin: 0;
-
-  color: #111827;
-  font-size: 22px;
-  font-weight: 800;
+  font-size: var(--title);
+  font-weight: 700;
 `;
 
 const PrimaryButton = styled.button`
-  height: 36px;
+  height: 35px;
   padding: 0 14px;
   border: none;
   border-radius: 10px;
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--blue);
+  color: white;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
 
   &:hover {
-    background: #1d4ed8;
+    filter: brightness(1.1);
+  }
+
+  & svg {
+    color: white;
   }
 `;
 
 const SummaryGrid = styled.div`
-  margin-bottom: 18px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
@@ -431,52 +429,24 @@ const SummaryGrid = styled.div`
   }
 `;
 
-const DateFilterGroup = styled.div`
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-`;
-
-const DateInput = styled.input`
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid #edf0f4;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #374151;
-  font-size: 13px;
-  outline: none;
-
-  &:focus {
-    border-color: #cfd8e3;
-  }
-`;
-
-const DateDivider = styled.span`
-  color: #9ca3af;
-  font-size: 13px;
-  font-weight: 600;
-`;
-
 const ProductNameLink = styled.a`
   display: block;
   min-width: 0;
-  color: #111827;
-  font-size: 13px;
+  color: var(--font);
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
 
   &:hover {
-    color: #2563eb;
+    color: var(--blue);
     text-decoration: underline;
   }
 `;
 
 const SubText = styled.span`
-  color: #6b7280;
+  color: var(--font);
   font-size: 12px;
 `;
 
@@ -490,14 +460,14 @@ const CodeLink = styled.button`
   border: none;
   background: transparent;
   padding: 0;
-  color: #111827;
-  font-size: 13px;
+  color: var(--font);
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
 
   &:hover {
-    color: #2563eb;
+    color: var(--blue);
     text-decoration: underline;
   }
 `;

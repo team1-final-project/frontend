@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { Search, Plus, Calendar } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import ReactQuill, { Quill } from "react-quill";
 import BlotFormatter from "quill-blot-formatter";
 import "react-quill/dist/quill.snow.css";
@@ -34,6 +34,8 @@ const FIXED_RETURN_ADDRESS =
 export default function ProductUpdate() {
   const nav = useNavigate();
   const { productCode } = useParams();
+  const location = useLocation();
+  const aiPricingSectionRef = useRef(null);
 
   const thumbnailInputRef = useRef(null);
   const quillRef = useRef(null);
@@ -171,6 +173,17 @@ export default function ProductUpdate() {
 
     fetchInitialData();
   }, [nav, productCode]);
+
+  useEffect(() => {
+    if (!isPageLoading && location.state?.focusSection === "ai-pricing") {
+      setTimeout(() => {
+        aiPricingSectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 120);
+    }
+  }, [isPageLoading, location.state]);
 
   const activeMainCategory = useMemo(() => {
     return categories.find(
@@ -636,7 +649,7 @@ export default function ProductUpdate() {
           </FormGrid>
         </Section>
 
-        <Section>
+        <Section ref={aiPricingSectionRef}>
           <SectionTitle>가격정보</SectionTitle>
 
           <FormGrid>

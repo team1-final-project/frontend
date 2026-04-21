@@ -15,7 +15,6 @@ import {
 } from "../../../api/adminProduct";
 import ToggleSwitch from "../../../components/ToggleSwitch";
 
-
 Quill.register("modules/blotFormatter", BlotFormatter);
 const saleStatusOptions = [
   { value: "ON_SALE", label: "판매중" },
@@ -25,8 +24,10 @@ const saleStatusOptions = [
   { value: "ENDED", label: "판매종료" },
 ];
 
-const FIXED_SHIPPING_FROM = "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
-const FIXED_RETURN_ADDRESS = "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
+const FIXED_SHIPPING_FROM =
+  "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
+const FIXED_RETURN_ADDRESS =
+  "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
 
 export default function ProductRegist() {
   const nav = useNavigate();
@@ -105,13 +106,15 @@ export default function ProductRegist() {
   }, []);
 
   const activeMainCategory = useMemo(() => {
-    return categories.find((category) => category.id === selectedMainCategoryId);
+    return categories.find(
+      (category) => category.id === selectedMainCategoryId,
+    );
   }, [categories, selectedMainCategoryId]);
 
   const activeSubCategory = useMemo(() => {
     if (!activeMainCategory) return null;
     return activeMainCategory.subCategories?.find(
-      (subCategory) => subCategory.id === selectedSubCategoryId
+      (subCategory) => subCategory.id === selectedSubCategoryId,
     );
   }, [activeMainCategory, selectedSubCategoryId]);
 
@@ -133,7 +136,7 @@ export default function ProductRegist() {
           category.subCategories?.filter((subCategory) =>
             `${category.name} ${subCategory.name}`
               .toLowerCase()
-              .includes(keyword)
+              .includes(keyword),
           ) || [];
 
         if (mainMatched) return category;
@@ -174,7 +177,7 @@ export default function ProductRegist() {
     } catch (error) {
       console.error(error);
       setCatalogError(
-        error?.response?.data?.detail || "카탈로그 이름 조회에 실패했습니다."
+        error?.response?.data?.detail || "카탈로그 이름 조회에 실패했습니다.",
       );
       handleChange("catalogName", "");
     } finally {
@@ -195,7 +198,9 @@ export default function ProductRegist() {
       setThumbnailUrl(result.image_url);
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.detail || "대표이미지 업로드에 실패했습니다.");
+      alert(
+        error?.response?.data?.detail || "대표이미지 업로드에 실패했습니다.",
+      );
       setThumbnailPreview(null);
       setThumbnailUrl("");
     } finally {
@@ -224,7 +229,7 @@ export default function ProductRegist() {
           editor.insertEmbed(
             range ? range.index : editor.getLength(),
             "image",
-            result.image_url
+            result.image_url,
           );
           editor.setSelection((range ? range.index : editor.getLength()) + 1);
         }
@@ -235,7 +240,9 @@ export default function ProductRegist() {
         });
       } catch (error) {
         console.error(error);
-        alert(error?.response?.data?.detail || "상세 이미지 업로드에 실패했습니다.");
+        alert(
+          error?.response?.data?.detail || "상세 이미지 업로드에 실패했습니다.",
+        );
       } finally {
         setIsDetailImageUploading(false);
       }
@@ -261,7 +268,7 @@ export default function ProductRegist() {
       },
       blotFormatter: {},
     }),
-    []
+    [],
   );
 
   const quillFormats = [
@@ -329,8 +336,10 @@ export default function ProductRegist() {
         cost_price: Number(form.costPrice || 0),
 
         ai_pricing_enabled: form.useAiPrice,
-        min_price_limit: form.useAiPrice && form.minPrice ? Number(form.minPrice) : null,
-        max_price_limit: form.useAiPrice && form.maxPrice ? Number(form.maxPrice) : null,
+        min_price_limit:
+          form.useAiPrice && form.minPrice ? Number(form.minPrice) : null,
+        max_price_limit:
+          form.useAiPrice && form.maxPrice ? Number(form.maxPrice) : null,
 
         stock_qty: Number(form.stockQty || 0),
         safety_stock_qty: Number(form.safetyStock || 0),
@@ -350,10 +359,10 @@ export default function ProductRegist() {
       const result = await createAdminProduct(payload);
 
       alert("상품이 등록되었습니다.");
-        nav("/admin/product-list", {
-          replace: true,
-          state: { createdProductCode: result.product_code },
-        });
+      nav("/admin/product-list", {
+        replace: true,
+        state: { createdProductCode: result.product_code },
+      });
     } catch (error) {
       console.error(error);
       alert(error?.response?.data?.detail || "상품 등록에 실패했습니다.");
@@ -364,7 +373,7 @@ export default function ProductRegist() {
 
   return (
     <PageWrap>
-      <PageTitle>상품 등록</PageTitle>
+      <Title>상품 등록</Title>
 
       <Form onSubmit={handleSubmit}>
         <Section>
@@ -397,7 +406,9 @@ export default function ProductRegist() {
                     $active={selectedMainCategoryId === category.id}
                     onClick={() => {
                       setSelectedMainCategoryId(category.id);
-                      setSelectedSubCategoryId(category.subCategories?.[0]?.id ?? null);
+                      setSelectedSubCategoryId(
+                        category.subCategories?.[0]?.id ?? null,
+                      );
                     }}
                   >
                     <span>{category.name}</span>
@@ -453,7 +464,7 @@ export default function ProductRegist() {
                         {fullName}
                       </SearchResultButton>
                     );
-                  })
+                  }),
                 )}
               </SearchResultList>
             </SearchCategoryPanel>
@@ -492,7 +503,6 @@ export default function ProductRegist() {
                   placeholder="상품명을 입력하세요"
                   maxLength={100}
                 />
-                <HelperText>{form.productName.length}/100</HelperText>
               </FormField>
             </FormRow>
           </FormGrid>
@@ -529,7 +539,9 @@ export default function ProductRegist() {
               <FormField>
                 <Input
                   value={form.catalogExternalId}
-                  onChange={(e) => handleChange("catalogExternalId", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("catalogExternalId", e.target.value)
+                  }
                   onBlur={handleResolveCatalogName}
                   placeholder="예: 53390091166"
                 />
@@ -542,7 +554,11 @@ export default function ProductRegist() {
                 <Input
                   value={form.catalogName}
                   readOnly
-                  placeholder={isCatalogLoading ? "카탈로그 조회 중..." : "자동으로 입력됩니다."}
+                  placeholder={
+                    isCatalogLoading
+                      ? "카탈로그 조회 중..."
+                      : "자동으로 입력됩니다."
+                  }
                 />
                 {catalogError ? (
                   <HelperText style={{ color: "#dc2626", textAlign: "left" }}>
@@ -591,7 +607,9 @@ export default function ProductRegist() {
               <FormField>
                 <ToggleSwitch
                   checked={form.useAiPrice}
-                  onChange={(nextChecked) => handleChange("useAiPrice", nextChecked)}
+                  onChange={(nextChecked) =>
+                    handleChange("useAiPrice", nextChecked)
+                  }
                 />
               </FormField>
             </FormRow>
@@ -652,7 +670,9 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.safetyStock}
-                    onChange={(e) => handleChange("safetyStock", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("safetyStock", e.target.value)
+                    }
                     placeholder="안전재고"
                   />
                   <UnitText>개</UnitText>
@@ -777,7 +797,9 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.shippingFee}
-                    onChange={(e) => handleChange("shippingFee", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("shippingFee", e.target.value)
+                    }
                     placeholder="배송비"
                   />
                   <UnitText>원</UnitText>
@@ -818,7 +840,9 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.exchangeFee}
-                    onChange={(e) => handleChange("exchangeFee", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("exchangeFee", e.target.value)
+                    }
                     placeholder="교환배송비"
                   />
                   <UnitText>원</UnitText>
@@ -842,53 +866,57 @@ export default function ProductRegist() {
 }
 
 const PageWrap = styled.div`
-  padding: 24px;
-  background: #f6f8fb;
+  padding: 25px;
+  background: var(--background);
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
 `;
 
-const PageTitle = styled.h2`
-  margin: 0 0 18px;
-  color: #111827;
-  font-size: 28px;
-  font-weight: 800;
+const Title = styled.h2`
+  margin: 0;
+  font-size: var(--title);
+  font-weight: 700;
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 15px;
 `;
 
 const Section = styled.section`
   padding: 18px 20px;
-  border: 1px solid #eef2f7;
+  box-shadow: var(--shadow);
   border-radius: 16px;
-  background: #ffffff;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 `;
 
 const SectionTitle = styled.h3`
-  margin: 0 0 16px;
-  color: #111827;
-  font-size: 20px;
-  font-weight: 800;
+  color: var(--font);
+  font-size: 17px;
+  font-weight: 600;
 `;
 
 const CategoryTabs = styled.div`
   display: inline-flex;
-  margin-bottom: 12px;
+  width: 240px;
+  height: 35px;
   border-radius: 10px;
-  background: #f3f6fb;
-  padding: 4px;
+  background: var(--choice);
 `;
 
 const CategoryTabButton = styled.button`
   min-width: 120px;
-  height: 34px;
+  height: 35px;
   border: none;
   border-radius: 8px;
-  background: ${({ $active }) => ($active ? "#2563eb" : "transparent")};
-  color: ${({ $active }) => ($active ? "#ffffff" : "#6b7280")};
+  background: ${({ $active }) => ($active ? "var(--blue)" : "transparent")};
+  color: ${({ $active }) => ($active ? "#ffffff" : "var(--placeholder)")};
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -898,7 +926,6 @@ const CategoryPanel = styled.div`
   display: grid;
   grid-template-columns: 220px 220px;
   gap: 12px;
-  margin-bottom: 12px;
 
   @media (max-width: 700px) {
     grid-template-columns: 1fr;
@@ -906,8 +933,8 @@ const CategoryPanel = styled.div`
 `;
 
 const CategoryColumn = styled.div`
-  min-height: 180px;
-  border: 1px solid #e8edf4;
+  min-height: 40px;
+  border: 1px solid var(--border);
   border-radius: 12px;
   background: #ffffff;
   overflow: hidden;
@@ -915,12 +942,12 @@ const CategoryColumn = styled.div`
 
 const CategoryItemButton = styled.button`
   width: 100%;
-  min-height: 42px;
+  min-height: 40px;
   padding: 0 14px;
   border: none;
-  border-bottom: 1px solid #f1f4f8;
-  background: ${({ $active }) => ($active ? "#f4f8ff" : "#ffffff")};
-  color: ${({ $active }) => ($active ? "#2563eb" : "#374151")};
+  border-bottom: 1px solid var(--border);
+  background: ${({ $active }) => ($active ? "var(--choice)" : "#ffffff")};
+  color: ${({ $active }) => ($active ? "var(--blue)" : "var(--font)")};
   font-size: 13px;
   font-weight: ${({ $active }) => ($active ? 700 : 500)};
   display: flex;
@@ -948,7 +975,7 @@ const SearchIconWrap = styled.div`
   top: 50%;
   left: 12px;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -958,15 +985,15 @@ const CategorySearchInput = styled.input`
   width: 100%;
   height: 40px;
   padding: 0 14px 0 36px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
   background: #ffffff;
-  color: #374151;
+  color: var(--font);
   font-size: 13px;
   outline: none;
 
   &:focus {
-    border-color: #cfd8e3;
+    border-color: var(--border);
   }
 `;
 
@@ -979,12 +1006,13 @@ const SearchResultList = styled.div`
 const SearchResultButton = styled.button`
   height: 34px;
   padding: 0 12px;
-  border: 1px solid ${({ $active }) => ($active ? "#2563eb" : "#e5e7eb")};
+  border: 1px solid
+    ${({ $active }) => ($active ? "var(--focus-border)" : "var(--border)")};
   border-radius: 999px;
-  background: ${({ $active }) => ($active ? "#eff6ff" : "#ffffff")};
-  color: ${({ $active }) => ($active ? "#2563eb" : "#4b5563")};
+  background: ${({ $active }) => ($active ? "var(--hover-bg)" : "#ffffff")};
+  color: ${({ $active }) => ($active ? "var(--font)" : "var(--placeholder)")};
   font-size: 12px;
-  font-weight: 600;
+  font-weight: ${({ $active }) => ($active ? "600" : "500")};
   cursor: pointer;
 `;
 
@@ -996,18 +1024,16 @@ const SelectedCategoryRow = styled.div`
 `;
 
 const MiniLabel = styled.div`
-  color: #6b7280;
+  color: var(--font);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
 `;
 
 const SelectedCategoryValue = styled.div`
   min-height: 40px;
   padding: 0 14px;
-  border: 1px solid #e5e7eb;
   border-radius: 10px;
-  background: #fafbfc;
-  color: #111827;
+  color: var(--font);
   font-size: 13px;
   font-weight: 600;
   display: inline-flex;
@@ -1033,9 +1059,9 @@ const FormRow = styled.div`
 `;
 
 const FormLabel = styled.label`
-  color: #374151;
+  color: var(--font);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
 `;
 
 const FormField = styled.div`
@@ -1046,21 +1072,21 @@ const Input = styled.input`
   width: 100%;
   height: 40px;
   padding: 0 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
   background: ${({ readOnly, disabled }) =>
-    disabled || readOnly ? "#f3f4f6" : "#ffffff"};
-  color: #111827;
+    disabled || readOnly ? "var(--read-only)" : "white"};
+  color: var(--font);
   font-size: 13px;
   outline: none;
   box-sizing: border-box;
 
   &:focus {
-    border-color: #cfd8e3;
+    border-color: var(--focus-border);
   }
 
   &::placeholder {
-    color: #9ca3af;
+    color: var(--placeholder);
   }
 `;
 
@@ -1068,17 +1094,17 @@ const Select = styled.select`
   width: 180px;
   height: 40px;
   padding: 0 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #ffffff;
-  color: #111827;
+  background: white;
+  color: var(--font);
   font-size: 13px;
   outline: none;
 `;
 
 const HelperText = styled.div`
   margin-top: 6px;
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 12px;
   text-align: right;
 `;
@@ -1093,9 +1119,9 @@ const UnitText = styled.span`
   top: 50%;
   right: 12px;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
 `;
 
 const DateInputWrap = styled.div`
@@ -1108,7 +1134,7 @@ const DateIconWrap = styled.div`
   top: 50%;
   right: 12px;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--placeholder);
   pointer-events: none;
   display: flex;
   align-items: center;
@@ -1128,9 +1154,9 @@ const HiddenFileInput = styled.input`
 const ImagePreviewButton = styled.button`
   width: 160px;
   height: 160px;
-  border: 1px dashed #d1d5db;
+  border: 1px dashed var(--border);
   border-radius: 14px;
-  background: #fafbfc;
+  background: var(--read-only);
   overflow: hidden;
   padding: 0;
   cursor: pointer;
@@ -1139,7 +1165,7 @@ const ImagePreviewButton = styled.button`
 const UploadPlaceholder = styled.div`
   width: 100%;
   height: 100%;
-  color: #9ca3af;
+  color: var(--placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1152,38 +1178,38 @@ const PreviewImage = styled.img`
 `;
 
 const ImageGuide = styled.div`
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 12px;
   line-height: 1.6;
 `;
 
 const EditorWrap = styled.div`
   .ql-toolbar.ql-snow {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border);
     border-top-left-radius: 14px;
     border-top-right-radius: 14px;
   }
 
   .ql-container.ql-snow {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border);
     border-top: none;
     border-bottom-left-radius: 14px;
     border-bottom-right-radius: 14px;
     min-height: 280px;
-    background: #ffffff;
+    background: white;
   }
 
   .ql-editor {
     min-height: 280px;
     font-size: 14px;
     line-height: 1.7;
-    color: #111827;
+    color: var(--font);
   }
 `;
 
 const EditorNotice = styled.div`
   margin-top: 10px;
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 12px;
   line-height: 1.7;
 `;
@@ -1199,12 +1225,12 @@ const BottomButtonRow = styled.div`
 const CancelButton = styled.button`
   min-width: 96px;
   height: 40px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #ffffff;
-  color: #4b5563;
+  background: white;
+  color: var(--font);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
 `;
 

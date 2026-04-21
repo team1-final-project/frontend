@@ -70,12 +70,12 @@ export default function AdminSidebar() {
         defaultOpen: true,
         items: [
           {
-            label: "판매 분석",
+            label: "판매 현황",
             to: "/admin/sales-stat",
             icon: BarChart3,
           },
           {
-            label: "AI 가격변경 성과",
+            label: "AI 가격변경 분석",
             to: "/admin/ai-price-stat",
             icon: FileText,
           },

@@ -1,4 +1,5 @@
 import { plainApi } from "./axios";
+import api from "./axios";
 
 export const getHomeAiRanking = async () => {
   return {
@@ -190,4 +191,13 @@ export const getHomeAiRanking = async () => {
   // 실제 연동 시
   // const response = await plainApi.get("/stats/home-ai-ranking");
   // return response.data;
+
+
 };
+
+  export const getAdminSalesStat = async (params) => {
+    const response = await api.get("/admin/price/sales-stat", {
+      params,
+    });
+    return response.data;
+  };

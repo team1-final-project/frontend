@@ -24,13 +24,33 @@ const weekLabels = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const formatCount = (value) =>
   `${Math.abs(Number(value || 0)).toLocaleString()}개`;
 
-const formatSignedCount = (value) =>
-  `${Number(value || 0) > 0 ? "+" : ""}${Number(value || 0).toLocaleString()}개`;
+const formatMovementByType = (value, changeType) => {
+  const qty = Math.abs(Number(value || 0));
 
-const buildPolylinePoints = (values, width, height, padding = 12) => {
-  const max = Math.max(...values, 0);
-  const min = Math.min(...values, 0);
+  if (changeType === "INBOUND") {
+    return `+${qty.toLocaleString()}개`;
+  }
+
+  if (changeType === "ORDER_OUT") {
+    return `-${qty.toLocaleString()}개`;
+  }
+
+  return `${Number(value || 0) > 0 ? "+" : ""}${Number(
+    value || 0
+  ).toLocaleString()}개`;
+};
+
+const getChartScale = (...datasets) => {
+  const flatValues = datasets.flat().map((value) => Number(value || 0));
+  const max = Math.max(...flatValues, 0);
+  const min = Math.min(...flatValues, 0);
   const range = max - min || 1;
+
+  return { max, min, range };
+};
+
+const buildPolylinePoints = (values, width, height, padding = 12, scale) => {
+  const { min, range } = scale;
 
   return values
     .map((value, index) => {
@@ -44,10 +64,8 @@ const buildPolylinePoints = (values, width, height, padding = 12) => {
     .join(" ");
 };
 
-const buildChartPoints = (values, width, height, padding = 12) => {
-  const max = Math.max(...values, 0);
-  const min = Math.min(...values, 0);
-  const range = max - min || 1;
+const buildChartPoints = (values, width, height, padding = 12, scale) => {
+  const { min, range } = scale;
 
   return values.map((value, index) => {
     const x =
@@ -131,11 +149,30 @@ const defaultSummaryData = {
   outbound_qty_diff: 0,
 };
 
+const mapHistoryRows = (items) =>
+  Array.isArray(items)
+    ? items.map((item) => ({
+        id: item.id,
+        productId: item.product_id,
+        productCode: item.product_code,
+        productName: item.product_name,
+        type: item.change_type_label,
+        changeType: item.change_type,
+        baseStock: Number(item.qty_before ?? 0),
+        movementQty: Number(item.change_qty ?? 0),
+        resultStock: Number(item.qty_after ?? 0),
+        date: formatOccurredAt(item.occurred_at),
+        occurredAt: item.occurred_at,
+        note: item.note || "-",
+      }))
+    : [];
+
 export default function InventoryHistory() {
   const nav = useNavigate();
   const chartAreaRef = useRef(null);
 
   const [rows, setRows] = useState([]);
+  const [trendRows, setTrendRows] = useState([]);
   const [summaryData, setSummaryData] = useState(defaultSummaryData);
   const [currentWeekMeta, setCurrentWeekMeta] = useState(() =>
     buildCurrentWeekMeta()
@@ -156,39 +193,30 @@ export default function InventoryHistory() {
     setErrorMessage("");
 
     try {
-      const [historyResponse, summaryResponse] = await Promise.all([
-        getAdminInventoryHistoryList({
-          keyword: searchValue.trim() || undefined,
-          change_type: movementType || undefined,
-          start_date: startDate || undefined,
-          end_date: endDate || undefined,
-        }),
-        getAdminInventoryHistorySummary(),
-      ]);
+      const [trendResponse, historyResponse, summaryResponse] = await Promise.all(
+        [
+          getAdminInventoryHistoryList(),
+          getAdminInventoryHistoryList({
+            keyword: searchValue.trim() || undefined,
+            change_type: movementType || undefined,
+            start_date: startDate || undefined,
+            end_date: endDate || undefined,
+          }),
+          getAdminInventoryHistorySummary(),
+        ]
+      );
 
-      const mappedRows = Array.isArray(historyResponse?.items)
-        ? historyResponse.items.map((item) => ({
-            id: item.id,
-            productId: item.product_id,
-            productCode: item.product_code,
-            productName: item.product_name,
-            type: item.change_type_label,
-            changeType: item.change_type,
-            baseStock: Number(item.qty_before ?? 0),
-            movementQty: Number(item.change_qty ?? 0),
-            resultStock: Number(item.qty_after ?? 0),
-            date: formatOccurredAt(item.occurred_at),
-            occurredAt: item.occurred_at,
-            note: item.note || "-",
-          }))
-        : [];
+      const mappedTrendRows = mapHistoryRows(trendResponse?.items);
+      const mappedRows = mapHistoryRows(historyResponse?.items);
 
+      setTrendRows(mappedTrendRows);
       setRows(mappedRows);
       setSummaryData(summaryResponse || defaultSummaryData);
       setPage(1);
     } catch (error) {
       console.error("재고 변동 이력 조회 실패", error);
       setRows([]);
+      setTrendRows([]);
       setSummaryData(defaultSummaryData);
       setErrorMessage("재고 변동 이력을 불러오지 못했습니다.");
     } finally {
@@ -230,21 +258,28 @@ export default function InventoryHistory() {
   }, [fetchInventoryHistory]);
 
   const inboundTrend = useMemo(
-    () => buildWeeklyTrend(rows, "INBOUND", currentWeekMeta),
-    [rows, currentWeekMeta]
+    () => buildWeeklyTrend(trendRows, "INBOUND", currentWeekMeta),
+    [trendRows, currentWeekMeta]
   );
+
   const outboundTrend = useMemo(
-    () => buildWeeklyTrend(rows, "ORDER_OUT", currentWeekMeta),
-    [rows, currentWeekMeta]
+    () => buildWeeklyTrend(trendRows, "ORDER_OUT", currentWeekMeta),
+    [trendRows, currentWeekMeta]
+  );
+
+  const chartScale = useMemo(
+    () => getChartScale(inboundTrend, outboundTrend),
+    [inboundTrend, outboundTrend]
   );
 
   const inboundPoints = useMemo(
-    () => buildChartPoints(inboundTrend, 260, 96, 10),
-    [inboundTrend]
+    () => buildChartPoints(inboundTrend, 260, 96, 10, chartScale),
+    [inboundTrend, chartScale]
   );
+
   const outboundPoints = useMemo(
-    () => buildChartPoints(outboundTrend, 260, 96, 10),
-    [outboundTrend]
+    () => buildChartPoints(outboundTrend, 260, 96, 10, chartScale),
+    [outboundTrend, chartScale]
   );
 
   const tooltipData =
@@ -256,13 +291,35 @@ export default function InventoryHistory() {
         }
       : null;
 
+  const formatHistoryChange = (skuDiff, qtyDiff) => {
+    const sku = Math.abs(Number(skuDiff || 0));
+    const qty = Math.abs(Number(qtyDiff || 0));
+
+    if (sku === 0 && qty === 0) return "-";
+
+    return `${sku} SKU / ${qty.toLocaleString()}개`;
+  };
+
+  const isNoHistoryChange = (skuDiff, qtyDiff) =>
+    Number(skuDiff || 0) === 0 && Number(qtyDiff || 0) === 0;
+
+  const isInboundNoChange = isNoHistoryChange(
+    summaryData.inbound_sku_diff,
+    summaryData.inbound_qty_diff
+  );
+
+  const isOutboundNoChange = isNoHistoryChange(
+    summaryData.outbound_sku_diff,
+    summaryData.outbound_qty_diff
+  );
+
   const isInboundUp =
     Number(summaryData.inbound_sku_diff || 0) >= 0 &&
     Number(summaryData.inbound_qty_diff || 0) >= 0;
 
   const isOutboundUp =
-    Number(summaryData.outbound_sku_diff || 0) < 0 ||
-    Number(summaryData.outbound_qty_diff || 0) < 0;
+    Number(summaryData.outbound_sku_diff || 0) >= 0 &&
+    Number(summaryData.outbound_qty_diff || 0) >= 0;
 
   const handleChartMouseMove = (e) => {
     if (!chartAreaRef.current) return;
@@ -339,9 +396,9 @@ export default function InventoryHistory() {
       title: "입출고수량",
       width: "120px",
       sortType: "number",
-      render: (value) => (
-        <QuantityText $positive={value > 0}>
-          {formatSignedCount(value)}
+      render: (value, row) => (
+        <QuantityText $positive={row.changeType === "INBOUND"}>
+          {formatMovementByType(value, row.changeType)}
         </QuantityText>
       ),
     },
@@ -383,11 +440,15 @@ export default function InventoryHistory() {
             <Slash>/</Slash>
             <SubNumber>{summaryData.inbound_qty.toLocaleString()}개</SubNumber>
           </BigLine>
-          <ChangeRow $up={isInboundUp}>
-            <ChangeArrow>{isInboundUp ? "↑" : "↓"}</ChangeArrow>
+          <ChangeRow $up={isInboundUp} $neutral={isInboundNoChange}>
+            <ChangeArrow>
+              {isInboundNoChange ? "-" : isInboundUp ? "↑" : "↓"}
+            </ChangeArrow>
             <span>
-              {Math.abs(summaryData.inbound_sku_diff)} SKU /{" "}
-              {Math.abs(summaryData.inbound_qty_diff).toLocaleString()}개
+              {formatHistoryChange(
+                summaryData.inbound_sku_diff,
+                summaryData.inbound_qty_diff
+              )}
             </span>
             <ChangeMuted>vs Yesterday</ChangeMuted>
           </ChangeRow>
@@ -401,11 +462,15 @@ export default function InventoryHistory() {
             <Slash>/</Slash>
             <SubNumber>{summaryData.outbound_qty.toLocaleString()}개</SubNumber>
           </BigLine>
-          <ChangeRow $up={isOutboundUp}>
-            <ChangeArrow>{isOutboundUp ? "↑" : "↓"}</ChangeArrow>
+          <ChangeRow $up={isOutboundUp} $neutral={isOutboundNoChange}>
+            <ChangeArrow>
+              {isOutboundNoChange ? "-" : isOutboundUp ? "↑" : "↓"}
+            </ChangeArrow>
             <span>
-              {Math.abs(summaryData.outbound_sku_diff)} SKU /{" "}
-              {Math.abs(summaryData.outbound_qty_diff).toLocaleString()}개
+              {formatHistoryChange(
+                summaryData.outbound_sku_diff,
+                summaryData.outbound_qty_diff
+              )}
             </span>
             <ChangeMuted>vs Yesterday</ChangeMuted>
           </ChangeRow>
@@ -476,7 +541,13 @@ export default function InventoryHistory() {
                   strokeWidth="4"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points={buildPolylinePoints(inboundTrend, 260, 96, 10)}
+                  points={buildPolylinePoints(
+                    inboundTrend,
+                    260,
+                    96,
+                    10,
+                    chartScale
+                  )}
                 />
                 <polyline
                   fill="none"
@@ -484,7 +555,13 @@ export default function InventoryHistory() {
                   strokeWidth="4"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points={buildPolylinePoints(outboundTrend, 260, 96, 10)}
+                  points={buildPolylinePoints(
+                    outboundTrend,
+                    260,
+                    96,
+                    10,
+                    chartScale
+                  )}
                 />
 
                 {inboundPoints.map((point, index) => (
@@ -662,7 +739,8 @@ const ChangeRow = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
-  color: ${({ $up }) => ($up ? "#16a34a" : "#ef4444")};
+  color: ${({ $neutral, $up }) =>
+    $neutral ? "#9ca3af" : $up ? "#16a34a" : "#ef4444"};
   font-size: 14px;
   font-weight: 700;
 `;
@@ -854,7 +932,7 @@ const CodeLink = styled.button`
   border: 0;
   padding: 0;
   background: none;
-  color: #2563eb;
+  color: #111827;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
