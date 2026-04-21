@@ -13,6 +13,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import SearchDate from "./SearchDate";
 import SelectBar from "./SelectBar";
+import SearchBar from "./SearchBar";
 
 const DatePickerStyle = createGlobalStyle`
   .react-datepicker-wrapper {
@@ -221,17 +222,12 @@ export default function TableComponent({
           <>
             <ToolbarLeft $variant={variant}>
               {typeof onSearchChange === "function" && (
-                <SearchWrap $variant={variant}>
-                  <SearchInput
-                    $variant={variant}
-                    value={searchValue}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                    placeholder={searchPlaceholder}
-                  />
-                  <SearchIcon>
-                    <Search size={15} />
-                  </SearchIcon>
-                </SearchWrap>
+                <SearchBar
+                  variant={variant}
+                  value={searchValue}
+                  onChange={onSearchChange}
+                  placeholder={searchPlaceholder}
+                />
               )}
 
               {typeof onFilterChange === "function" && (
@@ -424,64 +420,6 @@ const CustomToolbarWrap = styled.div`
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-`;
-
-const SearchWrap = styled.div`
-  position: relative;
-  width: 100%;
-  max-width: ${({ $variant }) =>
-    $variant === "inventory" ? "224px" : "240px"};
-
-  @media (max-width: 900px) {
-    max-width: 100%;
-  }
-`;
-
-const SearchIcon = styled.div`
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
-  color: var(--placeholder);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-`;
-
-const SearchInput = styled.input`
-  width: 100%;
-  border-radius: 10px;
-  background: white;
-  color: var(--font);
-  font-size: 13px;
-  outline: none;
-  box-shadow: var(--shadow);
-
-  &::placeholder {
-    color: var(--placeholder);
-  }
-
-  ${({ $variant }) =>
-    $variant === "inventory"
-      ? css`
-          height: 44px;
-          padding: 0 36px 0 14px;
-          border: 1px solid transparent;
-
-          &:focus {
-            border-color: var(--focus-border);
-          }
-        `
-      : css`
-          height: 38px;
-          padding: 0 34px 0 14px;
-          border: 1px solid transparent;
-
-          &:focus {
-            border-color: var(--focus-border);
-          }
-        `}
 `;
 
 const FilterSelectWrap = styled.div`

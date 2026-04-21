@@ -83,7 +83,7 @@ const SelectTrigger = styled.button`
   height: ${({ $variant }) => ($variant === "inventory" ? "44px" : "38px")};
   transition: all 0.2s;
 
-  &:hover {
+  &:focus {
     border-color: var(--focus-border);
   }
 
