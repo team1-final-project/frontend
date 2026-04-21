@@ -3,9 +3,20 @@ import styled from "styled-components";
 import { Info, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getAdminDashboard } from "../../api/adminDashboard";
+import InfoTooltip from "../../components/InfoTooltip";
 
 const weekLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const hourLabels = ["0시", "3시", "6시", "9시", "12시", "15시", "18시", "21시", "24시"];
+const hourLabels = [
+  "0시",
+  "3시",
+  "6시",
+  "9시",
+  "12시",
+  "15시",
+  "18시",
+  "21시",
+  "24시",
+];
 
 const numberFormat = (value) => `${Number(value || 0).toLocaleString()}원`;
 const qtyFormat = (value) => `${Number(value || 0).toLocaleString()}개`;
@@ -19,14 +30,24 @@ function buildLinePoints(values, width, height, padding = 18) {
 
   return safeValues
     .map((value, index) => {
-      const x = padding + (index * (width - padding * 2)) / Math.max(safeValues.length - 1, 1);
-      const y = height - padding - ((value - min) * (height - padding * 2)) / range;
+      const x =
+        padding +
+        (index * (width - padding * 2)) / Math.max(safeValues.length - 1, 1);
+      const y =
+        height - padding - ((value - min) * (height - padding * 2)) / range;
       return `${x},${y}`;
     })
     .join(" ");
 }
 
-function buildBars(values, width, height, padding = 28, offset = 0, barWidth = 10) {
+function buildBars(
+  values,
+  width,
+  height,
+  padding = 28,
+  offset = 0,
+  barWidth = 10,
+) {
   const safeValues = Array.isArray(values) && values.length ? values : [0];
   const max = Math.max(...safeValues, 1);
   const groupWidth = (width - padding * 2) / safeValues.length;
@@ -49,7 +70,7 @@ function buildStackedBars(points, width, height, padding = 28) {
       : weekLabels.map((label) => ({ label, segments: [0, 0, 0] }));
 
   const totals = safePoints.map((point) =>
-    (point.segments || []).reduce((sum, value) => sum + Number(value || 0), 0)
+    (point.segments || []).reduce((sum, value) => sum + Number(value || 0), 0),
   );
   const max = Math.max(...totals, 1);
   const groupWidth = (width - padding * 2) / safePoints.length;
@@ -64,7 +85,12 @@ function buildStackedBars(points, width, height, padding = 28) {
     const blueHeight = (blue / max) * (height - padding * 2);
 
     return {
-      orange: { x, y: baseY - orangeHeight, width: barWidth, height: orangeHeight },
+      orange: {
+        x,
+        y: baseY - orangeHeight,
+        width: barWidth,
+        height: orangeHeight,
+      },
       pink: {
         x,
         y: baseY - orangeHeight - pinkHeight,
@@ -100,9 +126,7 @@ const gmvTooltipLines = [
   "일반 매출 : AI 가격변경이 OFF인 상태에서 발생한 매출",
 ];
 
-const contributionTooltipLines = [
-  "공헌이익 : 매출-(매출원가+변동비)",
-];
+const contributionTooltipLines = ["공헌이익 : 매출-(매출원가+변동비)"];
 
 const aiPerformanceTooltipLines = [
   "수익성 개선 : 수동 가격변경 대비 AI 가격변경으로 인한 공헌이익 개선 금액",
@@ -110,22 +134,6 @@ const aiPerformanceTooltipLines = [
   "악성재고 판매 : AI 가격변경을 통한 악성재고의 판매량",
   "악성재고(재고 보유일수 90일 초과)의 감가상각 및 폐기비용으로 인한 손실을 줄이기 위해 AI가 판매가를 인하하여 판매를 촉진함",
 ];
-
-const InfoTooltip = ({ title, lines }) => {
-  return (
-    <TooltipWrap>
-      <InfoButton type="button" aria-label={`${title} 설명`}>
-        <Info size={14} />
-      </InfoButton>
-      <TooltipBox>
-        <TooltipTitle>{title}</TooltipTitle>
-        {lines.map((line, index) => (
-          <TooltipLine key={`${title}-${index}`}>{line}</TooltipLine>
-        ))}
-      </TooltipBox>
-    </TooltipWrap>
-  );
-};
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -151,7 +159,9 @@ export default function Dashboard() {
         setActiveShareTab(data.categories[0]);
       }
     } catch (err) {
-      setError(err?.response?.data?.detail || "대시보드 데이터를 불러오지 못했습니다.");
+      setError(
+        err?.response?.data?.detail || "대시보드 데이터를 불러오지 못했습니다.",
+      );
     } finally {
       setLoading(false);
     }
@@ -192,7 +202,7 @@ export default function Dashboard() {
 
   const shareBars = useMemo(
     () => buildStackedBars(dashboard?.share_points || [], 520, 250, 28),
-    [dashboard?.share_points]
+    [dashboard?.share_points],
   );
 
   const salesBars = useMemo(
@@ -203,9 +213,9 @@ export default function Dashboard() {
         260,
         28,
         10,
-        10
+        10,
       ),
-    [contributionTrend]
+    [contributionTrend],
   );
 
   const profitBars = useMemo(
@@ -216,9 +226,9 @@ export default function Dashboard() {
         260,
         28,
         24,
-        10
+        10,
       ),
-    [contributionTrend]
+    [contributionTrend],
   );
 
   if (loading && !dashboard) {
@@ -229,11 +239,12 @@ export default function Dashboard() {
     return <PageState>{error}</PageState>;
   }
 
-  const categories = dashboard?.categories?.length ? dashboard.categories : ["전체"];
+  const categories = dashboard?.categories?.length
+    ? dashboard.categories
+    : ["전체"];
   const gmvCard = dashboard?.gmv_card;
   const contributionCard = dashboard?.contribution_card;
   const aiPerformance = dashboard?.ai_performance;
-
 
   return (
     <PageWrap>
@@ -245,7 +256,9 @@ export default function Dashboard() {
         <Dot $color="#6b7280" />
         KPI
       </SectionLabel>
-      <SectionSubText>오늘 운영 성과와 주요 지표를 빠르게 확인하세요.</SectionSubText>
+      <SectionSubText>
+        오늘 운영 성과와 주요 지표를 빠르게 확인하세요.
+      </SectionSubText>
 
       <TopMetricGrid>
         <TopMetricCard>
@@ -271,14 +284,23 @@ export default function Dashboard() {
 
         <TopMetricCard>
           <MetricHeader>
-            <MetricTitle>{contributionCard?.title || "금일 공헌이익"}</MetricTitle>
-            <InfoTooltip title="금일 공헌이익" lines={contributionTooltipLines} />
+            <MetricTitle>
+              {contributionCard?.title || "금일 공헌이익"}
+            </MetricTitle>
+            <InfoTooltip
+              title="금일 공헌이익"
+              lines={contributionTooltipLines}
+            />
           </MetricHeader>
 
           <MetricRow>
             <Dot $color="#22c55e" />
-            <MetricLabel>{contributionCard?.total_label || "전체 이익"}</MetricLabel>
-            <MetricValue>{numberFormat(contributionCard?.total_value)}</MetricValue>
+            <MetricLabel>
+              {contributionCard?.total_label || "전체 이익"}
+            </MetricLabel>
+            <MetricValue>
+              {numberFormat(contributionCard?.total_value)}
+            </MetricValue>
           </MetricRow>
 
           {(contributionCard?.details || []).map((detail, index) => (
@@ -299,14 +321,19 @@ export default function Dashboard() {
           <MetricRow>
             <Dot $color="#22c55e" />
             <MetricLabel>수익성 개선</MetricLabel>
-            <MetricValue>{numberFormat(aiPerformance?.improvement_profit)}</MetricValue>
+            <MetricValue>
+              {numberFormat(aiPerformance?.improvement_profit)}
+            </MetricValue>
           </MetricRow>
 
           <MetricRow>
             <Dot $color="#2563eb" />
             <MetricLabel>AI 가격변경 횟수</MetricLabel>
             <MetricSubValue>
-              {Number(aiPerformance?.ai_price_change_count || 0).toLocaleString()}회
+              {Number(
+                aiPerformance?.ai_price_change_count || 0,
+              ).toLocaleString()}
+              회
             </MetricSubValue>
           </MetricRow>
 
@@ -314,8 +341,10 @@ export default function Dashboard() {
             <Dot $color="#ef5a67" />
             <MetricLabel>악성재고 판매</MetricLabel>
             <MetricSubValue>
-              {Number(aiPerformance?.bad_inventory_sold_sku_count || 0).toLocaleString()} SKU /{" "}
-              {qtyFormat(aiPerformance?.bad_inventory_sold_qty)}
+              {Number(
+                aiPerformance?.bad_inventory_sold_sku_count || 0,
+              ).toLocaleString()}{" "}
+              SKU / {qtyFormat(aiPerformance?.bad_inventory_sold_qty)}
             </MetricSubValue>
           </MetricRow>
         </TopMetricCard>
@@ -325,7 +354,9 @@ export default function Dashboard() {
         <Dot $color="#2563eb" />
         AI 전략 및 최저가
       </SectionLabel>
-      <SectionSubText>시장 가격을 비교해 조정이 필요한 상품을 확인하세요.</SectionSubText>
+      <SectionSubText>
+        시장 가격을 비교해 조정이 필요한 상품을 확인하세요.
+      </SectionSubText>
 
       <ContentGrid>
         <Card>
@@ -368,7 +399,7 @@ export default function Dashboard() {
                     aiTrend.map((item) => Number(item.ai_profit || 0)),
                     520,
                     250,
-                    22
+                    22,
                   )}
                 />
                 <polyline
@@ -381,17 +412,18 @@ export default function Dashboard() {
                     aiTrend.map((item) => Number(item.manual_profit || 0)),
                     520,
                     250,
-                    22
+                    22,
                   )}
                 />
               </ChartSvg>
 
               <XAxis>
-                {(aiTrend.length ? aiTrend : weekLabels.map((label) => ({ label }))).map(
-                  (item, index) => (
-                    <span key={`${item.label}-${index}`}>{item.label}</span>
-                  )
-                )}
+                {(aiTrend.length
+                  ? aiTrend
+                  : weekLabels.map((label) => ({ label }))
+                ).map((item, index) => (
+                  <span key={`${item.label}-${index}`}>{item.label}</span>
+                ))}
               </XAxis>
             </ChartCanvas>
 
@@ -449,12 +481,16 @@ export default function Dashboard() {
                   <td>{numberFormat(row.current_price)}</td>
                   <td>
                     <NegativeText>
-                      {row.market_lowest_price ? numberFormat(row.market_lowest_price) : "-"}
+                      {row.market_lowest_price
+                        ? numberFormat(row.market_lowest_price)
+                        : "-"}
                     </NegativeText>
                   </td>
                   <td>
                     <BlueText>
-                      {row.ai_recommended_price ? numberFormat(row.ai_recommended_price) : "-"}
+                      {row.ai_recommended_price
+                        ? numberFormat(row.ai_recommended_price)
+                        : "-"}
                     </BlueText>
                   </td>
                   <td>{row.expected_effect}</td>
@@ -470,7 +506,9 @@ export default function Dashboard() {
         <Dot $color="#eab308" />
         공헌이익
       </SectionLabel>
-      <SectionSubText>수익성이 낮은 상품과 개선 대상을 점검하세요.</SectionSubText>
+      <SectionSubText>
+        수익성이 낮은 상품과 개선 대상을 점검하세요.
+      </SectionSubText>
 
       <ContentGrid>
         <Card>
@@ -552,10 +590,12 @@ export default function Dashboard() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   points={buildLinePoints(
-                    contributionTrend.map((item) => Number(item.lowest_price || 0)),
+                    contributionTrend.map((item) =>
+                      Number(item.lowest_price || 0),
+                    ),
                     760,
                     260,
-                    28
+                    28,
                   )}
                 />
 
@@ -569,7 +609,7 @@ export default function Dashboard() {
                     contributionTrend.map((item) => Number(item.my_price || 0)),
                     760,
                     260,
-                    28
+                    28,
                   )}
                 />
               </BarSvg>
@@ -618,7 +658,9 @@ export default function Dashboard() {
                   <td>
                     <CodeButton
                       type="button"
-                      onClick={() => navigate(`/admin/product-update/${row.product_code}`)}
+                      onClick={() =>
+                        navigate(`/admin/product-update/${row.product_code}`)
+                      }
                     >
                       {row.product_code}
                     </CodeButton>
@@ -650,7 +692,9 @@ export default function Dashboard() {
         <Dot $color="#22c55e" />
         판매랭킹 및 비중
       </SectionLabel>
-      <SectionSubText>주요 판매 상품과 카테고리 비중을 확인하세요.</SectionSubText>
+      <SectionSubText>
+        주요 판매 상품과 카테고리 비중을 확인하세요.
+      </SectionSubText>
 
       <BottomGrid>
         <Card>
@@ -674,7 +718,9 @@ export default function Dashboard() {
                   <td>
                     <CodeButton
                       type="button"
-                      onClick={() => navigate(`/admin/product-update/${row.product_code}`)}
+                      onClick={() =>
+                        navigate(`/admin/product-update/${row.product_code}`)
+                      }
                     >
                       {row.product_code}
                     </CodeButton>
@@ -925,7 +971,8 @@ const TabButton = styled.button`
   background: transparent;
   padding: 0 0 8px;
   color: ${({ $active }) => ($active ? "#111827" : "#9ca3af")};
-  border-bottom: 2px solid ${({ $active }) => ($active ? "#3b5bfd" : "transparent")};
+  border-bottom: 2px solid
+    ${({ $active }) => ($active ? "#3b5bfd" : "transparent")};
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -1107,73 +1154,4 @@ const BlueText = styled.span`
 const GreenText = styled.span`
   color: #16a34a;
   font-weight: 700;
-`;
-
-const TooltipWrap = styled.div`
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-
-  &:hover > div {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
-`;
-
-const InfoButton = styled.button`
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #9ca3af;
-  cursor: pointer;
-`;
-
-const TooltipBox = styled.div`
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  width: 320px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: #111827;
-  color: #f9fafb;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.22);
-  z-index: 30;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(4px);
-  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: -6px;
-    right: 10px;
-    width: 12px;
-    height: 12px;
-    background: #111827;
-    transform: rotate(45deg);
-  }
-`;
-
-const TooltipTitle = styled.div`
-  margin-bottom: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #ffffff;
-`;
-
-const TooltipLine = styled.div`
-  font-size: 12px;
-  line-height: 1.55;
-  color: #e5e7eb;
-
-  & + & {
-    margin-top: 6px;
-  }
 `;
