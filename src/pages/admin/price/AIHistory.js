@@ -10,6 +10,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { getAdminPriceHistory } from "../../../api/adminPrice";
+import RateBadge from "../../../components/RateBadge";
+import SearchDate from "../../../components/SearchDate";
+import SearchBar from "../../../components/SearchBar";
 
 export default function AIHistory() {
   const [filters, setFilters] = useState({
@@ -21,7 +24,6 @@ export default function AIHistory() {
   const [searched, setSearched] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [result, setResult] = useState(null);
@@ -38,43 +40,37 @@ export default function AIHistory() {
     return rows.slice(startIndex, startIndex + pageSize);
   }, [rows, page, pageSize]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFilters((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleStartDateChange = (val) =>
+    setFilters((prev) => ({ ...prev, startDate: val }));
+  const handleEndDateChange = (val) =>
+    setFilters((prev) => ({ ...prev, endDate: val }));
+  const handleKeywordChange = (val) =>
+    setFilters((prev) => ({ ...prev, keyword: val }));
 
   const handleSearch = async () => {
     const keyword = filters.keyword.trim();
-
     if (!keyword) {
       setSearched(true);
       setResult(null);
       setErrorMessage("상품명 또는 상품코드를 입력해주세요.");
-      setPage(1);
       return;
     }
 
     try {
       setIsLoading(true);
       setErrorMessage("");
-
       const data = await getAdminPriceHistory({
         keyword,
         startDate: filters.startDate,
         endDate: filters.endDate,
       });
-
       setResult(data);
       setSearched(true);
       setPage(1);
     } catch (error) {
-      console.error(error);
       setResult(null);
       setSearched(true);
-      setPage(1);
-      setErrorMessage(
-        error?.response?.data?.detail || "AI 가격변경 이력 조회에 실패했습니다."
-      );
+      setErrorMessage(error?.response?.data?.detail || "조회 실패");
     } finally {
       setIsLoading(false);
     }
@@ -87,9 +83,7 @@ export default function AIHistory() {
 
   const renderEmptyState = () => (
     <EmptyStateWrap>
-      <EmptyIconWrap>
-        <AlertTriangle size={54} strokeWidth={1.8} />
-      </EmptyIconWrap>
+      <AlertTriangle size={54} strokeWidth={1.8} />
       <EmptyText>
         {isLoading ? "조회 중입니다..." : errorMessage || "상품을 검색하세요"}
       </EmptyText>
@@ -97,69 +91,72 @@ export default function AIHistory() {
   );
 
   const renderResult = () => (
-    <>
+    <ResultArea>
       <SectionCard>
         <SectionTitle>상품정보</SectionTitle>
-        <InfoGrid>
-          <InfoRow>
-            <InfoLabel>상품코드</InfoLabel>
-            <InfoValueBox $compact>
-              <InternalLink to={`/admin/product-update/${product.product_code}`}>
+        <FormGrid>
+          <FormRow>
+            <FormLabel>상품코드</FormLabel>
+            <FormField>
+              <CodeLinkInput
+                to={`/admin/product-update/${product.product_code}`}
+              >
                 {product.product_code}
-              </InternalLink>
-            </InfoValueBox>
-          </InfoRow>
-
-          <InfoRow>
-            <InfoLabel>상품명</InfoLabel>
-            <InfoValueBox>
-              <ExternalAnchor href="#">
-                {product.product_name}
-              </ExternalAnchor>
-            </InfoValueBox>
-          </InfoRow>
-
-          <InfoRow>
-            <InfoLabel>판매가</InfoLabel>
-            <InfoValueBox $compact>{formatWon(product.sale_price)}</InfoValueBox>
-          </InfoRow>
-        </InfoGrid>
+              </CodeLinkInput>
+            </FormField>
+          </FormRow>
+          <FormRow>
+            <FormLabel>상품명</FormLabel>
+            <FormField>
+              <Input readOnly value={product.product_name} />
+            </FormField>
+          </FormRow>
+          <FormRow>
+            <FormLabel>판매가</FormLabel>
+            <FormField>
+              <UnitInputWrap>
+                <Input readOnly value={formatNumber(product.sale_price)} />
+                <UnitText>원</UnitText>
+              </UnitInputWrap>
+            </FormField>
+          </FormRow>
+        </FormGrid>
       </SectionCard>
 
       <SectionCard>
         <SectionTitle>가격비교 정보</SectionTitle>
-        <InfoGrid>
-          <InfoRow>
-            <InfoLabel>카탈로그 ID</InfoLabel>
-            <InfoValueBox $compact>
-              {catalog?.external_catalog_id ? (
-              <ExternalAnchor
-                href={`https://search.shopping.naver.com/catalog/${catalog.external_catalog_id}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {catalog.external_catalog_id}
-              </ExternalAnchor>
-            ) : (
-              "-"
-            )}
-            </InfoValueBox>
-          </InfoRow>
-
-          <InfoRow>
-            <InfoLabel>카탈로그명</InfoLabel>
-            <InfoValueBox>{catalog?.catalog_name || "-"}</InfoValueBox>
-          </InfoRow>
-
-          <InfoRow>
-            <InfoLabel>최저가</InfoLabel>
-            <InfoValueBox $compact>
-              {catalog?.market_lowest_price != null
-                ? formatWon(catalog.market_lowest_price)
-                : "-"}
-            </InfoValueBox>
-          </InfoRow>
-        </InfoGrid>
+        <FormGrid>
+          <FormRow>
+            <FormLabel>카탈로그 ID</FormLabel>
+            <FormField>
+              <UnitInputWrap>
+                <Input readOnly value={catalog?.external_catalog_id || "-"} />
+              </UnitInputWrap>
+            </FormField>
+          </FormRow>
+          <FormRow>
+            <FormLabel>카탈로그명</FormLabel>
+            <FormField>
+              <Input readOnly value={catalog?.catalog_name || "-"} />
+            </FormField>
+          </FormRow>
+          <FormRow>
+            <FormLabel>최저가</FormLabel>
+            <FormField>
+              <UnitInputWrap>
+                <Input
+                  readOnly
+                  value={
+                    catalog?.market_lowest_price != null
+                      ? formatNumber(catalog.market_lowest_price)
+                      : "-"
+                  }
+                />
+                <UnitText>원</UnitText>
+              </UnitInputWrap>
+            </FormField>
+          </FormRow>
+        </FormGrid>
       </SectionCard>
 
       <SectionCard>
@@ -179,23 +176,23 @@ export default function AIHistory() {
                   <th>최저가대비</th>
                   <th>최저가제한</th>
                   <th>최고가제한</th>
-                  <th>희망조정가 제한</th>
+                  <th>회당조정가 제한</th>
                   <th>재고</th>
                 </tr>
               </thead>
-
               <tbody>
                 {pagedRows.map((item, index) => {
                   const priceRate = formatRate(item.market_gap_rate);
                   const isNegative = Number(item.market_gap_rate ?? 0) < 0;
-
                   return (
                     <tr key={`${item.logged_at}-${index}`}>
                       <td>{formatDateTime(item.logged_at)}</td>
                       <td>{formatWon(item.applied_sale_price)}</td>
                       <td>{formatQty(item.sales_qty)}</td>
                       <td>{formatPerHour(item.sales_per_hour)}</td>
-                      <LowestTextCell $isLowest={item.is_lowest_price ? "Y" : "N"}>
+                      <LowestTextCell
+                        $isLowest={item.is_lowest_price ? "Y" : "N"}
+                      >
                         {item.is_lowest_price ? "Y" : "N"}
                       </LowestTextCell>
                       <td>{formatWon(item.market_lowest_price)}</td>
@@ -206,18 +203,15 @@ export default function AIHistory() {
                               ? "-"
                               : formatWon(item.market_gap_amount)}
                           </div>
-                          {priceRate ? (
-                            <RateBadge $negative={isNegative}>
-                              {priceRate}
-                            </RateBadge>
-                          ) : (
-                            <RateBadge $negative={false}>-</RateBadge>
-                          )}
+                          <RateBadge
+                            value={priceRate || "-"}
+                            isGood={isNegative}
+                          />
                         </GapWrap>
                       </td>
                       <td>{formatWon(item.min_price_limit)}</td>
                       <td>{formatWon(item.max_price_limit)}</td>
-                      <td>-</td>
+                      <td>{formatWon(item.price_per_time)}</td>
                       <td>{formatQty(item.remaining_stock)}</td>
                     </tr>
                   );
@@ -243,29 +237,23 @@ export default function AIHistory() {
             </PageSizeSelect>
             <span>of {totalCount}</span>
           </PageSizeBox>
-
           <Pagination>
             <PageButton
-              type="button"
               onClick={() => handlePageChange(page - 1)}
               disabled={page === 1}
             >
               <ChevronLeft size={14} />
             </PageButton>
-
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
               <PageButton
                 key={num}
-                type="button"
                 $active={page === num}
                 onClick={() => handlePageChange(num)}
               >
                 {num}
               </PageButton>
             ))}
-
             <PageButton
-              type="button"
               onClick={() => handlePageChange(page + 1)}
               disabled={page === totalPages}
             >
@@ -274,421 +262,235 @@ export default function AIHistory() {
           </Pagination>
         </PaginationRow>
       </SectionCard>
-    </>
+    </ResultArea>
   );
 
   return (
-    <PageSection>
-      <PageInner>
-        <TopBar>
-          <PageTitle>AI 가격변경 이력 조회</PageTitle>
-        </TopBar>
+    <PageWrap>
+      <Title>AI 가격변경 이력 조회</Title>
 
-        <FilterBar>
-          <DateInputWrap>
-            <FilterInput
-              type="date"
-              name="startDate"
-              value={filters.startDate}
-              onChange={handleChange}
-            />
-            <CalendarIcon>
-              <CalendarDays size={16} />
-            </CalendarIcon>
-          </DateInputWrap>
+      <FilterBarCard>
+        <SearchDate
+          startDate={filters.startDate}
+          onStartDateChange={handleStartDateChange}
+          endDate={filters.endDate}
+          onEndDateChange={handleEndDateChange}
+        />
+        <SearchBar
+          value={filters.keyword}
+          onChange={handleKeywordChange}
+          placeholder="상품명, 상품코드로 검색"
+        />
+        <SearchButton type="button" onClick={handleSearch} disabled={isLoading}>
+          조회
+        </SearchButton>
+      </FilterBarCard>
 
-          <Tilde>~</Tilde>
-
-          <DateInputWrap>
-            <FilterInput
-              type="date"
-              name="endDate"
-              value={filters.endDate}
-              onChange={handleChange}
-            />
-            <CalendarIcon>
-              <CalendarDays size={16} />
-            </CalendarIcon>
-          </DateInputWrap>
-
-          <KeywordWrap>
-            <KeywordInput
-              type="text"
-              name="keyword"
-              placeholder="상품명, 상품코드로 검색"
-              value={filters.keyword}
-              onChange={handleChange}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSearch();
-              }}
-            />
-            <KeywordIconButton type="button" onClick={handleSearch}>
-              <Search size={16} />
-            </KeywordIconButton>
-          </KeywordWrap>
-        </FilterBar>
-
-        {searched && result && rows.length > 0 ? renderResult() : renderEmptyState()}
-      </PageInner>
-    </PageSection>
+      {searched && result && rows.length > 0
+        ? renderResult()
+        : renderEmptyState()}
+    </PageWrap>
   );
 }
 
 function formatNumber(value) {
-  const num = Number(value ?? 0);
-  if (Number.isNaN(num)) return "0";
-  return num.toLocaleString("ko-KR");
+  return Number(value ?? 0).toLocaleString();
 }
-
 function formatWon(value) {
-  if (value === null || value === undefined) return "-";
-  return `${formatNumber(value)}원`;
+  return value == null ? "-" : `${formatNumber(value)}원`;
 }
-
 function formatQty(value) {
-  if (value === null || value === undefined) return "-";
-  return `${formatNumber(value)}개`;
+  return value == null ? "-" : `${formatNumber(value)}개`;
 }
-
 function formatPerHour(value) {
-  if (value === null || value === undefined) return "-";
-  const num = Number(value);
-  if (Number.isNaN(num)) return "-";
-  return `${num.toLocaleString("ko-KR")}개`;
+  return value == null ? "-" : `${Number(value).toLocaleString()}개`;
 }
-
 function formatRate(value) {
-  if (value === null || value === undefined) return null;
+  if (value == null) return null;
   const num = Number(value);
-  if (Number.isNaN(num)) return null;
   return `${num > 0 ? "+" : ""}${num}%`;
 }
-
 function formatDateTime(value) {
   if (!value) return "-";
-
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-
   const yy = String(date.getFullYear()).slice(-2);
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   const dd = String(date.getDate()).padStart(2, "0");
   const hh = String(date.getHours()).padStart(2, "0");
   const mi = String(date.getMinutes()).padStart(2, "0");
-
   return `${yy}/${mm}/${dd} ${hh}:${mi}`;
 }
 
-const PageSection = styled.main`
-  min-height: 100vh;
-  background: #f5f6f8;
-  padding: 28px 26px 40px;
-`;
-
-const PageInner = styled.div`
-  width: 100%;
-  max-width: 1260px;
-  margin: 0 auto;
-`;
-
-const TopBar = styled.div`
+const PageWrap = styled.div`
+  padding: 25px;
+  background: var(--background);
+  min-height: 100%;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 28px;
+  flex-direction: column;
+  gap: 25px;
 `;
 
-const PageTitle = styled.h1`
+const Title = styled.h2`
   margin: 0;
-  font-size: 24px;
-  font-weight: 800;
-  color: #1f2430;
+  font-size: var(--title);
+  font-weight: 700;
 `;
 
-const TopActions = styled.div`
+const FilterBarCard = styled.div`
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 10px;
 `;
 
-const BellWrap = styled.div`
-  position: relative;
-  color: #6b7280;
+const SearchButton = styled.button`
+  height: 38px;
+  padding: 0 20px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  &:disabled {
+    opacity: 0.6;
+  }
+  &:hover:enabled {
+    filter: brightness(1.1);
+  }
+`;
+
+const ResultArea = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 15px;
 `;
 
-const Badge = styled.span`
-  position: absolute;
-  top: -7px;
-  right: -8px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 999px;
-  background: #ef4444;
-  color: #fff;
-  font-size: 11px;
+const SectionCard = styled.section`
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  border-radius: 16px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+`;
+
+const SectionTitle = styled.h3`
+  color: var(--font);
+  font-size: 17px;
+  font-weight: 600;
+`;
+
+const FormGrid = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const FormRow = styled.div`
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+`;
+
+const FormLabel = styled.label`
+  color: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+`;
+
+const FormField = styled.div`
+  min-width: 0;
+`;
+
+const CodeLinkInput = styled(Link)`
+  max-width: 220px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  color: var(--font);
+  font-size: 13px;
   font-weight: 700;
   display: flex;
   align-items: center;
-  justify-content: center;
+  text-decoration: none;
 `;
 
-const ProfileCircle = styled.div`
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  background: #8b7cf6;
-  position: relative;
-
-  &::after {
-    content: "";
-    position: absolute;
-    right: 1px;
-    bottom: 1px;
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    background: #22c55e;
-    border: 2px solid #f5f6f8;
-  }
-`;
-
-const FilterBar = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 28px;
-`;
-
-const sharedInputStyle = css`
-  height: 42px;
-  border: 1px solid #eceef3;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #374151;
-  font-size: 14px;
-  outline: none;
-
-  &:focus {
-    border-color: #d5d9e2;
-  }
-`;
-
-const DateInputWrap = styled.div`
-  position: relative;
-  width: 134px;
-`;
-
-const FilterInput = styled.input`
-  ${sharedInputStyle};
+const Input = styled.input`
   width: 100%;
-  padding: 0 38px 0 14px;
-
-  &::-webkit-calendar-picker-indicator {
-    opacity: 0;
-    cursor: pointer;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  color: var(--font);
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+  &:focus {
+    border-color: var(--focus-border);
   }
 `;
 
-const CalendarIcon = styled.div`
+const UnitInputWrap = styled.div`
+  position: relative;
+  max-width: 220px;
+`;
+
+const UnitText = styled.span`
   position: absolute;
   top: 50%;
   right: 12px;
   transform: translateY(-50%);
-  color: #9aa3b2;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const Tilde = styled.span`
-  color: #9aa3b2;
-  font-size: 14px;
-`;
-
-const KeywordWrap = styled.div`
-  display: flex;
-  align-items: center;
-  width: 230px;
-  height: 42px;
-  border: 1px solid #eceef3;
-  border-radius: 8px;
-  background: #ffffff;
-  overflow: hidden;
-`;
-
-const KeywordInput = styled.input`
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  border: none;
-  outline: none;
-  padding: 0 14px;
-  color: #374151;
-  font-size: 14px;
-
-  &::placeholder {
-    color: #9aa3b2;
-  }
-`;
-
-const KeywordIconButton = styled.button`
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-left: 1px solid #f0f2f6;
-  background: #ffffff;
-  color: #9aa3b2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-`;
-
-const EmptyStateWrap = styled.div`
-  min-height: 620px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #9aa3b2;
-`;
-
-const EmptyIconWrap = styled.div`
-  margin-bottom: 16px;
-`;
-
-const EmptyText = styled.p`
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-`;
-
-const SectionCard = styled.section`
-  background: #ffffff;
-  border: 1px solid #eef0f4;
-  border-radius: 16px;
-  padding: 18px 18px 16px;
-  margin-bottom: 14px;
-`;
-
-const SectionTitle = styled.h2`
-  margin: 0 0 18px;
-  font-size: 18px;
-  font-weight: 800;
-  color: #1f2430;
-`;
-
-const InfoGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-const InfoRow = styled.div`
-  display: grid;
-  grid-template-columns: 88px 1fr;
-  align-items: center;
-  gap: 14px;
-`;
-
-const InfoLabel = styled.div`
-  color: #4b5563;
-  font-size: 14px;
-  font-weight: 600;
-`;
-
-const InfoValueBox = styled.div`
-  height: 34px;
-  width: ${({ $compact }) => ($compact ? "174px" : "100%")};
-  border: 1px solid #eceef3;
-  border-radius: 6px;
-  background: #ffffff;
-  padding: 0 14px;
-  display: flex;
-  align-items: center;
-  color: #4b5563;
-  font-size: 14px;
-`;
-
-const linkBase = css`
-  color: #111827;
-  text-decoration: none;
-  font-weight: 600;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const InternalLink = styled(Link)`
-  ${linkBase}
-`;
-
-const ExternalAnchor = styled.a`
-  ${linkBase}
+  color: var(--placeholder);
+  font-size: 12px;
+  font-weight: 500;
 `;
 
 const TableCard = styled.div`
-  border: 1px solid #eef0f4;
+  border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
-  background: #ffffff;
 `;
 
 const TableScroll = styled.div`
   width: 100%;
   overflow-x: auto;
-
-  &::-webkit-scrollbar {
-    height: 10px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #cfd5df;
-    border-radius: 999px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #f1f3f7;
-  }
 `;
 
 const StyledTable = styled.table`
   width: 100%;
-  min-width: 1280px;
+  min-width: 1200px;
   border-collapse: collapse;
-
   th,
   td {
     padding: 14px 12px;
     text-align: center;
-    border-bottom: 1px solid #eef1f5;
-    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
     white-space: nowrap;
-    color: #2a3240;
+    color: var(--font);
   }
-
   th {
     background: #f9fafc;
     font-weight: 700;
-    color: #8b93a1;
-  }
-
-  tbody tr:last-child td {
-    border-bottom: none;
+    color: var(--placeholder);
   }
 `;
 
 const LowestTextCell = styled.td`
   font-weight: 700 !important;
-  color: ${({ $isLowest }) => ($isLowest === "Y" ? "#18b663" : "#ef5350")} !important;
+  color: ${({ $isLowest }) =>
+    $isLowest === "Y" ? "var(--green)" : "var(--red)"} !important;
 `;
 
 const GapWrap = styled.div`
@@ -697,70 +499,65 @@ const GapWrap = styled.div`
   gap: 8px;
 `;
 
-const RateBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 54px;
-  height: 24px;
-  padding: 0 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  background: ${({ $negative }) => ($negative ? "#dcf7e8" : "#ffe7e7")};
-  color: ${({ $negative }) => ($negative ? "#18b663" : "#ef5350")};
-`;
-
 const PaginationRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-top: 16px;
-
-  @media (max-width: 900px) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  margin-top: 10px;
 `;
 
 const PageSizeBox = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #8b93a1;
+  color: var(--placeholder);
   font-size: 13px;
 `;
 
 const PageSizeSelect = styled.select`
-  ${sharedInputStyle};
-  height: 34px;
-  min-width: 58px;
-  padding: 0 10px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  outline: none;
+  padding: 0 5px;
 `;
 
 const Pagination = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 `;
 
 const PageButton = styled.button`
-  min-width: 30px;
-  height: 30px;
+  min-width: 32px;
+  height: 32px;
   padding: 0 8px;
-  border: 1px solid ${({ $active }) => ($active ? "#111827" : "#e5e9f0")};
+  border: 1px solid
+    ${({ $active }) => ($active ? "var(--blue)" : "var(--border)")};
   border-radius: 8px;
-  background: ${({ $active }) => ($active ? "#111827" : "#ffffff")};
-  color: ${({ $active }) => ($active ? "#ffffff" : "#4b5563")};
+  background: ${({ $active }) => ($active ? "var(--blue)" : "white")};
+  color: ${({ $active }) => ($active ? "white" : "var(--font)")};
   font-size: 13px;
-  display: inline-flex;
+  font-weight: 600;
+  cursor: pointer;
+  &:disabled {
+    opacity: 0.4;
+  }
+`;
+
+const EmptyStateWrap = styled.div`
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  color: var(--placeholder);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+`;
 
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
+const EmptyText = styled.p`
+  margin-top: 15px;
+  font-size: 16px;
+  font-weight: 600;
 `;

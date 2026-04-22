@@ -10,6 +10,7 @@ import {
   getAdminMatchingSummary,
   patchAdminPriceSearchRow,
 } from "../../../api/adminPrice.js";
+import RateBadge from "../../../components/RateBadge.jsx";
 
 const STATUS_PALETTE = {
   success: { color: "#1EB564", bg: "#EEFBF4" }, // 판매중
@@ -401,9 +402,10 @@ export default function PriceSearch() {
       render: (value, row) => (
         <PriceGapWrap>
           <div>{value}</div>
-          <RateBadge $negative={String(row.priceRate).startsWith("-")}>
-            {row.priceRate}
-          </RateBadge>
+          <RateBadge
+            value={row.priceRate}
+            isGood={String(row.priceRate).startsWith("-")}
+          />
         </PriceGapWrap>
       ),
     },
@@ -650,20 +652,6 @@ const PriceGapWrap = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-`;
-
-const RateBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 54px;
-  height: 24px;
-  padding: 0 8px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  background: ${({ $negative }) => ($negative ? "#dcf7e8" : "#ffe7e7")};
-  color: ${({ $negative }) => ($negative ? "var(--green)" : "var(--red)")};
 `;
 
 const CodeLink = styled.button`

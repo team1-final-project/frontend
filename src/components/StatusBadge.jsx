@@ -3,25 +3,22 @@ import { createPortal } from "react-dom";
 import styled from "styled-components";
 import { ChevronDown, Check } from "lucide-react";
 
-/* 1. 하린님이 지정하신 상태별 색상 팔레트 고정 */
 const STATUS_PALETTE = {
   판매종료: { color: "#33189D", bg: "#EFECFA", variant: "purple" },
-  판매중지: { color: "#FFC600", bg: "#FFF6D6", variant: "warning" },
+  판매중지: { color: "#b99306", bg: "#FFF6D6", variant: "warning" },
   판매중: { color: "#1EB564", bg: "#EEFBF4", variant: "success" },
-  품절: { color: "#BD00FF", bg: "#F9E7FF", variant: "danger" },
+  품절: { color: "#EA5455 ", bg: "#fceeef", variant: "danger" },
   판매예정: { color: "#0FB7FF", bg: "#F0FAFF", variant: "info" },
 };
 
-/* 영문 variant와 색상 매핑 (fallback용) */
 const VARIANT_COLOR_MAP = {
   success: { color: "#1EB564", bg: "#EEFBF4" },
   info: { color: "#0FB7FF", bg: "#F0FAFF" },
-  warning: { color: "#FFC600", bg: "#FFF6D6" },
-  danger: { color: "#BD00FF", bg: "#F9E7FF" },
+  warning: { color: "#b99306", bg: "#FFF6D6" },
+  danger: { color: "#EA5455 ", bg: "#fceeef" },
   purple: { color: "#33189D", bg: "#EFECFA" },
 };
 
-/* 2. 메뉴 위치 계산을 위한 상수 (기존 코드 유지) */
 const MENU_WIDTH = 180;
 const MENU_GAP = 6;
 const VIEWPORT_GAP = 8;
@@ -49,13 +46,11 @@ export default function StatusBadge({
 
   const displayValue = value ?? children ?? "";
 
-  /* [LOGIC] 현재 텍스트(한글)에 맞는 색상 추출, 없으면 variant 기준 추출 */
   const currentStyle =
     STATUS_PALETTE[displayValue] ||
     VARIANT_COLOR_MAP[variant] ||
     VARIANT_COLOR_MAP.warning;
 
-  /* 3. 메뉴 위치 자동 계산 함수 (기존 로직 유지) */
   const updateMenuPosition = () => {
     if (!triggerRef.current) return;
 
@@ -116,7 +111,6 @@ export default function StatusBadge({
     setOpen((prev) => !prev);
   };
 
-  /* 공용 스타일 헬퍼 */
   const badgeStyle = `
     background: ${currentStyle.bg};
     color: ${currentStyle.color};
@@ -189,8 +183,6 @@ export default function StatusBadge({
   );
 }
 
-/* --- Styled Components --- */
-
 const Badge = styled.span`
   min-width: ${({ $width }) => $width};
   height: 28px;
@@ -252,10 +244,10 @@ const PortalMenu = styled.div`
   position: fixed;
   z-index: 9999;
   padding: 6px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 12px;
   background: #ffffff;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+  box-shadow: var(--shadow);
 `;
 
 const MenuItem = styled.button`
@@ -270,10 +262,6 @@ const MenuItem = styled.button`
   display: flex;
   align-items: center;
   justify-content: flex-start;
-
-  &:hover {
-    background: #f8fafc;
-  }
 `;
 
 const ItemLeft = styled.span`
@@ -292,7 +280,7 @@ const ColorDot = styled.span`
 const ItemLabel = styled.span`
   font-size: 12px;
   font-weight: 600;
-  color: #374151;
+  color: var(--placeholder);
 `;
 
 const SelectedIcon = styled.span`
@@ -300,6 +288,6 @@ const SelectedIcon = styled.span`
   top: 50%;
   right: 10px;
   transform: translateY(-50%);
-  color: #111827;
+  color: var(--font);
   display: flex;
 `;

@@ -36,7 +36,7 @@ const formatMovementByType = (value, changeType) => {
   }
 
   return `${Number(value || 0) > 0 ? "+" : ""}${Number(
-    value || 0
+    value || 0,
   ).toLocaleString()}개`;
 };
 
@@ -125,7 +125,7 @@ const buildWeeklyTrend = (rows, targetType, weekMeta) => {
         if (Number.isNaN(occurredAt.getTime())) return false;
         return occurredAt >= start && occurredAt < end;
       })
-      .reduce((acc, row) => acc + Math.abs(Number(row.movementQty || 0)), 0)
+      .reduce((acc, row) => acc + Math.abs(Number(row.movementQty || 0)), 0),
   );
 };
 
@@ -175,7 +175,7 @@ export default function InventoryHistory() {
   const [trendRows, setTrendRows] = useState([]);
   const [summaryData, setSummaryData] = useState(defaultSummaryData);
   const [currentWeekMeta, setCurrentWeekMeta] = useState(() =>
-    buildCurrentWeekMeta()
+    buildCurrentWeekMeta(),
   );
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -193,8 +193,8 @@ export default function InventoryHistory() {
     setErrorMessage("");
 
     try {
-      const [trendResponse, historyResponse, summaryResponse] = await Promise.all(
-        [
+      const [trendResponse, historyResponse, summaryResponse] =
+        await Promise.all([
           getAdminInventoryHistoryList(),
           getAdminInventoryHistoryList({
             keyword: searchValue.trim() || undefined,
@@ -203,8 +203,7 @@ export default function InventoryHistory() {
             end_date: endDate || undefined,
           }),
           getAdminInventoryHistorySummary(),
-        ]
-      );
+        ]);
 
       const mappedTrendRows = mapHistoryRows(trendResponse?.items);
       const mappedRows = mapHistoryRows(historyResponse?.items);
@@ -259,27 +258,27 @@ export default function InventoryHistory() {
 
   const inboundTrend = useMemo(
     () => buildWeeklyTrend(trendRows, "INBOUND", currentWeekMeta),
-    [trendRows, currentWeekMeta]
+    [trendRows, currentWeekMeta],
   );
 
   const outboundTrend = useMemo(
     () => buildWeeklyTrend(trendRows, "ORDER_OUT", currentWeekMeta),
-    [trendRows, currentWeekMeta]
+    [trendRows, currentWeekMeta],
   );
 
   const chartScale = useMemo(
     () => getChartScale(inboundTrend, outboundTrend),
-    [inboundTrend, outboundTrend]
+    [inboundTrend, outboundTrend],
   );
 
   const inboundPoints = useMemo(
     () => buildChartPoints(inboundTrend, 260, 96, 10, chartScale),
-    [inboundTrend, chartScale]
+    [inboundTrend, chartScale],
   );
 
   const outboundPoints = useMemo(
     () => buildChartPoints(outboundTrend, 260, 96, 10, chartScale),
-    [outboundTrend, chartScale]
+    [outboundTrend, chartScale],
   );
 
   const tooltipData =
@@ -305,12 +304,12 @@ export default function InventoryHistory() {
 
   const isInboundNoChange = isNoHistoryChange(
     summaryData.inbound_sku_diff,
-    summaryData.inbound_qty_diff
+    summaryData.inbound_qty_diff,
   );
 
   const isOutboundNoChange = isNoHistoryChange(
     summaryData.outbound_sku_diff,
-    summaryData.outbound_qty_diff
+    summaryData.outbound_qty_diff,
   );
 
   const isInboundUp =
@@ -330,7 +329,7 @@ export default function InventoryHistory() {
     const sectionWidth = rect.width / weekLabels.length;
     const index = Math.min(
       weekLabels.length - 1,
-      Math.max(0, Math.floor(clampedX / sectionWidth))
+      Math.max(0, Math.floor(clampedX / sectionWidth)),
     );
 
     setHoveredIndex(index);
@@ -427,9 +426,7 @@ export default function InventoryHistory() {
 
   return (
     <PageWrap>
-      <HeaderRow>
-        <Title>입출고 이력 조회</Title>
-      </HeaderRow>
+      <Title>입출고 이력 조회</Title>
 
       <SummaryGrid>
         <StatCard>
@@ -447,7 +444,7 @@ export default function InventoryHistory() {
             <span>
               {formatHistoryChange(
                 summaryData.inbound_sku_diff,
-                summaryData.inbound_qty_diff
+                summaryData.inbound_qty_diff,
               )}
             </span>
             <ChangeMuted>vs Yesterday</ChangeMuted>
@@ -469,7 +466,7 @@ export default function InventoryHistory() {
             <span>
               {formatHistoryChange(
                 summaryData.outbound_sku_diff,
-                summaryData.outbound_qty_diff
+                summaryData.outbound_qty_diff,
               )}
             </span>
             <ChangeMuted>vs Yesterday</ChangeMuted>
@@ -546,7 +543,7 @@ export default function InventoryHistory() {
                     260,
                     96,
                     10,
-                    chartScale
+                    chartScale,
                   )}
                 />
                 <polyline
@@ -560,7 +557,7 @@ export default function InventoryHistory() {
                     260,
                     96,
                     10,
-                    chartScale
+                    chartScale,
                   )}
                 />
 
@@ -658,29 +655,23 @@ export default function InventoryHistory() {
 }
 
 const PageWrap = styled.div`
-  padding: 24px;
-  background: #f8fafc;
+  padding: 25px;
+  background: var(--background);
   min-height: 100%;
-`;
-
-const HeaderRow = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
+  flex-direction: column;
+  gap: 25px;
 `;
 
 const Title = styled.h2`
   margin: 0;
-  color: #111827;
-  font-size: 22px;
-  font-weight: 800;
+  font-size: var(--title);
+  font-weight: 700;
 `;
-
 const SummaryGrid = styled.div`
   margin-bottom: 18px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1.3fr;
+  grid-template-columns: 1fr 1fr 1.5fr;
   gap: 16px;
 
   @media (max-width: 1100px) {
@@ -689,17 +680,17 @@ const SummaryGrid = styled.div`
 `;
 
 const StatCard = styled.div`
-  background: #ffffff;
-  border: 1px solid #edf0f4;
+  background: white;
+  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 20px 22px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--shadow);
 `;
 
 const CardTitle = styled.p`
   margin: 0 0 14px;
-  color: #111827;
-  font-size: 16px;
+  color: var(--font);
+  font-size: 15px;
   font-weight: 700;
 `;
 
@@ -710,26 +701,26 @@ const BigLine = styled.div`
 `;
 
 const BigNumber = styled.span`
-  color: #111827;
-  font-size: 34px;
+  color: var(--font);
+  font-size: 28px;
   font-weight: 800;
   line-height: 1;
 `;
 
 const Unit = styled.span`
-  color: #111827;
-  font-size: 16px;
+  color: var(--font);
+  font-size: 18px;
   font-weight: 700;
 `;
 
 const Slash = styled.span`
-  color: #d1d5db;
+  color: var(--placeholder);
   font-size: 18px;
   font-weight: 700;
 `;
 
 const SubNumber = styled.span`
-  color: #4b5563;
+  color: var(--font);
   font-size: 16px;
   font-weight: 700;
 `;
@@ -740,21 +731,21 @@ const ChangeRow = styled.div`
   align-items: center;
   gap: 4px;
   color: ${({ $neutral, $up }) =>
-    $neutral ? "#9ca3af" : $up ? "#16a34a" : "#ef4444"};
-  font-size: 14px;
+    $neutral ? "var(--placeholder);" : $up ? "var(--green);" : "var(--red);"};
+  font-size: 12px;
   font-weight: 700;
 `;
 
 const ChangeArrow = styled.span`
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1;
 `;
 
 const ChangeMuted = styled.span`
-  margin-left: 4px;
-  color: #9ca3af;
-  font-size: 13px;
-  font-weight: 600;
+  margin-left: 2px;
+  color: var(--placeholder);
+  font-size: 12px;
+  font-weight: 500;
 `;
 
 const TrendCard = styled(StatCard)`
@@ -763,7 +754,7 @@ const TrendCard = styled(StatCard)`
 
 const TrendHeader = styled.div`
   margin-bottom: 14px;
-  color: #111827;
+  color: var(--font);
   font-size: 16px;
   font-weight: 700;
 `;

@@ -18,6 +18,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import RateBadge from "../../../components/RateBadge";
 
 import { getAdminSalesStat } from "../../../api/stats";
 
@@ -140,13 +141,18 @@ export default function SalesStat() {
           if (!trendCategory || !categoryOptions.includes(trendCategory)) {
             setTrendCategory(categoryOptions[0]);
           }
-          if (!productMixCategory || !categoryOptions.includes(productMixCategory)) {
+          if (
+            !productMixCategory ||
+            !categoryOptions.includes(productMixCategory)
+          ) {
             setProductMixCategory(categoryOptions[0]);
           }
         }
       } catch (error) {
         console.error(error);
-        alert(error?.response?.data?.detail || "판매 현황 조회에 실패했습니다.");
+        alert(
+          error?.response?.data?.detail || "판매 현황 조회에 실패했습니다.",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -247,24 +253,84 @@ export default function SalesStat() {
     if (rankingType === "sales") {
       return [
         ...common,
-        { key: "sales", label: "판매량", width: "100px", formatter: formatCount },
-        { key: "avgSales", label: "일평균판매량", width: "120px", formatter: formatCount },
-        { key: "compareRate", label: rankingCompareLabel, width: "110px", isDelta: true },
-        { key: "avgPrice", label: "평균판매가", width: "110px", formatter: formatCurrency },
-        { key: "avgProfit", label: "평균이익", width: "110px", formatter: formatCurrency },
-        { key: "avgMargin", label: "평균이익률", width: "100px", formatter: (v) => `${v}%` },
+        {
+          key: "sales",
+          label: "판매량",
+          width: "100px",
+          formatter: formatCount,
+        },
+        {
+          key: "avgSales",
+          label: "일평균판매량",
+          width: "120px",
+          formatter: formatCount,
+        },
+        {
+          key: "compareRate",
+          label: rankingCompareLabel,
+          width: "110px",
+          isDelta: true,
+        },
+        {
+          key: "avgPrice",
+          label: "평균판매가",
+          width: "110px",
+          formatter: formatCurrency,
+        },
+        {
+          key: "avgProfit",
+          label: "평균이익",
+          width: "110px",
+          formatter: formatCurrency,
+        },
+        {
+          key: "avgMargin",
+          label: "평균이익률",
+          width: "100px",
+          formatter: (v) => `${v}%`,
+        },
       ];
     }
 
     if (rankingType === "revenue") {
       return [
         ...common,
-        { key: "revenue", label: "매출", width: "110px", formatter: formatCurrency },
-        { key: "avgRevenue", label: "일평균매출", width: "120px", formatter: formatCurrency },
-        { key: "compareRate", label: rankingCompareLabel, width: "110px", isDelta: true },
-        { key: "avgPrice", label: "평균판매가", width: "110px", formatter: formatCurrency },
-        { key: "avgProfit", label: "평균이익", width: "110px", formatter: formatCurrency },
-        { key: "avgMargin", label: "평균이익률", width: "100px", formatter: (v) => `${v}%` },
+        {
+          key: "revenue",
+          label: "매출",
+          width: "110px",
+          formatter: formatCurrency,
+        },
+        {
+          key: "avgRevenue",
+          label: "일평균매출",
+          width: "120px",
+          formatter: formatCurrency,
+        },
+        {
+          key: "compareRate",
+          label: rankingCompareLabel,
+          width: "110px",
+          isDelta: true,
+        },
+        {
+          key: "avgPrice",
+          label: "평균판매가",
+          width: "110px",
+          formatter: formatCurrency,
+        },
+        {
+          key: "avgProfit",
+          label: "평균이익",
+          width: "110px",
+          formatter: formatCurrency,
+        },
+        {
+          key: "avgMargin",
+          label: "평균이익률",
+          width: "100px",
+          formatter: (v) => `${v}%`,
+        },
       ];
     }
 
@@ -283,18 +349,53 @@ export default function SalesStat() {
           width: "120px",
           formatter: formatCurrency,
         },
-        { key: "compareRate", label: rankingCompareLabel, width: "110px", isDelta: true },
-        { key: "avgPrice", label: "평균판매가", width: "110px", formatter: formatCurrency },
-        { key: "avgProfit", label: "평균이익", width: "110px", formatter: formatCurrency },
-        { key: "avgMargin", label: "평균이익률", width: "100px", formatter: (v) => `${v}%` },
+        {
+          key: "compareRate",
+          label: rankingCompareLabel,
+          width: "110px",
+          isDelta: true,
+        },
+        {
+          key: "avgPrice",
+          label: "평균판매가",
+          width: "110px",
+          formatter: formatCurrency,
+        },
+        {
+          key: "avgProfit",
+          label: "평균이익",
+          width: "110px",
+          formatter: formatCurrency,
+        },
+        {
+          key: "avgMargin",
+          label: "평균이익률",
+          width: "100px",
+          formatter: (v) => `${v}%`,
+        },
       ];
     }
 
     return [
       ...common,
-      { key: "originalPrice", label: "기존판매가", width: "110px", formatter: formatCurrency },
-      { key: "changedPrice", label: "변경판매가", width: "110px", formatter: formatCurrency },
-      { key: "dropAmount", label: "하락폭", width: "90px", formatter: formatCurrency },
+      {
+        key: "originalPrice",
+        label: "기존판매가",
+        width: "110px",
+        formatter: formatCurrency,
+      },
+      {
+        key: "changedPrice",
+        label: "변경판매가",
+        width: "110px",
+        formatter: formatCurrency,
+      },
+      {
+        key: "dropAmount",
+        label: "하락폭",
+        width: "90px",
+        formatter: formatCurrency,
+      },
     ];
   }, [rankingType, rankingCompareLabel]);
 
@@ -360,7 +461,9 @@ export default function SalesStat() {
         </SelectWrap>
       </GlobalFilterRow>
 
-      {isLoading ? <LoadingText>데이터를 불러오는 중입니다.</LoadingText> : null}
+      {isLoading ? (
+        <LoadingText>데이터를 불러오는 중입니다.</LoadingText>
+      ) : null}
 
       <SummaryGrid>
         {summary.cards.map((card) => (
@@ -402,7 +505,10 @@ export default function SalesStat() {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={categoryTrendData}>
                 <CartesianGrid stroke="#eef2f7" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#9aa3b2" }} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 12, fill: "#9aa3b2" }}
+                />
                 <YAxis
                   tick={{ fontSize: 12, fill: "#9aa3b2" }}
                   tickFormatter={formatAxisToMan}
@@ -642,7 +748,10 @@ export default function SalesStat() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={productMixData}>
                 <CartesianGrid stroke="#eef2f7" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#9aa3b2" }} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 12, fill: "#9aa3b2" }}
+                />
                 <YAxis
                   tick={{ fontSize: 12, fill: "#9aa3b2" }}
                   tickFormatter={formatAxisToMan}
@@ -663,7 +772,12 @@ export default function SalesStat() {
                   fill="#f59e0b"
                   radius={[4, 4, 0, 0]}
                 />
-                <Bar dataKey="profit" stackId="a" name="공헌이익" fill="#f8b4b4" />
+                <Bar
+                  dataKey="profit"
+                  stackId="a"
+                  name="공헌이익"
+                  fill="#f8b4b4"
+                />
                 <Bar dataKey="sales" stackId="a" name="판매량" fill="#2563eb" />
               </BarChart>
             </ResponsiveContainer>
@@ -677,7 +791,10 @@ export default function SalesStat() {
 
           <PanelHeaderFilters>
             <SelectWrap>
-              <Select value={rankingType} onChange={(e) => setRankingType(e.target.value)}>
+              <Select
+                value={rankingType}
+                onChange={(e) => setRankingType(e.target.value)}
+              >
                 {RANKING_TYPE_OPTIONS.map((item) => (
                   <option key={item.value} value={item.value}>
                     {item.label}
@@ -749,8 +866,10 @@ export default function SalesStat() {
                 rankingRows.map((row) => (
                   <tr key={row.product_code}>
                     {rankingColumns.map((column) => {
-                      const snakeKey = column.key
-                        .replace(/[A-Z]/g, (match) => `_${match.toLowerCase()}`);
+                      const snakeKey = column.key.replace(
+                        /[A-Z]/g,
+                        (match) => `_${match.toLowerCase()}`,
+                      );
                       const value = row[snakeKey];
 
                       if (column.isLink) {
@@ -758,7 +877,9 @@ export default function SalesStat() {
                           <td key={column.key}>
                             <CodeButton
                               type="button"
-                              onClick={() => handleProductCodeClick(row.product_code)}
+                              onClick={() =>
+                                handleProductCodeClick(row.product_code)
+                              }
                             >
                               {value}
                             </CodeButton>
@@ -1078,7 +1199,8 @@ const InnerTabButton = styled.button`
   min-width: 62px;
   height: 32px;
   border: none;
-  border-bottom: 2px solid ${({ $active }) => ($active ? "#2563eb" : "transparent")};
+  border-bottom: 2px solid
+    ${({ $active }) => ($active ? "#2563eb" : "transparent")};
   background: transparent;
   color: ${({ $active }) => ($active ? "#2563eb" : "#4b5563")};
   font-size: 13px;

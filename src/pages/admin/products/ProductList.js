@@ -10,13 +10,16 @@ import { getCategories } from "../../../api/category";
 import {
   getAdminProductList,
   updateAdminProductAiPricing,
+  updateAdminProductSaleStatus,
 } from "../../../api/adminProduct";
 
-const statusStyleMap = {
-  판매중: { label: "판매중", variant: "success" },
-  일시품절: { label: "일시품절", variant: "warning" },
-  품절: { label: "품절", variant: "danger" },
-};
+const saleStatusOptions = [
+  { label: "판매중", value: "ON_SALE" },
+  { label: "판매예정", value: "READY" },
+  { label: "판매중지", value: "STOPPED" },
+  { label: "품절", value: "SOLD_OUT" },
+  { label: "판매종료", value: "ENDED" },
+];
 
 const salesStatusLabelMap = {
   ON_SALE: "판매중",
@@ -39,10 +42,6 @@ function formatNumber(value) {
   return `${Number(value).toLocaleString()}원`;
 }
 
-function toDateValue(dateTimeText) {
-  return dateTimeText?.split(" ")[0] ?? "";
-}
-
 export default function ProductList() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -57,11 +56,17 @@ export default function ProductList() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  const [reloadTick, setReloadTick] = useState(0);
+
   const [summary, setSummary] = useState({
     totalCount: 0,
     saleCount: 0,
     soldOutCount: 0,
     aiEnabledCount: 0,
+    totalDiff: 0,
+    saleDiff: 0,
+    soldOutDiff: 0,
+    aiEnabledDiff: 0,
   });
 
   const nav = useNavigate();
@@ -112,6 +117,7 @@ export default function ProductList() {
           aiPricingEnabled: item.ai_pricing_enabled,
           stock: item.stock_qty,
           saleStatus: mapSaleStatusLabel(item.sale_status),
+          saleStatusCode: item.sale_status,
           updatedAt: formatUpdatedAt(item.updated_at),
         }));
 
@@ -122,6 +128,10 @@ export default function ProductList() {
           saleCount: data.summary?.sale_count || 0,
           soldOutCount: data.summary?.sold_out_count || 0,
           aiEnabledCount: data.summary?.ai_enabled_count || 0,
+          totalDiff: data.summary?.total_diff || 0,
+          saleDiff: data.summary?.sale_diff || 0,
+          soldOutDiff: data.summary?.sold_out_diff || 0,
+          aiEnabledDiff: data.summary?.ai_enabled_diff || 0,
         });
 
         setTotal(data.total || 0);
@@ -137,7 +147,15 @@ export default function ProductList() {
     };
 
     fetchProducts();
-  }, [searchValue, categoryValue, startDate, endDate, page, pageSize]);
+  }, [
+    searchValue,
+    categoryValue,
+    startDate,
+    endDate,
+    page,
+    pageSize,
+    reloadTick,
+  ]);
 
   const handleToggleAiPricing = async (id, nextChecked) => {
     const previousProducts = products;
@@ -148,31 +166,42 @@ export default function ProductList() {
       ),
     );
 
-    setSummary((prev) => ({
-      ...prev,
-      aiEnabledCount: nextChecked
-        ? prev.aiEnabledCount + 1
-        : Math.max(0, prev.aiEnabledCount - 1),
-    }));
-
     try {
       await updateAdminProductAiPricing(id, nextChecked);
+      setReloadTick((prev) => prev + 1);
     } catch (error) {
       console.error(error);
-
       setProducts(previousProducts);
-
-      setSummary((prev) => ({
-        ...prev,
-        aiEnabledCount: nextChecked
-          ? Math.max(0, prev.aiEnabledCount - 1)
-          : prev.aiEnabledCount + 1,
-      }));
-
       alert(
         error?.response?.data?.detail ||
           "AI 가격변경 상태 변경에 실패했습니다.",
       );
+    }
+  };
+
+  const handleChangeSaleStatus = async (id, nextStatusCode) => {
+    const previousProducts = products;
+    const nextStatusLabel = mapSaleStatusLabel(nextStatusCode);
+
+    setProducts((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              saleStatusCode: nextStatusCode,
+              saleStatus: nextStatusLabel,
+            }
+          : item,
+      ),
+    );
+
+    try {
+      await updateAdminProductSaleStatus(id, nextStatusCode);
+      setReloadTick((prev) => prev + 1);
+    } catch (error) {
+      console.error(error);
+      setProducts(previousProducts);
+      alert(error?.response?.data?.detail || "판매상태 변경에 실패했습니다.");
     }
   };
 
@@ -239,7 +268,6 @@ export default function ProductList() {
         </CenterCell>
       ),
     },
-
     {
       key: "stock",
       title: "재고",
@@ -250,22 +278,19 @@ export default function ProductList() {
     {
       key: "saleStatus",
       title: "판매상태",
-      width: "110px",
+      width: "120px",
       sortable: false,
-      render: (value) => {
-        const status = statusStyleMap[value] || {
-          label: value,
-          variant: "info",
-        };
-
-        return (
+      render: (_, row) => (
+        <CenterCell>
           <StatusBadge
-            value={status.label}
-            variant={status.variant}
-            width="88px"
+            value={row.saleStatus}
+            mode="select"
+            options={saleStatusOptions}
+            onChange={(nextValue) => handleChangeSaleStatus(row.id, nextValue)}
+            width="96px"
           />
-        );
-      },
+        </CenterCell>
+      ),
     },
     {
       key: "updatedAt",
@@ -289,9 +314,10 @@ export default function ProductList() {
               <span>SKU</span>
             </>
           }
-          change="6 SKU"
-          up
+          change={`${Math.abs(summary.totalDiff)} SKU`}
+          up={summary.totalDiff >= 0}
         />
+
         <SummaryCard
           title="판매 중"
           value={
@@ -300,9 +326,10 @@ export default function ProductList() {
               <span>SKU</span>
             </>
           }
-          change="1 SKU"
-          up={false}
+          change={`${Math.abs(summary.saleDiff)} SKU`}
+          up={summary.saleDiff >= 0}
         />
+
         <SummaryCard
           title="품절"
           value={
@@ -311,9 +338,10 @@ export default function ProductList() {
               <span>SKU</span>
             </>
           }
-          change="1 SKU"
-          up
+          change={`${Math.abs(summary.soldOutDiff)} SKU`}
+          up={summary.soldOutDiff >= 0}
         />
+
         <SummaryCard
           title="AI 가격변경"
           value={
@@ -322,8 +350,8 @@ export default function ProductList() {
               <span>SKU</span>
             </>
           }
-          change="0 SKU"
-          up
+          change={`${Math.abs(summary.aiEnabledDiff)} SKU`}
+          up={summary.aiEnabledDiff >= 0}
         />
       </SummaryGrid>
 
@@ -394,6 +422,7 @@ const Title = styled.h2`
 
 const PrimaryButton = styled.button`
   height: 35px;
+  min-width: 100px;
   padding: 0 14px;
   border: none;
   border-radius: 10px;
@@ -401,8 +430,9 @@ const PrimaryButton = styled.button`
   color: white;
   font-size: 13px;
   font-weight: 600;
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   cursor: pointer;
 

@@ -1331,7 +1331,7 @@ const SubmitButton = styled.button`
   height: 40px;
   border: none;
   border-radius: 10px;
-  background: #2563eb;
+  background: var(--blue);
   color: #ffffff;
   font-size: 13px;
   font-weight: 700;

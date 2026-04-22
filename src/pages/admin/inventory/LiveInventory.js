@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import TableComponent from "../../../components/TableComponent";
+import StatusBadge from "../../../components/StatusBadge";
+import { Plus } from "lucide-react";
 import InboundRegisterModal from "./InboundRegisterModal";
 import {
   getAdminLiveInventoryList,
@@ -10,15 +12,18 @@ import {
   createAdminInbound,
 } from "../../../api/adminInventory";
 
-const inventoryStatusOptions = ["안전재고", "발주권고", "일시품절"];
-const salesStatusOptions = ["판매중", "판매중지", "품절", "판매종료", "판매예정"];
+const inventoryStatusOptions = [
+  { label: "안전재고", value: "안전재고" },
+  { label: "발주권고", value: "발주권고" },
+  { label: "일시품절", value: "일시품절" },
+];
 
-const salesStatusList = [
-  { value: "ON_SALE", label: "판매중" },
-  { value: "STOPPED", label: "판매중지" },
-  { value: "SOLD_OUT", label: "품절" },
-  { value: "ENDED", label: "판매종료" },
-  { value: "READY", label: "판매예정" },
+const salesStatusOptions = [
+  { label: "판매중", value: "판매중" },
+  { label: "판매중지", value: "판매중지" },
+  { label: "품절", value: "품절" },
+  { label: "판매종료", value: "판매종료" },
+  { label: "판매예정", value: "판매예정" },
 ];
 
 const saleStatusLabelMap = {
@@ -83,7 +88,7 @@ export default function LiveInventory() {
 
       const items = Array.isArray(listResponse)
         ? listResponse
-        : listResponse?.items ?? [];
+        : (listResponse?.items ?? []);
 
       setRows(items.map(mapInventoryRow));
       setSummaryData(summaryResponse || defaultSummaryData);
@@ -139,9 +144,7 @@ export default function LiveInventory() {
     } catch (error) {
       console.error(error);
       setRows(previousRows);
-      alert(
-        error?.response?.data?.detail || "판매상태 변경에 실패했습니다.",
-      );
+      alert(error?.response?.data?.detail || "판매상태 변경에 실패했습니다.");
     } finally {
       setPendingActionKey("");
     }
@@ -166,9 +169,7 @@ export default function LiveInventory() {
       await fetchRows();
     } catch (error) {
       console.error(error);
-      alert(
-        error?.response?.data?.detail || "입고 등록에 실패했습니다.",
-      );
+      alert(error?.response?.data?.detail || "입고 등록에 실패했습니다.");
     } finally {
       setIsInboundSubmitting(false);
     }
@@ -303,20 +304,21 @@ export default function LiveInventory() {
       sortable: false,
       render: (value, row) => (
         <CenterCell>
-          <SalesStatusSelect
-            $type={value}
-            value={row.salesStatusCode}
+          <StatusBadge
+            value={value}
+            mode="select"
+            width="96px"
             disabled={pendingActionKey === `${row.productCode}:status`}
-            onChange={(e) =>
-              handleSalesStatusChange(row.productCode, e.target.value)
+            options={salesStatusOptions.map((opt) => ({
+              ...opt,
+              value: Object.keys(saleStatusLabelMap).find(
+                (key) => saleStatusLabelMap[key] === opt.value,
+              ),
+            }))}
+            onChange={(nextValue) =>
+              handleSalesStatusChange(row.productCode, nextValue)
             }
-          >
-            {salesStatusList.map((status) => (
-              <option key={status.value} value={status.value}>
-                {status.label}
-              </option>
-            ))}
-          </SalesStatusSelect>
+          />
         </CenterCell>
       ),
     },
@@ -327,9 +329,7 @@ export default function LiveInventory() {
   return (
     <>
       <PageWrap>
-        <HeaderRow>
-          <Title>실시간 재고 현황</Title>
-        </HeaderRow>
+        <Title>실시간 재고 현황</Title>
 
         {isLoading && (
           <PageStatusText>실시간 재고 목록을 불러오는 중입니다.</PageStatusText>
@@ -360,14 +360,18 @@ export default function LiveInventory() {
                   <Dot $color="green" />
                   판매중
                 </SummaryLabel>
-                <SummaryValue>{summary.salesSummary["판매중"]} SKU</SummaryValue>
+                <SummaryValue>
+                  {summary.salesSummary["판매중"]} SKU
+                </SummaryValue>
               </SummaryRow>
               <SummaryRow>
                 <SummaryLabel>
                   <Dot $color="yellow" />
                   판매중지
                 </SummaryLabel>
-                <SummaryValue>{summary.salesSummary["판매중지"]} SKU</SummaryValue>
+                <SummaryValue>
+                  {summary.salesSummary["판매중지"]} SKU
+                </SummaryValue>
               </SummaryRow>
               <SummaryRow>
                 <SummaryLabel>
@@ -381,7 +385,9 @@ export default function LiveInventory() {
                   <Dot $color="indigo" />
                   판매종료
                 </SummaryLabel>
-                <SummaryValue>{summary.salesSummary["판매종료"]} SKU</SummaryValue>
+                <SummaryValue>
+                  {summary.salesSummary["판매종료"]} SKU
+                </SummaryValue>
               </SummaryRow>
             </SummaryList>
           </SummaryCardBox>
@@ -394,21 +400,27 @@ export default function LiveInventory() {
                   <Dot $color="green" />
                   안전재고
                 </SummaryLabel>
-                <SummaryValue>{summary.inventorySummary["안전재고"]} SKU</SummaryValue>
+                <SummaryValue>
+                  {summary.inventorySummary["안전재고"]} SKU
+                </SummaryValue>
               </SummaryRow>
               <SummaryRow>
                 <SummaryLabel>
                   <Dot $color="yellow" />
                   발주권고
                 </SummaryLabel>
-                <SummaryValue>{summary.inventorySummary["발주권고"]} SKU</SummaryValue>
+                <SummaryValue>
+                  {summary.inventorySummary["발주권고"]} SKU
+                </SummaryValue>
               </SummaryRow>
               <SummaryRow>
                 <SummaryLabel>
                   <Dot $color="pink" />
                   일시품절
                 </SummaryLabel>
-                <SummaryValue>{summary.inventorySummary["일시품절"]} SKU</SummaryValue>
+                <SummaryValue>
+                  {summary.inventorySummary["일시품절"]} SKU
+                </SummaryValue>
               </SummaryRow>
             </SummaryList>
           </SummaryCardBox>
@@ -431,7 +443,9 @@ export default function LiveInventory() {
                 summary.warningItems.map((row) => (
                   <WarningItem key={row.id}>
                     <WarningName>{row.productName}</WarningName>
-                    <WarningStock>{formatCount(row.availableStock)}</WarningStock>
+                    <WarningStock>
+                      {formatCount(row.availableStock)}
+                    </WarningStock>
                   </WarningItem>
                 ))
               ) : (
@@ -442,73 +456,55 @@ export default function LiveInventory() {
         </SummaryGrid>
 
         <TableComponent
-          variant="inventory"
           columns={columns}
           data={filteredData}
           headerAlign="center"
           cellAlign="center"
           rowKey="id"
+          // 검색
           searchValue={keyword}
-          onSearchChange={(value) => {
-            setKeyword(value);
+          onSearchChange={(val) => {
+            setKeyword(val);
             setPage(1);
           }}
           searchPlaceholder="상품명, 상품코드로 검색"
-          filterValue={categoryValue}
-          onFilterChange={(value) => {
-            setCategoryValue(value);
+          // 재고상태별
+          filterValue={inventoryValue}
+          onFilterChange={(val) => {
+            setInventoryValue(val);
             setPage(1);
           }}
-          filterPlaceholder="카테고리"
-          filterOptions={categoryOptions}
-          extraToolbar={
-            <FilterGroup>
-              <ToolbarSelect
-                value={inventoryValue}
-                onChange={(e) => {
-                  setInventoryValue(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">재고상태별</option>
-                {inventoryStatusOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </ToolbarSelect>
-
-              <ToolbarSelect
-                value={salesValue}
-                onChange={(e) => {
-                  setSalesValue(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">판매상태별</option>
-                {salesStatusOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </ToolbarSelect>
-            </FilterGroup>
-          }
+          filterPlaceholder="재고상태 전체"
+          filterOptions={inventoryStatusOptions}
+          // 판매상태별
+          filterValue2={salesValue}
+          onFilterChange2={(val) => {
+            setSalesValue(val);
+            setPage(1);
+          }}
+          filterPlaceholder2="판매상태 전체"
+          filterOptions2={salesStatusOptions}
+          // 카테고리별
+          filterValue3={categoryValue}
+          onFilterChange3={(val) => {
+            setCategoryValue(val);
+            setPage(1);
+          }}
+          filterPlaceholder3="카테고리 전체"
+          filterOptions3={categoryOptions}
           toolbarRight={
             <InboundButton
               type="button"
               onClick={() => setIsInboundModalOpen(true)}
             >
+              <Plus size={15} />
               입고등록
             </InboundButton>
           }
           page={page}
           pageSize={pageSize}
           onPageChange={setPage}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
-          }}
+          onPageSizeChange={setPageSize}
         />
       </PageWrap>
 
@@ -526,23 +522,18 @@ export default function LiveInventory() {
 }
 
 const PageWrap = styled.div`
-  padding: 24px;
-  background: #f8fafc;
+  padding: 25px;
+  background: var(--background);
   min-height: 100%;
-`;
-
-const HeaderRow = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
+  flex-direction: column;
+  gap: 25px;
 `;
 
 const Title = styled.h2`
   margin: 0;
-  color: #111827;
-  font-size: 22px;
-  font-weight: 800;
+  font-size: var(--title);
+  font-weight: 700;
 `;
 
 const PageStatusText = styled.div`
@@ -553,7 +544,6 @@ const PageStatusText = styled.div`
 `;
 
 const SummaryGrid = styled.div`
-  margin-bottom: 18px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
@@ -568,16 +558,16 @@ const SummaryGrid = styled.div`
 `;
 
 const SummaryCardBox = styled.div`
-  background: #ffffff;
+  background: white;
   border-radius: 16px;
   padding: 18px;
   min-height: 118px;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
+  box-shadow: var(--shadow);
   box-sizing: border-box;
 `;
 
 const CardTitle = styled.div`
-  color: #111827;
+  color: var(--font);
   font-size: 14px;
   font-weight: 700;
 `;
@@ -590,15 +580,15 @@ const CardValueWrap = styled.div`
 `;
 
 const CardValue = styled.div`
-  color: #111827;
-  font-size: 34px;
+  color: var(--font);
+  font-size: 28px;
   font-weight: 800;
   line-height: 1;
 `;
 
 const CardUnit = styled.span`
-  color: #111827;
-  font-size: 16px;
+  color: var(--font);
+  font-size: 18px;
   font-weight: 700;
 `;
 
@@ -607,7 +597,7 @@ const CardChangeRow = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
-  color: ${({ $up }) => ($up ? "#16a34a" : "#ef4444")};
+  color: ${({ $up }) => ($up ? "var(--green)" : "var(--red)")};
   font-size: 14px;
   font-weight: 700;
 `;
@@ -619,7 +609,7 @@ const ChangeArrow = styled.span`
 
 const ChangeMuted = styled.span`
   margin-left: 4px;
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 13px;
   font-weight: 600;
 `;
@@ -642,13 +632,13 @@ const SummaryLabel = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #334155;
+  color: var(--font);
   font-size: 14px;
   font-weight: 600;
 `;
 
 const SummaryValue = styled.div`
-  color: #111827;
+  color: var(--font);
   font-size: 14px;
   font-weight: 700;
 `;
@@ -658,10 +648,10 @@ const Dot = styled.span`
   height: 9px;
   border-radius: 999px;
   background: ${({ $color }) => {
-    if ($color === "green") return "#22c55e";
-    if ($color === "yellow") return "#eab308";
-    if ($color === "pink") return "#a855f7";
-    if ($color === "indigo") return "#6366f1";
+    if ($color === "green") return "var(--green)";
+    if ($color === "yellow") return "var(--yellow)";
+    if ($color === "pink") return "var(--purple)";
+    if ($color === "indigo") return "var(--violet)";
     return "#cbd5e1";
   }};
 `;
@@ -674,7 +664,7 @@ const CardHeaderRow = styled.div`
 `;
 
 const CardRightValue = styled.div`
-  color: #111827;
+  color: var(--font);
   font-size: 14px;
   font-weight: 800;
 `;
@@ -684,7 +674,7 @@ const WarningHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #64748b;
+  color: var(--placeholder);
   font-size: 12px;
   font-weight: 700;
 `;
@@ -706,7 +696,7 @@ const WarningItem = styled.div`
 const WarningName = styled.div`
   flex: 1;
   min-width: 0;
-  color: #334155;
+  color: var(--font);
   font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
@@ -716,15 +706,15 @@ const WarningName = styled.div`
 `;
 
 const WarningStock = styled.div`
-  color: #111827;
+  color: var(--font);
   font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
 `;
 
 const WarningEmpty = styled.div`
-  color: #94a3b8;
-  font-size: 13px;
+  color: var(--font);
+  font-size: 12px;
   font-weight: 600;
 `;
 
@@ -735,38 +725,24 @@ const FilterGroup = styled.div`
   flex-wrap: wrap;
 `;
 
-const ToolbarSelect = styled.select`
-  min-width: 120px;
-  height: 40px;
-  border: 1px solid #dbe2ea;
-  border-radius: 10px;
-  background: #ffffff;
-  padding: 0 12px;
-  color: #334155;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:focus {
-    outline: none;
-    border-color: #2563eb;
-  }
-`;
-
 const InboundButton = styled.button`
-  min-width: 108px;
-  height: 40px;
+  height: 35px;
+  min-width: 100px;
+  padding: 0 14px;
   border: none;
   border-radius: 10px;
-  background: #2563eb;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 700;
+  background: var(--blue);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.16);
 
   &:hover {
-    background: #1d4ed8;
+    filter: brightness(1.1);
   }
 `;
 
@@ -774,24 +750,24 @@ const CodeLink = styled.button`
   border: none;
   background: transparent;
   padding: 0;
-  color: #111827;
-  font-size: 14px;
-  font-weight: 800;
+  color: var(--font);
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
 
   &:hover {
-    color: #2563eb;
+    color: var(--blue);
   }
 `;
 
 const ProductNameLink = styled.a`
-  color: #334155;
-  font-size: 14px;
+  color: var(--font);
+  font-size: 12px;
   font-weight: 600;
   text-decoration: none;
 
   &:hover {
-    color: #2563eb;
+    color: var(--blue);
     text-decoration: underline;
   }
 `;
@@ -817,75 +793,27 @@ const InventoryStatusBadge = styled.span`
     if ($type === "안전재고") {
       return `
         background: #dcfce7;
-        color: #16a34a;
+        color: var(--grren);
       `;
     }
 
     if ($type === "발주권고") {
       return `
         background: #fef3c7;
-        color: #d97706;
+        color: var(--yellow);
       `;
     }
 
     if ($type === "일시품절") {
       return `
         background: #f3e8ff;
-        color: #a855f7;
+        color: var(--purple);
       `;
     }
 
     return `
       background: #e5e7eb;
-      color: #475569;
-    `;
-  }}
-`;
-
-const SalesStatusSelect = styled.select`
-  min-width: 96px;
-  height: 32px;
-  border: none;
-  border-radius: 999px;
-  padding: 0 12px;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-  appearance: none;
-
-  ${({ $type }) => {
-    if ($type === "판매중") {
-      return `
-        background: #dcfce7;
-        color: #16a34a;
-      `;
-    }
-
-    if ($type === "판매중지") {
-      return `
-        background: #fef3c7;
-        color: #d97706;
-      `;
-    }
-
-    if ($type === "품절") {
-      return `
-        background: #f3e8ff;
-        color: #a855f7;
-      `;
-    }
-
-    if ($type === "판매종료") {
-      return `
-        background: #e0e7ff;
-        color: #4f46e5;
-      `;
-    }
-
-    return `
-      background: #e5e7eb;
-      color: #475569;
+      color: var(--placeholder);
     `;
   }}
 `;

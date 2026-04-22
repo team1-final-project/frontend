@@ -4,6 +4,14 @@ import "react-datepicker/dist/react-datepicker.css";
 import styled, { createGlobalStyle, css } from "styled-components";
 import { Calendar } from "lucide-react";
 
+const formatDate = (date) => {
+  if (!date) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 const DatePickerGlobalStyle = createGlobalStyle`
   .react-datepicker-wrapper { width: auto; }
   .react-datepicker { font-family: inherit; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); }
@@ -43,9 +51,7 @@ export default function SearchDate({
           <DatePickerContainer {...containerProps}>
             <DatePicker
               selected={singleDate}
-              onChange={(date) =>
-                onChange(date ? date.toISOString().split("T")[0] : "")
-              }
+              onChange={(date) => onChange(formatDate(date))}
               placeholderText="날짜 선택"
               dateFormat="yyyy-MM-dd"
               className="custom-datepicker"
@@ -57,11 +63,7 @@ export default function SearchDate({
             <DatePickerContainer {...containerProps}>
               <DatePicker
                 selected={sDate}
-                onChange={(date) =>
-                  onStartDateChange(
-                    date ? date.toISOString().split("T")[0] : "",
-                  )
-                }
+                onChange={(date) => onStartDateChange(formatDate(date))}
                 placeholderText="시작일"
                 dateFormat="yyyy-MM-dd"
                 className="custom-datepicker"
@@ -74,9 +76,7 @@ export default function SearchDate({
             <DatePickerContainer {...containerProps}>
               <DatePicker
                 selected={eDate}
-                onChange={(date) =>
-                  onEndDateChange(date ? date.toISOString().split("T")[0] : "")
-                }
+                onChange={(date) => onEndDateChange(formatDate(date))}
                 placeholderText="종료일"
                 dateFormat="yyyy-MM-dd"
                 className="custom-datepicker"

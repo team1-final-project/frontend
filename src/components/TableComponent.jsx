@@ -63,6 +63,11 @@ export default function TableComponent({
   filterOptions2 = [],
   filterPlaceholder2 = "Filter 2",
 
+  filterValue3 = "",
+  onFilterChange3,
+  filterOptions3 = [],
+  filterPlaceholder3 = "Filter 3",
+
   startDate = "",
   onStartDateChange,
   endDate = "",
@@ -210,13 +215,13 @@ export default function TableComponent({
     if (column.sortable === false) return null;
 
     if (sortConfig.key !== column.key) {
-      return <ArrowUpDown size={variant === "inventory" ? 13 : 14} />;
+      return <ArrowUpDown size={14} />;
     }
 
     return sortConfig.direction === "asc" ? (
-      <ChevronUp size={variant === "inventory" ? 13 : 14} />
+      <ChevronUp size={14} />
     ) : (
-      <ChevronDown size={variant === "inventory" ? 13 : 14} />
+      <ChevronDown size={14} />
     );
   };
 
@@ -267,6 +272,17 @@ export default function TableComponent({
                   onChange={onFilterChange2}
                   options={filterOptions2}
                   placeholder={filterPlaceholder2}
+                  shadow={true}
+                />
+              )}
+
+              {typeof onFilterChange3 === "function" && (
+                <SelectBar
+                  variant={variant}
+                  value={filterValue3}
+                  onChange={onFilterChange3}
+                  options={filterOptions3}
+                  placeholder={filterPlaceholder3}
                   shadow={true}
                 />
               )}
@@ -378,28 +394,9 @@ const Wrap = styled.div`
   width: 100%;
   background: white;
   overflow: hidden;
-
-  ${({ $variant }) =>
-    $variant === "inventory" &&
-    css`
-      border-radius: 16px;
-      padding: 15px;
-      box-shadow: var(--shadow);
-    `}
-  ${({ $variant }) =>
-    $variant === "price" &&
-    css`
-      border-radius: 16px;
-      padding: 15px;
-      box-shadow: var(--shadow);
-    `}
-    ${({ $variant }) =>
-    $variant === "default" &&
-    css`
-      border-radius: 16px;
-      padding: 15px;
-      box-shadow: var(--shadow);
-    `};
+  border-radius: 16px;
+  padding: 15px;
+  box-shadow: var(--shadow);
 `;
 
 const Toolbar = styled.div`
@@ -407,16 +404,7 @@ const Toolbar = styled.div`
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
-
-  ${({ $variant }) =>
-    $variant === "inventory"
-      ? css`
-          padding: 14px 14px 12px;
-          margin-bottom: 0;
-        `
-      : css`
-          margin-bottom: 10px;
-        `}
+  margin-bottom: 10px;
 `;
 
 const ToolbarLeft = styled.div`
@@ -445,8 +433,7 @@ const CustomToolbarWrap = styled.div`
 const FilterSelectWrap = styled.div`
   position: relative;
   box-shadow: var(--shadow);
-  min-width: ${({ $variant }) =>
-    $variant === "inventory" ? "126px" : "180px"};
+  min-width: 180px;
 
   @media (max-width: 900px) {
     width: 100%;
@@ -461,31 +448,15 @@ const FilterSelect = styled.select`
   outline: none;
   appearance: none;
   cursor: pointer;
+  height: 38px;
+  padding: 0 34px 0 14px;
+  border: 1px solid transparent;
+  color: var(--placeholder);
 
-  ${({ $variant }) =>
-    $variant === "inventory"
-      ? css`
-          height: 44px;
-          padding: 0 34px 0 14px;
-          border: 1px solid transparent;
-          color: var(--placeholder);
-
-          &:focus {
-            border-color: var(--focus-border);
-          }
-        `
-      : css`
-          height: 38px;
-          padding: 0 34px 0 14px;
-          border: 1px solid transparent;
-          color: var(--placeholder);
-
-          &:focus {
-            border-color: var(--focus-border);
-          }
-        `}
+  &:focus {
+    border-color: var(--focus-border);
+  }
 `;
-
 const FilterIcon = styled.div`
   position: absolute;
   top: 50%;
@@ -511,21 +482,12 @@ const DateInput = styled.input`
   font-size: 13px;
   outline: none;
   border: 1px solid transparent;
+  height: 38px;
+  padding: 0 12px;
 
   &:focus {
     border-color: var(--focus-border);
   }
-
-  ${({ $variant }) =>
-    $variant === "inventory"
-      ? css`
-          height: 44px;
-          padding: 0 12px;
-        `
-      : css`
-          height: 38px;
-          padding: 0 12px;
-        `}
 `;
 
 const DatePickerContainer = styled.div`
@@ -544,7 +506,7 @@ const DatePickerContainer = styled.div`
 
   .custom-datepicker {
     width: 130px;
-    height: ${({ $variant }) => ($variant === "inventory" ? "44px" : "38px")};
+    height: 38px;
     padding: 0 34px 0 12px;
     border-radius: 10px;
     border: 1px solid transparent;
@@ -579,73 +541,38 @@ const TableScroll = styled.div`
 const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  min-width: ${({ $variant }) =>
-    $variant === "inventory" ? "1280px" : "1200px"};
+  min-width: 1200px;
 
   thead th {
     white-space: nowrap;
     background: #ffffff;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--placeholder);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
 
   tbody tr:last-child td {
     border-bottom: none;
   }
 
-  ${({ $variant }) =>
-    $variant === "inventory"
-      ? css`
-          thead th {
-            padding: 16px 14px;
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-            color: var(--placeholder);
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: none;
-            letter-spacing: normal;
-          }
+  tbody td {
+    position: relative;
+    padding: 16px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--font);
+    font-size: 12px;
+    white-space: nowrap;
+    vertical-align: middle;
+    background: #ffffff;
+  }
 
-          tbody td {
-            position: relative;
-            padding: 16px 14px;
-            border-bottom: 1px solid var(--border);
-            color: var(--font);
-            font-size: 12px;
-            white-space: nowrap;
-            vertical-align: middle;
-            background: #ffffff;
-          }
-
-          tbody tr:hover td {
-            background: var(--hover-bg);
-          }
-        `
-      : css`
-          thead th {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border);
-            color: var(--placeholder);
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-          }
-
-          tbody td {
-            position: relative;
-            padding: 16px 14px;
-            border-bottom: 1px solid var(--border);
-            color: var(--font);
-            font-size: 12px;
-            white-space: nowrap;
-            vertical-align: middle;
-            background: #ffffff;
-          }
-
-          tbody tr:hover td {
-            background: var(--hover-bg);
-          }
-        `}
+  tbody tr:hover td {
+    background: var(--hover-bg);
+  }
 `;
 
 const HeaderButton = styled.button`
@@ -661,14 +588,13 @@ const HeaderButton = styled.button`
       : $align === "right"
         ? "flex-end"
         : "flex-start"};
-  gap: ${({ $variant }) => ($variant === "inventory" ? "4px" : "6px")};
+  gap: 6px;
   color: inherit;
   font: inherit;
   cursor: ${({ $sortable }) => ($sortable ? "pointer" : "default")};
 
   svg {
     color: var(--placeholder);
-
     flex-shrink: 0;
   }
 `;
