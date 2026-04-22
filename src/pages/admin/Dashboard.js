@@ -145,6 +145,7 @@ export default function Dashboard() {
   const [activeAiTab, setActiveAiTab] = useState("");
   const [activeShareTab, setActiveShareTab] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [liveTime, setLiveTime] = useState(formatDateTime(new Date()));
 
   const fetchDashboard = async (options = {}) => {
     try {
@@ -171,6 +172,17 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchDashboard();
+  }, []);
+
+  useEffect(() => {
+    const updateClock = () => {
+      setLiveTime(formatDateTime(new Date()));
+    };
+
+    updateClock();
+    const timer = setInterval(updateClock, 1000 * 30);
+
+    return () => clearInterval(timer);
   }, []);
 
   const handleSearch = () => {
@@ -251,7 +263,7 @@ export default function Dashboard() {
   return (
     <PageWrap>
       <PageTitle>대시보드</PageTitle>
-      <DateText>{formatDateTime(dashboard?.current_time)}</DateText>
+      <DateText>{liveTime}</DateText>
       {error ? <ErrorText>{error}</ErrorText> : null}
 
       <SectionLabel>
