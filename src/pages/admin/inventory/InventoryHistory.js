@@ -671,7 +671,7 @@ const Title = styled.h2`
 const SummaryGrid = styled.div`
   margin-bottom: 18px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1.3fr;
+  grid-template-columns: 1fr 1fr 1.5fr;
   gap: 16px;
 
   @media (max-width: 1100px) {
@@ -680,17 +680,17 @@ const SummaryGrid = styled.div`
 `;
 
 const StatCard = styled.div`
-  background: #ffffff;
-  border: 1px solid #edf0f4;
+  background: white;
+  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 20px 22px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--shadow);
 `;
 
 const CardTitle = styled.p`
   margin: 0 0 14px;
-  color: #111827;
-  font-size: 16px;
+  color: var(--font);
+  font-size: 15px;
   font-weight: 700;
 `;
 
@@ -701,26 +701,26 @@ const BigLine = styled.div`
 `;
 
 const BigNumber = styled.span`
-  color: #111827;
-  font-size: 34px;
+  color: var(--font);
+  font-size: 28px;
   font-weight: 800;
   line-height: 1;
 `;
 
 const Unit = styled.span`
-  color: #111827;
-  font-size: 16px;
+  color: var(--font);
+  font-size: 18px;
   font-weight: 700;
 `;
 
 const Slash = styled.span`
-  color: #d1d5db;
+  color: var(--placeholder);
   font-size: 18px;
   font-weight: 700;
 `;
 
 const SubNumber = styled.span`
-  color: #4b5563;
+  color: var(--font);
   font-size: 16px;
   font-weight: 700;
 `;
@@ -731,21 +731,21 @@ const ChangeRow = styled.div`
   align-items: center;
   gap: 4px;
   color: ${({ $neutral, $up }) =>
-    $neutral ? "#9ca3af" : $up ? "#16a34a" : "#ef4444"};
-  font-size: 14px;
+    $neutral ? "var(--placeholder);" : $up ? "var(--green);" : "var(--red);"};
+  font-size: 12px;
   font-weight: 700;
 `;
 
 const ChangeArrow = styled.span`
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1;
 `;
 
 const ChangeMuted = styled.span`
-  margin-left: 4px;
-  color: #9ca3af;
-  font-size: 13px;
-  font-weight: 600;
+  margin-left: 2px;
+  color: var(--placeholder);
+  font-size: 12px;
+  font-weight: 500;
 `;
 
 const TrendCard = styled(StatCard)`
@@ -754,7 +754,7 @@ const TrendCard = styled(StatCard)`
 
 const TrendHeader = styled.div`
   margin-bottom: 14px;
-  color: #111827;
+  color: var(--font);
   font-size: 16px;
   font-weight: 700;
 `;

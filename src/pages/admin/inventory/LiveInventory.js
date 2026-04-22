@@ -581,14 +581,14 @@ const CardValueWrap = styled.div`
 
 const CardValue = styled.div`
   color: var(--font);
-  font-size: 34px;
+  font-size: 28px;
   font-weight: 800;
   line-height: 1;
 `;
 
 const CardUnit = styled.span`
   color: var(--font);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
 `;
 
