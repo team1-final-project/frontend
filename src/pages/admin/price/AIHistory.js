@@ -279,6 +279,7 @@ export default function AIHistory() {
         <SearchBar
           value={filters.keyword}
           onChange={handleKeywordChange}
+          onSearch={handleSearch}
           placeholder="상품명, 상품코드로 검색"
         />
         <SearchButton type="button" onClick={handleSearch} disabled={isLoading}>

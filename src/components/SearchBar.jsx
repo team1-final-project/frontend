@@ -5,12 +5,31 @@ import { Search } from "lucide-react";
 export default function SearchBar({
   value,
   onChange,
+  onSearch,
   placeholder = "Search...",
   variant = "default",
   width,
   border = false, // 기본값: 테두리 없음
   shadow = true, // 기본값: 그림자 있음
 }) {
+  const handleSubmit = () => {
+    if (onSearch) {
+      onSearch(value);
+      return;
+    }
+
+    onChange(value);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSubmit();
+    }
+  };
+
+  const handleSearchClick = () => {
+    handleSubmit();
+  };
   return (
     <SearchWrap
       $variant={variant}
@@ -22,9 +41,19 @@ export default function SearchBar({
         $variant={variant}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder={placeholder}
       />
-      <SearchIcon>
+      <SearchIcon
+        role="button"
+        tabIndex={0}
+        onClick={handleSearchClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            handleSearchClick();
+          }
+        }}
+      >
         <Search size={15} />
       </SearchIcon>
     </SearchWrap>
