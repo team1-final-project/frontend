@@ -36,7 +36,7 @@ const formatMovementByType = (value, changeType) => {
   }
 
   return `${Number(value || 0) > 0 ? "+" : ""}${Number(
-    value || 0
+    value || 0,
   ).toLocaleString()}개`;
 };
 
@@ -125,7 +125,7 @@ const buildWeeklyTrend = (rows, targetType, weekMeta) => {
         if (Number.isNaN(occurredAt.getTime())) return false;
         return occurredAt >= start && occurredAt < end;
       })
-      .reduce((acc, row) => acc + Math.abs(Number(row.movementQty || 0)), 0)
+      .reduce((acc, row) => acc + Math.abs(Number(row.movementQty || 0)), 0),
   );
 };
 
@@ -175,7 +175,7 @@ export default function InventoryHistory() {
   const [trendRows, setTrendRows] = useState([]);
   const [summaryData, setSummaryData] = useState(defaultSummaryData);
   const [currentWeekMeta, setCurrentWeekMeta] = useState(() =>
-    buildCurrentWeekMeta()
+    buildCurrentWeekMeta(),
   );
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -193,8 +193,8 @@ export default function InventoryHistory() {
     setErrorMessage("");
 
     try {
-      const [trendResponse, historyResponse, summaryResponse] = await Promise.all(
-        [
+      const [trendResponse, historyResponse, summaryResponse] =
+        await Promise.all([
           getAdminInventoryHistoryList(),
           getAdminInventoryHistoryList({
             keyword: searchValue.trim() || undefined,
@@ -203,8 +203,7 @@ export default function InventoryHistory() {
             end_date: endDate || undefined,
           }),
           getAdminInventoryHistorySummary(),
-        ]
-      );
+        ]);
 
       const mappedTrendRows = mapHistoryRows(trendResponse?.items);
       const mappedRows = mapHistoryRows(historyResponse?.items);
@@ -259,27 +258,27 @@ export default function InventoryHistory() {
 
   const inboundTrend = useMemo(
     () => buildWeeklyTrend(trendRows, "INBOUND", currentWeekMeta),
-    [trendRows, currentWeekMeta]
+    [trendRows, currentWeekMeta],
   );
 
   const outboundTrend = useMemo(
     () => buildWeeklyTrend(trendRows, "ORDER_OUT", currentWeekMeta),
-    [trendRows, currentWeekMeta]
+    [trendRows, currentWeekMeta],
   );
 
   const chartScale = useMemo(
     () => getChartScale(inboundTrend, outboundTrend),
-    [inboundTrend, outboundTrend]
+    [inboundTrend, outboundTrend],
   );
 
   const inboundPoints = useMemo(
     () => buildChartPoints(inboundTrend, 260, 96, 10, chartScale),
-    [inboundTrend, chartScale]
+    [inboundTrend, chartScale],
   );
 
   const outboundPoints = useMemo(
     () => buildChartPoints(outboundTrend, 260, 96, 10, chartScale),
-    [outboundTrend, chartScale]
+    [outboundTrend, chartScale],
   );
 
   const tooltipData =
@@ -305,12 +304,12 @@ export default function InventoryHistory() {
 
   const isInboundNoChange = isNoHistoryChange(
     summaryData.inbound_sku_diff,
-    summaryData.inbound_qty_diff
+    summaryData.inbound_qty_diff,
   );
 
   const isOutboundNoChange = isNoHistoryChange(
     summaryData.outbound_sku_diff,
-    summaryData.outbound_qty_diff
+    summaryData.outbound_qty_diff,
   );
 
   const isInboundUp =
@@ -330,7 +329,7 @@ export default function InventoryHistory() {
     const sectionWidth = rect.width / weekLabels.length;
     const index = Math.min(
       weekLabels.length - 1,
-      Math.max(0, Math.floor(clampedX / sectionWidth))
+      Math.max(0, Math.floor(clampedX / sectionWidth)),
     );
 
     setHoveredIndex(index);
@@ -427,9 +426,7 @@ export default function InventoryHistory() {
 
   return (
     <PageWrap>
-      <HeaderRow>
-        <Title>입출고 이력 조회</Title>
-      </HeaderRow>
+      <Title>입출고 이력 조회</Title>
 
       <SummaryGrid>
         <StatCard>
@@ -447,7 +444,7 @@ export default function InventoryHistory() {
             <span>
               {formatHistoryChange(
                 summaryData.inbound_sku_diff,
-                summaryData.inbound_qty_diff
+                summaryData.inbound_qty_diff,
               )}
             </span>
             <ChangeMuted>vs Yesterday</ChangeMuted>
@@ -469,7 +466,7 @@ export default function InventoryHistory() {
             <span>
               {formatHistoryChange(
                 summaryData.outbound_sku_diff,
-                summaryData.outbound_qty_diff
+                summaryData.outbound_qty_diff,
               )}
             </span>
             <ChangeMuted>vs Yesterday</ChangeMuted>
@@ -546,7 +543,7 @@ export default function InventoryHistory() {
                     260,
                     96,
                     10,
-                    chartScale
+                    chartScale,
                   )}
                 />
                 <polyline
@@ -560,7 +557,7 @@ export default function InventoryHistory() {
                     260,
                     96,
                     10,
-                    chartScale
+                    chartScale,
                   )}
                 />
 
@@ -658,25 +655,19 @@ export default function InventoryHistory() {
 }
 
 const PageWrap = styled.div`
-  padding: 24px;
-  background: #f8fafc;
+  padding: 25px;
+  background: var(--background);
   min-height: 100%;
-`;
-
-const HeaderRow = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
+  flex-direction: column;
+  gap: 25px;
 `;
 
 const Title = styled.h2`
   margin: 0;
-  color: #111827;
-  font-size: 22px;
-  font-weight: 800;
+  font-size: var(--title);
+  font-weight: 700;
 `;
-
 const SummaryGrid = styled.div`
   margin-bottom: 18px;
   display: grid;

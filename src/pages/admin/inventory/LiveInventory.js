@@ -558,16 +558,16 @@ const SummaryGrid = styled.div`
 `;
 
 const SummaryCardBox = styled.div`
-  background: #ffffff;
+  background: white;
   border-radius: 16px;
   padding: 18px;
   min-height: 118px;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
+  box-shadow: var(--shadow);
   box-sizing: border-box;
 `;
 
 const CardTitle = styled.div`
-  color: #111827;
+  color: var(--font);
   font-size: 14px;
   font-weight: 700;
 `;
@@ -580,14 +580,14 @@ const CardValueWrap = styled.div`
 `;
 
 const CardValue = styled.div`
-  color: #111827;
+  color: var(--font);
   font-size: 34px;
   font-weight: 800;
   line-height: 1;
 `;
 
 const CardUnit = styled.span`
-  color: #111827;
+  color: var(--font);
   font-size: 16px;
   font-weight: 700;
 `;
@@ -597,7 +597,7 @@ const CardChangeRow = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
-  color: ${({ $up }) => ($up ? "#16a34a" : "#ef4444")};
+  color: ${({ $up }) => ($up ? "var(--green)" : "var(--red)")};
   font-size: 14px;
   font-weight: 700;
 `;
@@ -609,7 +609,7 @@ const ChangeArrow = styled.span`
 
 const ChangeMuted = styled.span`
   margin-left: 4px;
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 13px;
   font-weight: 600;
 `;
@@ -632,13 +632,13 @@ const SummaryLabel = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #334155;
+  color: var(--font);
   font-size: 14px;
   font-weight: 600;
 `;
 
 const SummaryValue = styled.div`
-  color: #111827;
+  color: var(--font);
   font-size: 14px;
   font-weight: 700;
 `;
@@ -648,10 +648,10 @@ const Dot = styled.span`
   height: 9px;
   border-radius: 999px;
   background: ${({ $color }) => {
-    if ($color === "green") return "#22c55e";
-    if ($color === "yellow") return "#eab308";
-    if ($color === "pink") return "#a855f7";
-    if ($color === "indigo") return "#6366f1";
+    if ($color === "green") return "var(--green)";
+    if ($color === "yellow") return "var(--yellow)";
+    if ($color === "pink") return "var(--purple)";
+    if ($color === "indigo") return "var(--violet)";
     return "#cbd5e1";
   }};
 `;
@@ -664,7 +664,7 @@ const CardHeaderRow = styled.div`
 `;
 
 const CardRightValue = styled.div`
-  color: #111827;
+  color: var(--font);
   font-size: 14px;
   font-weight: 800;
 `;
@@ -674,7 +674,7 @@ const WarningHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #64748b;
+  color: var(--placeholder);
   font-size: 12px;
   font-weight: 700;
 `;
@@ -696,7 +696,7 @@ const WarningItem = styled.div`
 const WarningName = styled.div`
   flex: 1;
   min-width: 0;
-  color: #334155;
+  color: var(--font);
   font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
@@ -706,15 +706,15 @@ const WarningName = styled.div`
 `;
 
 const WarningStock = styled.div`
-  color: #111827;
+  color: var(--font);
   font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
 `;
 
 const WarningEmpty = styled.div`
-  color: #94a3b8;
-  font-size: 13px;
+  color: var(--font);
+  font-size: 12px;
   font-weight: 600;
 `;
 
@@ -793,27 +793,27 @@ const InventoryStatusBadge = styled.span`
     if ($type === "안전재고") {
       return `
         background: #dcfce7;
-        color: #16a34a;
+        color: var(--grren);
       `;
     }
 
     if ($type === "발주권고") {
       return `
         background: #fef3c7;
-        color: #d97706;
+        color: var(--yellow);
       `;
     }
 
     if ($type === "일시품절") {
       return `
         background: #f3e8ff;
-        color: #a855f7;
+        color: var(--purple);
       `;
     }
 
     return `
       background: #e5e7eb;
-      color: #475569;
+      color: var(--placeholder);
     `;
   }}
 `;
