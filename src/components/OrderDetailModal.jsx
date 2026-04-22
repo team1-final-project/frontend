@@ -57,6 +57,11 @@ function getStatusTone(status) {
 export default function OrderDetailModal({ open, order, onClose }) {
   if (!open || !order) return null;
 
+  const totalProductAmount = Number(order.totalProductAmount || 0);
+  const shippingFee =
+    order.shippingFee != null ? Number(order.shippingFee) : 3000;
+  const totalAmount = Number(order.totalAmount || 0);
+
   return (
     <ModalOverlay onClick={onClose}>
       <ModalCard onClick={(e) => e.stopPropagation()}>
@@ -89,8 +94,18 @@ export default function OrderDetailModal({ open, order, onClose }) {
             </DetailRow>
 
             <DetailRow>
-              <DetailLabel>결제금액</DetailLabel>
-              <DetailValue>{formatCurrency(order.totalAmount)}</DetailValue>
+              <DetailLabel>총 주문 상품 금액</DetailLabel>
+              <DetailValue>{formatCurrency(totalProductAmount)}</DetailValue>
+            </DetailRow>
+
+            <DetailRow>
+              <DetailLabel>배송비</DetailLabel>
+              <DetailValue>{formatCurrency(shippingFee)}</DetailValue>
+            </DetailRow>
+
+            <DetailRow>
+              <DetailLabel>총 결제 금액</DetailLabel>
+              <StrongValue>{formatCurrency(totalAmount)}</StrongValue>
             </DetailRow>
           </DetailGrid>
         </ModalBody>
@@ -165,7 +180,7 @@ const DetailGrid = styled.div`
 
 const DetailRow = styled.div`
   display: grid;
-  grid-template-columns: 90px 1fr;
+  grid-template-columns: 120px 1fr;
   gap: 12px;
   align-items: center;
 `;
@@ -181,6 +196,11 @@ const DetailValue = styled.div`
   font-size: 14px;
   font-weight: 700;
   word-break: break-word;
+`;
+
+const StrongValue = styled(DetailValue)`
+  font-size: 15px;
+  font-weight: 800;
 `;
 
 const StatusBadge = styled.span`

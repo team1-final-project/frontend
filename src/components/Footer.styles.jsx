@@ -19,7 +19,7 @@ export const BrandLogoImage2 = styled.img`
 export const FooterWrap = styled.footer`
   width: 100%;
   background: #f5f5f5;
-  padding: 0 0 22px;
+  padding: 0 0 28px;
   border-top: 1px solid #ededed;
   overflow: visible;
 `;
@@ -34,13 +34,13 @@ export const SignupBanner = styled.div`
   width: 100%;
   background: #000;
   border-radius: 12px;
-  padding: 22px 28px;
+  padding: 24px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   margin-top: -51px;
-  margin-bottom: 12px;
+  margin-bottom: 18px;
   position: relative;
   z-index: 2;
 
@@ -53,11 +53,11 @@ export const SignupBanner = styled.div`
 export const BannerText = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   margin: 0;
   color: #fff;
   font-size: 16px;
-  line-height: 1.7;
+  line-height: 1.6;
   font-weight: 500;
 `;
 
@@ -74,7 +74,7 @@ export const SignupButton = styled.button`
   border-radius: 999px;
   background: #fff;
   color: #111;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
 `;
@@ -84,7 +84,7 @@ export const TopSection = styled.div`
   grid-template-columns: 320px 1fr;
   gap: 64px;
   align-items: flex-start;
-  padding: 18px 0 32px;
+  padding: 24px 0 36px;
   border-bottom: 1px solid #dddddd;
 
   @media (max-width: 980px) {
@@ -100,7 +100,7 @@ export const BrandArea = styled.div`
 
 export const BrandLogo = styled.h2`
   margin: 0 0 12px;
-  font-size: 30px;
+  font-size: 24px;
   font-weight: 800;
   font-style: italic;
   color: #111;
@@ -110,7 +110,7 @@ export const BrandLogo = styled.h2`
 export const BrandDesc = styled.p`
   margin: 0;
   color: #8a8a8a;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.8;
 `;
 
@@ -118,12 +118,12 @@ export const Socials = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 18px;
 `;
 
 export const SocialButton = styled.button`
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border: 1px solid #d7d7d7;
   border-radius: 50%;
   background: #fff;
@@ -142,27 +142,28 @@ export const LinkGrid = styled.div`
 
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, minmax(140px, 1fr));
+    gap: 28px;
   }
 `;
 
 export const LinkColumn = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 `;
 
 export const ColumnTitle = styled.h4`
   margin: 0 0 10px;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 1.6px;
+  letter-spacing: 1.4px;
   color: #444;
 `;
 
 export const FooterLink = styled.a`
   text-decoration: none;
   color: #7d7d7d;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.7;
 
   &:hover {
@@ -171,7 +172,7 @@ export const FooterLink = styled.a`
 `;
 
 export const BottomSection = styled.div`
-  padding-top: 18px;
+  padding-top: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -186,7 +187,7 @@ export const BottomSection = styled.div`
 export const Copyright = styled.p`
   margin: 0;
   color: #9a9a9a;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
 `;
 
@@ -197,13 +198,13 @@ export const PaymentArea = styled.div`
 `;
 
 export const PaymentBadge = styled.div`
-  height: 24px;
+  height: 26px;
   padding: 0 10px;
   border-radius: 6px;
   background: #fff;
   border: 1px solid #dedede;
   color: #444;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   display: flex;
   align-items: center;

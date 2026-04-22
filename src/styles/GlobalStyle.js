@@ -68,11 +68,11 @@ const GlobalStyle = createGlobalStyle`
     cursor: pointer; 
     font-family: inherit;
   }
-  input, textarea {
-    outline: none; 
+   input, textarea, select {
+    outline: none;
     border: none;
-    font-family: inherit; 
-    font-size: inherit
+    font-family: inherit;
+    font-size: inherit;
   }
   a {
     text-decoration: none;
@@ -92,6 +92,93 @@ const GlobalStyle = createGlobalStyle`
   svg *:focus {
   outline: none; 
   }
+
+
+
+  /* consumer ui colors */
+    --bg-page: #efefef;
+    --bg-section: #f5f1ea;
+    --bg-card: #ffffff;
+    --bg-soft: #f8f6f2;
+    --bg-soft-2: #fcfbf8;
+
+    --border: #eaeaea;
+    --border-soft: #ebe5dc;
+    --focus-border: #b7cdeb;
+
+    --font: #111111;
+    --font2: #6f685f;
+    --font3: #8b847c;
+    --placeholder: #9b948b;
+
+    --choice: #f3f6fb;
+    --hover-bg: #fafcff;
+    --hover-gray: #f3f4f8;
+    --read-only: #f3f4f6;
+
+    --shadow: 0 10px 30px rgba(17, 17, 17, 0.05);
+
+    /* radius */
+    --radius-xl: 32px;
+    --radius-lg: 24px;
+    --radius-md: 18px;
+    --radius-sm: 14px;
+    --radius-pill: 999px;
+
+    /* spacing */
+    --page-side-padding: 24px;
+    --page-top-padding: 48px;
+    --page-bottom-padding: 200px;
+    --section-gap-lg: 48px;
+    --section-gap-md: 32px;
+    --section-gap-sm: 24px;
+    --content-gap: 16px;
+
+    /* layout */
+    --container-width: 1180px;
+    --container-wide-width: 1265px;
+    --header-height: 72px;
+
+    /* font scale */
+    --fs-30: 30px;
+    --fs-24: 24px;
+    --fs-22: 22px;
+    --fs-20: 20px;
+    --fs-16: 16px;
+    --fs-12: 12px;
+
+    /* legacy vars 유지 */
+    --background: #fafafa;
+    --title: 22px;
+    --th: 11px;
+    --td: 12px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body, #root {
+    min-height: 100%;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family:
+      "Pretendard",
+      "Apple SD Gothic Neo",
+      "Noto Sans KR",
+      "Malgun Gothic",
+      sans-serif;
+    background: var(--bg-page);
+    color: var(--font);
+    line-height: 1.5;
+  
 `;
 
 export default GlobalStyle;

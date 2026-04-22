@@ -8,7 +8,7 @@ import { ChevronDown } from "lucide-react";
 export const Page = styled.div`
   width: 100%;
   background: #efefef;
-  padding: 0px 0px 200px;
+  padding: 0 0 200px;
 `;
 
 /* =========================
@@ -190,43 +190,49 @@ export const BrandLogo = styled.img`
 export const MainSection = styled.section`
   max-width: 1180px;
   margin: 0 auto;
-  padding: 58px 20px 22px;
+  padding: 50px 24px 0;
 `;
 
 export const MainSectionTitle = styled.h2`
   text-align: center;
-  font-size: 44px;
+  font-size: 30px;
   line-height: 1.1;
   font-weight: 900;
   color: #111111;
   letter-spacing: -0.04em;
-  margin: 0 0 38px;
+  margin: 50px 0 50px;
 
   @media (max-width: 900px) {
-    font-size: 34px;
+    font-size: 30px;
   }
 
   @media (max-width: 640px) {
-    font-size: 28px;
+    font-size: 24px;
   }
 `;
 
 export const SectionTitle = styled.h2`
   text-align: center;
-  font-size: 44px;
+  font-size: 30px;
   line-height: 1.1;
   font-weight: 900;
   color: #111111;
   letter-spacing: -0.04em;
-  margin: 0 0 32px;
+  margin: 0 0 50px;
 
   @media (max-width: 900px) {
-    font-size: 34px;
+    font-size: 30px;
   }
 
   @media (max-width: 640px) {
-    font-size: 28px;
+    font-size: 24px;
   }
+`;
+
+export const HotDealSection = styled.section`
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0px 20px 22px;
 `;
 
 export const CardGrid = styled.div`
@@ -266,8 +272,8 @@ export const ProductImage = styled.img`
 
 export const ProductName = styled(Link)`
   display: block;
-  margin-top: 10px;
-  font-size: 12px;
+  margin-top: 12px;
+  font-size: 16px;
   line-height: 1.45;
   font-weight: 700;
   color: #111111;
@@ -308,7 +314,7 @@ export const StarsFill = styled.span`
 
 export const RatingText = styled.span`
   color: #8d857b;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 `;
 
@@ -321,25 +327,25 @@ export const PriceRow = styled.div`
 `;
 
 export const CurrentPrice = styled.span`
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 900;
   color: #111111;
 `;
 
 export const OriginalPrice = styled.span`
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: #999189;
   text-decoration: line-through;
 `;
 
 export const DiscountBadge = styled.span`
-  height: 18px;
-  padding: 0 8px;
+  height: 22px;
+  padding: 0 10px;
   border-radius: 999px;
   background: ${({ $positive }) => ($positive ? "#dfeeff" : "#f5dddd")};
   color: ${({ $positive }) => ($positive ? "#2f6fd6" : "#c66a6a")};
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
@@ -347,15 +353,16 @@ export const DiscountBadge = styled.span`
 
 export const ViewAllButton = styled.button`
   display: block;
-  width: 118px;
-  height: 36px;
-  margin: 22px auto 0;
+  min-width: 118px;
+  height: 40px;
+  margin: 24px auto 0;
+  padding: 0 18px;
   border-radius: 999px;
   border: 1px solid #d9cfc1;
   background: transparent;
   color: #111111;
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   letter-spacing: -0.01em;
 
   &:hover {
@@ -364,9 +371,9 @@ export const ViewAllButton = styled.button`
 `;
 
 export const SectionDivider = styled.div`
-  max-width: 1180px;
+  max-width: calc(1180px - 48px);
   height: 1px;
-  margin: 26px auto 0;
+  margin: 30px auto 0;
   background: #ded6cb;
 `;
 
@@ -410,11 +417,31 @@ export const SalesBottomRow = styled.div`
   }
 `;
 
-export const SalesImageCardBase = styled.article`
+const SalesImageCardBase = styled(Link)`
   position: relative;
+  display: block;
   overflow: hidden;
   border-radius: 16px;
   background: #e9dece;
+  text-decoration: none;
+  isolation: isolate;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+    transition: background 0.25s ease;
+  }
+
+  &:hover::after {
+    background: rgba(0, 0, 0, 0.32);
+  }
+
+  &:hover img {
+    transform: scale(1.06);
+  }
 `;
 
 export const SalesImageCard = styled(SalesImageCardBase)`
@@ -463,32 +490,51 @@ export const SalesImage = styled.img`
     }
   }};
   transform-origin: center center;
+  transition: transform 0.3s ease;
+`;
+
+export const SalesItemName = styled.span`
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+
+  @media (max-width: 640px) {
+    font-size: 16px;
+    top: 14px;
+    left: 14px;
+  }
 `;
 
 /* =========================
    AI Ranking 섹션
 ========================= */
 export const AIRankingSection = styled.section`
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 56px 20px 28px;
+  width: 100%;
+  padding: 50px 24px 0;
 `;
 
 export const AIRankingTitle = styled.h2`
   text-align: center;
-  font-size: 44px;
+  font-size: 30px;
   line-height: 1.1;
   font-weight: 900;
   color: #111111;
   letter-spacing: -0.04em;
-  margin: 0 0 34px;
+  margin: 0 0 50px;
 
   @media (max-width: 900px) {
-    font-size: 34px;
+    font-size: 30px;
   }
 
   @media (max-width: 640px) {
-    font-size: 28px;
+    font-size: 24px;
   }
 `;
 
@@ -522,7 +568,7 @@ export const CardTop = styled.div`
 `;
 
 export const CardTitle = styled.h3`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 900;
   color: #111111;
   letter-spacing: -0.02em;
@@ -592,10 +638,10 @@ export const BarHeader = styled.div`
 `;
 
 export const BarLabel = styled.span`
-  font-size: 15px;
+  font-size: 16px;
   color: #5f5a54;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.3;
 `;
 
 export const BarValueWrap = styled.div`
@@ -608,7 +654,7 @@ export const BarValueWrap = styled.div`
 `;
 
 export const BarValue = styled.span`
-  font-size: 14px;
+  font-size: 16px;
   color: #eb6c6c;
   text-align: right;
   font-weight: 900;
@@ -665,7 +711,7 @@ export const SelectBox = styled.select`
   border-radius: 999px;
   background: #f7f4ef;
   color: #222;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   appearance: none;
   -webkit-appearance: none;
@@ -685,9 +731,18 @@ export const SelectArrowText = styled.span`
   pointer-events: none;
 `;
 
+export const SelectArrow = styled(ChevronDown)`
+  position: absolute;
+  right: 12px;
+  width: 14px;
+  height: 14px;
+  color: #8f8a82;
+  pointer-events: none;
+`;
+
 export const MoreLink = styled.button`
   color: #23b14d;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
 `;
@@ -739,6 +794,15 @@ export const InnerSelect = styled.select`
   -moz-appearance: none;
   cursor: pointer;
   padding-right: 18px;
+`;
+
+export const InnerSelectArrow = styled(ChevronDown)`
+  position: absolute;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  color: #8f8a82;
+  pointer-events: none;
 `;
 
 export const PositiveValue = styled.span`
@@ -804,7 +868,7 @@ export const ChartMain = styled.div`
 
 export const ChartGridLines = styled.div`
   position: absolute;
-  inset: 14px 0 28px 0;
+  inset: 0 0 24px 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -814,13 +878,12 @@ export const ChartGridLines = styled.div`
 export const GridLine = styled.div`
   width: 100%;
   height: 1px;
-  background: #ebe5dc;
+  background: #ece7df;
 `;
 
 export const PlotArea = styled.div`
   position: relative;
-  height: 180px;
-  margin-top: 10px;
+  height: 188px;
 `;
 
 export const LineSvg = styled.svg`
@@ -832,99 +895,41 @@ export const LineSvg = styled.svg`
 `;
 
 export const XAxisRow = styled.div`
+  margin-top: 10px;
   display: flex;
   justify-content: space-between;
-  padding-top: 8px;
+  gap: 8px;
 `;
 
 export const XAxisLabel = styled.span`
+  flex: 1;
+  text-align: center;
   font-size: 11px;
-  color: #8f887f;
-  transform: rotate(-55deg);
-  transform-origin: top left;
+  color: #9a958d;
 `;
 
 export const ChartLegendSide = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 16px;
+  gap: 10px;
 `;
 
 export const SideLegendItem = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
 `;
 
-export const SideLegendLine = styled.div`
-  width: 34px;
-  height: 5px;
+export const SideLegendLine = styled.span`
+  width: 16px;
+  height: 2px;
   border-radius: 999px;
+  background: #000;
+  flex-shrink: 0;
 `;
 
 export const SideLegendText = styled.span`
-  font-size: 11px;
-  color: #555;
-  font-weight: 700;
-`;
-
-/* 보조 범례/임시 차트 */
-export const TrendLegend = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-`;
-
-export const LegendItem = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 9px;
-  color: #7b756d;
-  font-weight: 600;
-`;
-
-export const LegendDot = styled.i`
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-`;
-
-export const ChartArea = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 132px;
-  padding: 8px 0;
-`;
-
-export const ChartLine = styled.div`
-  height: 2px;
-  width: 100%;
-  background: ${({ $color = "#2563eb" }) => $color};
-  border-radius: 999px;
-  opacity: 0.95;
-`;
-
-/* 아이콘 화살표 */
-export const SelectArrow = styled(ChevronDown)`
-  position: absolute;
-  right: 12px;
-  width: 14px;
-  height: 14px;
+  font-size: 10px;
   color: #8f8a82;
-  pointer-events: none;
-`;
-
-export const InnerSelectArrow = styled(ChevronDown)`
-  position: absolute;
-  right: 0;
-  width: 12px;
-  height: 12px;
-  color: #b0aba3;
-  pointer-events: none;
 `;

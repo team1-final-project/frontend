@@ -311,6 +311,37 @@ function AIRankingSection({ data }) {
 function ProductCard({ item }) {
   const isPositive = item.discount.trim().startsWith("+");
 
+  const salesItems = {
+    shin: {
+      name: "신라면",
+      image:
+        bestItems.find((item) => item.name.includes("신라면"))?.image ||
+        salesShinramyunImg,
+      to: "/products/4",
+      variant: "shin",
+    },
+    hetban: {
+      name: "햇반",
+      image: salesHetbanImg, // 실제 햇반 썸네일 생기면 이 값만 교체
+      to: "/products/hetban",
+      variant: "hetban",
+    },
+    curry: {
+      name: "3분카레",
+      image: salesCurryImg, // 실제 3분카레 썸네일 생기면 이 값만 교체
+      to: "/products/curry",
+      variant: "curry",
+    },
+    cokezero: {
+      name: "코카콜라제로",
+      image:
+        hotDealItems.find((item) => item.name.includes("코카콜라"))?.image ||
+        salesCokezeroImg,
+      to: "/products/cokezero",
+      variant: "cokezero",
+    },
+  };
+
   return (
     <S.ProductCardWrap>
       <S.ProductThumb>
@@ -346,6 +377,33 @@ export default function Home() {
     priceDropTop5ByCategory: [],
     categories: [],
   });
+
+  const salesItems = {
+    shin: {
+      name: "신라면",
+      image: salesShinramyunImg,
+      to: "/products/1",
+      variant: "shin",
+    },
+    hetban: {
+      name: "햇반",
+      image: salesHetbanImg,
+      to: "/products/2",
+      variant: "hetban",
+    },
+    curry: {
+      name: "3분카레",
+      image: salesCurryImg,
+      to: "/products/3",
+      variant: "curry",
+    },
+    cokezero: {
+      name: "코카콜라제로",
+      image: salesCokezeroImg,
+      to: "/products/4",
+      variant: "cokezero",
+    },
+  };
 
   useEffect(() => {
     const fetchAiRanking = async () => {
@@ -451,7 +509,7 @@ export default function Home() {
 
       <S.SectionDivider />
 
-      <S.MainSection>
+      <S.HotDealSection>
         <S.MainSectionTitle>Hot Deal</S.MainSectionTitle>
 
         <S.CardGrid>
@@ -461,41 +519,61 @@ export default function Home() {
         </S.CardGrid>
 
         <S.ViewAllButton type="button">View All</S.ViewAllButton>
-      </S.MainSection>
+      </S.HotDealSection>
 
       <S.SalesSection>
         <S.SalesPanel>
           <S.SectionTitle>Sales Item</S.SectionTitle>
 
           <S.SalesTopRow>
-            <S.SalesImageCard $variant="shin">
+            <S.SalesImageCard
+              to={salesItems.shin.to}
+              $variant={salesItems.shin.variant}
+            >
               <S.SalesImage
-                src={salesShinramyunImg}
-                alt="신라면"
-                $variant="shin"
+                src={salesItems.shin.image}
+                alt={salesItems.shin.name}
+                $variant={salesItems.shin.variant}
               />
+              <S.SalesItemName>{salesItems.shin.name}</S.SalesItemName>
             </S.SalesImageCard>
 
-            <S.SalesImageCard $variant="hetban">
-              <S.SalesImage src={salesHetbanImg} alt="햇반" $variant="hetban" />
+            <S.SalesImageCard
+              to={salesItems.hetban.to}
+              $variant={salesItems.hetban.variant}
+            >
+              <S.SalesImage
+                src={salesItems.hetban.image}
+                alt={salesItems.hetban.name}
+                $variant={salesItems.hetban.variant}
+              />
+              <S.SalesItemName>{salesItems.hetban.name}</S.SalesItemName>
             </S.SalesImageCard>
           </S.SalesTopRow>
 
           <S.SalesBottomRow>
-            <S.SalesWideImageCard $variant="curry">
+            <S.SalesWideImageCard
+              to={salesItems.curry.to}
+              $variant={salesItems.curry.variant}
+            >
               <S.SalesImage
-                src={salesCurryImg}
-                alt="3분카레"
-                $variant="curry"
+                src={salesItems.curry.image}
+                alt={salesItems.curry.name}
+                $variant={salesItems.curry.variant}
               />
+              <S.SalesItemName>{salesItems.curry.name}</S.SalesItemName>
             </S.SalesWideImageCard>
 
-            <S.SalesSmallImageCard $variant="cokezero">
+            <S.SalesSmallImageCard
+              to={salesItems.cokezero.to}
+              $variant={salesItems.cokezero.variant}
+            >
               <S.SalesImage
-                src={salesCokezeroImg}
-                alt="코카콜라제로"
-                $variant="cokezero"
+                src={salesItems.cokezero.image}
+                alt={salesItems.cokezero.name}
+                $variant={salesItems.cokezero.variant}
               />
+              <S.SalesItemName>{salesItems.cokezero.name}</S.SalesItemName>
             </S.SalesSmallImageCard>
           </S.SalesBottomRow>
         </S.SalesPanel>

@@ -9,7 +9,7 @@ export const Page = styled.div`
 export const Inner = styled.div`
   max-width: 1180px;
   margin: 0 auto;
-  padding: 50px 30px 200px;
+  padding: 50px 24px 200px;
 `;
 
 export const PageHeader = styled.div`
@@ -17,7 +17,7 @@ export const PageHeader = styled.div`
 `;
 
 export const PageTitle = styled.h1`
-  font-size: 38px;
+  font-size: 30px;
   line-height: 1.1;
   font-weight: 900;
   color: #111111;
@@ -26,20 +26,20 @@ export const PageTitle = styled.h1`
 
 export const PageDescription = styled.p`
   margin-top: 10px;
-  font-size: 15px;
+  font-size: 16px;
   color: #7a736b;
-  line-height: 1.5;
+  line-height: 1.6;
 `;
 
 export const FilterPanel = styled.section`
   background: #ffffff;
   border: 1px solid #ebe5dc;
   border-radius: 24px;
-  padding: 24px 22px;
+  padding: 24px;
 `;
 
 export const SectionLabel = styled.h2`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 900;
   color: #111111;
   margin-bottom: 16px;
@@ -60,7 +60,7 @@ export const CategoryButton = styled.button`
   border: 1px solid ${({ $active }) => ($active ? "#111111" : "#e3dbcf")};
   background: ${({ $active }) => ($active ? "#f7f1e9" : "#ffffff")};
   color: #111111;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: ${({ $active }) => ($active ? 800 : 600)};
   transition: all 0.2s ease;
 
@@ -104,10 +104,11 @@ export const SearchInput = styled.input`
   outline: none;
   background: transparent;
   color: #111111;
-  font-size: 14px;
+  font-size: 12px;
 
   &::placeholder {
     color: #9f988f;
+    font-size: 12px;
   }
 `;
 
@@ -117,7 +118,7 @@ export const SortSelect = styled.select`
   border: 1px solid #ebe5dc;
   background: #f7f4ef;
   padding: 0 16px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   color: #111111;
   outline: none;
@@ -131,7 +132,7 @@ export const ResultRow = styled.div`
 `;
 
 export const ResultText = styled.p`
-  font-size: 14px;
+  font-size: 12px;
   color: #6f685f;
 `;
 
@@ -141,7 +142,7 @@ export const ResultStrong = styled.span`
 `;
 
 export const GridSection = styled.section`
-  margin-top: 28px;
+  margin-top: 32px;
 `;
 
 export const ProductGrid = styled.div`
@@ -158,23 +159,38 @@ export const ProductCard = styled.article`
   background: #ffffff;
   border: 1px solid #ebe5dc;
   border-radius: 24px;
-  padding: 16px;
+  padding: 20px;
+`;
+
+export const ProductMain = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 2px 0 0;
 `;
 
 export const ProductTop = styled.div`
   display: grid;
-  grid-template-columns: 160px minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 20px;
   align-items: start;
 
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 `;
 
+export const ProductBottom = styled.div`
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
 export const ProductThumb = styled.div`
-  width: 100%;
-  aspect-ratio: 1 / 1;
+  width: 180px;
+  height: 180px;
   border-radius: 18px;
   background: #f7f7f7;
   border: 1px solid #ece5db;
@@ -182,39 +198,34 @@ export const ProductThumb = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: start;
+
+  @media (max-width: 640px) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
 `;
 
 export const ProductImage = styled.img`
   display: block;
-  width: 78%;
-  height: 78%;
+  width: 74%;
+  height: 74%;
   object-fit: contain;
   background: transparent;
 `;
 
-export const ProductMain = styled.div`
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-`;
-
-export const ProductBottom = styled.div`
-  margin-top: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-`;
-
 export const BrandText = styled.p`
-  font-size: 11px;
+  font-size: 12px;
   color: #8b847c;
   font-weight: 700;
+  margin: 0;
 `;
 
 export const ProductName = styled.h3`
-  margin-top: 6px;
-  font-size: 18px;
-  line-height: 1.4;
+  margin-top: 7px;
+  font-size: 20px;
+  line-height: 1.35;
   font-weight: 900;
   color: #111111;
   letter-spacing: -0.02em;
@@ -236,12 +247,12 @@ const badgeTone = {
 };
 
 export const AITag = styled.span`
-  margin-top: 10px;
+  margin-top: 15px;
   width: fit-content;
   height: 26px;
   padding: 0 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   display: inline-flex;
   align-items: center;
@@ -252,7 +263,7 @@ export const PriceSummary = styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 15px;
 
   @media (max-width: 520px) {
     grid-template-columns: 1fr;
@@ -263,21 +274,27 @@ export const InfoCard = styled.div`
   border-radius: 16px;
   background: #f8f6f2;
   border: 1px solid #eee7dd;
-  padding: 12px 10px;
+  padding: 12px;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 `;
 
 export const InfoLabel = styled.p`
-  font-size: 11px;
+  font-size: 12px;
   color: #8f887f;
   font-weight: 700;
 `;
 
 export const InfoValue = styled.p`
   margin-top: 6px;
-  font-size: 18px;
+  font-size: 16px;
+  line-height: 1.3;
   color: #111111;
   font-weight: 900;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
 `;
 
 export const DropValue = styled(InfoValue)`

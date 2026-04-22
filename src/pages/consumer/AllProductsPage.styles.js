@@ -9,7 +9,7 @@ export const Page = styled.div`
 export const Inner = styled.div`
   max-width: 1180px;
   margin: 0 auto;
-  padding: 50px 30px 200px;
+  padding: 50px 24px 200px;
 `;
 
 export const PageHeader = styled.div`
@@ -17,7 +17,7 @@ export const PageHeader = styled.div`
 `;
 
 export const PageTitle = styled.h1`
-  font-size: 38px;
+  font-size: 30px;
   line-height: 1.1;
   font-weight: 900;
   color: #111111;
@@ -26,20 +26,20 @@ export const PageTitle = styled.h1`
 
 export const PageDescription = styled.p`
   margin-top: 10px;
-  font-size: 15px;
+  font-size: 16px;
   color: #7a736b;
-  line-height: 1.5;
+  line-height: 1.6;
 `;
 
 export const FilterPanel = styled.section`
   background: #ffffff;
   border: 1px solid #ebe5dc;
   border-radius: 24px;
-  padding: 24px 22px;
+  padding: 24px;
 `;
 
 export const SectionLabel = styled.h2`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 900;
   color: #111111;
   margin-bottom: 16px;
@@ -60,7 +60,7 @@ export const CategoryButton = styled.button`
   border: 1px solid ${({ $active }) => ($active ? "#111111" : "#e3dbcf")};
   background: ${({ $active }) => ($active ? "#f7f1e9" : "#ffffff")};
   color: #111111;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: ${({ $active }) => ($active ? 800 : 600)};
   transition: all 0.2s ease;
 
@@ -104,10 +104,11 @@ export const SearchInput = styled.input`
   outline: none;
   background: transparent;
   color: #111111;
-  font-size: 14px;
+  font-size: 12px;
 
   &::placeholder {
     color: #9f988f;
+    font-size: 12px;
   }
 `;
 
@@ -117,7 +118,7 @@ export const SortSelect = styled.select`
   border: 1px solid #ebe5dc;
   background: #f7f4ef;
   padding: 0 16px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   color: #111111;
   outline: none;
@@ -131,7 +132,7 @@ export const ResultRow = styled.div`
 `;
 
 export const ResultText = styled.p`
-  font-size: 14px;
+  font-size: 12px;
   color: #6f685f;
 `;
 
@@ -141,7 +142,7 @@ export const ResultStrong = styled.span`
 `;
 
 export const GridSection = styled.section`
-  margin-top: 28px;
+  margin-top: 32px;
 `;
 
 export const ProductGrid = styled.div`
@@ -189,12 +190,12 @@ export const ProductImage = styled.img`
 `;
 
 export const ProductBody = styled.div`
-  padding-top: 10px;
+  padding: 12px 12px 0;
 `;
 
 export const ProductName = styled.h3`
-  font-size: 15px;
-  line-height: 1.45;
+  font-size: 16px;
+  line-height: 1.5;
   font-weight: 800;
   color: #111111;
   letter-spacing: -0.02em;
@@ -228,26 +229,26 @@ export const PriceRow = styled.div`
 `;
 
 export const CurrentPrice = styled.span`
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 900;
   color: #111111;
   line-height: 1;
 `;
 
 export const OriginalPrice = styled.span`
-  font-size: 11px;
+  font-size: 12px;
   color: #a59b90;
   text-decoration: line-through;
   font-weight: 700;
 `;
 
 export const DiscountBadge = styled.span`
-  height: 20px;
-  padding: 0 8px;
+  height: 22px;
+  padding: 0 10px;
   border-radius: 999px;
   background: #fbe8e8;
   color: #d65f5f;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
   display: inline-flex;
   align-items: center;
@@ -269,7 +270,7 @@ const badgeTone = {
 };
 
 export const TagRow = styled.div`
-  margin-top: 10px;
+  margin-top: 12px;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -280,7 +281,7 @@ export const ProductTag = styled.span`
   height: 24px;
   padding: 0 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   display: inline-flex;
   align-items: center;
@@ -294,7 +295,7 @@ export const EmptyBox = styled.div`
   padding: 48px 20px;
   text-align: center;
   color: #7a736b;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
 `;
 
@@ -302,7 +303,7 @@ export const PaginationRow = styled.div`
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-top: 28px;
+  margin-top: 32px;
 `;
 
 export const PageButton = styled.button`
@@ -312,6 +313,6 @@ export const PageButton = styled.button`
   border: 1px solid ${({ $active }) => ($active ? "#111111" : "#e3dbcf")};
   background: ${({ $active }) => ($active ? "#111111" : "#ffffff")};
   color: ${({ $active }) => ($active ? "#ffffff" : "#111111")};
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 800;
 `;
