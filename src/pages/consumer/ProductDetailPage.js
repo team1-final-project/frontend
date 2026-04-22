@@ -17,8 +17,191 @@ import { addCartItem } from "../../api/cart";
 import shinramyunImg from "../../assets/shinramyeon.jpg";
 
 const STATIC_RATING = 4.5;
-const REVIEW_COUNT_TEXT = "상품평(788,617)";
-const INQUIRY_COUNT_TEXT = "상품문의";
+
+const TAB_KEYS = {
+  DETAIL: "상품상세",
+  REVIEW: "상품평",
+  INQUIRY: "상품문의",
+  RETURN: "교환/반품 안내",
+};
+
+const CATEGORY_REVIEW_BANK = {
+  라면: [
+    "국물 맛이 진하고 면발이 쫄깃해서 재구매 의사 있어요.",
+    "간편하게 한 끼 먹기 좋고 매운맛도 적당해요.",
+    "멀티팩이라 보관하기 편하고 집에 두고 먹기 좋아요.",
+    "가격 대비 만족도가 높고 맛이 익숙해서 실패가 없어요.",
+    "야식용으로 사뒀는데 생각보다 훨씬 자주 손이 가네요.",
+    "끓였을 때 향이 좋고 기본에 충실한 맛이라 만족해요.",
+  ],
+  즉석식품: [
+    "전자레인지로 바로 먹을 수 있어서 바쁠 때 정말 편해요.",
+    "식감이 괜찮고 한 끼 대용으로 생각보다 든든해요.",
+    "포장 상태도 깔끔하고 보관하기 좋아서 만족합니다.",
+    "양도 적당하고 맛도 무난해서 쟁여두기 좋아요.",
+    "간단하게 먹기 좋은데 생각보다 퀄리티가 괜찮아요.",
+    "재구매 의사 있어요. 바쁜 날 한 끼 해결하기 편해요.",
+  ],
+  스낵과자: [
+    "바삭하고 맛이 진해서 계속 손이 가요.",
+    "양이 적당하고 간식으로 먹기 딱 좋아요.",
+    "단짠 밸런스가 괜찮아서 가족들이 다 좋아했어요.",
+    "포장도 깔끔하고 생각보다 눅눅하지 않아서 만족해요.",
+    "아이들 간식으로 두기 좋고 재구매할 것 같아요.",
+    "출출할 때 하나씩 먹기 좋아요.",
+  ],
+  소시지: [
+    "조리도 간편하고 반찬으로 쓰기 좋아요.",
+    "짠맛이 과하지 않고 식감이 탱탱해서 만족해요.",
+    "간단하게 구워 먹기 좋고 활용도가 높아요.",
+    "냉장 보관해두고 먹기 편해서 자주 사게 되네요.",
+    "아침 반찬으로 두기 좋아요.",
+    "맛이 무난하고 양도 괜찮아요.",
+  ],
+  탄산음료: [
+    "시원하게 마시면 깔끔하고 청량감이 좋아요.",
+    "무난하게 즐기기 좋고 가격도 괜찮아요.",
+    "행사할 때 사두면 금방 없어지네요.",
+    "탄산감이 살아 있어서 만족스러워요.",
+    "음식이랑 같이 마시기 좋아요.",
+    "가족들이 다 잘 마셔서 자주 주문합니다.",
+  ],
+  카레: [
+    "간편하게 먹기 좋고 밥이랑 잘 어울려요.",
+    "생각보다 내용물이 괜찮고 맛도 부드러워요.",
+    "바쁠 때 한 끼 해결하기 좋아서 자주 사요.",
+    "맵지 않아서 누구나 먹기 편한 맛이에요.",
+    "전자레인지 조리가 가능해서 편했어요.",
+    "재구매 의사 있습니다.",
+  ],
+  default: [
+    "가격 대비 만족도가 괜찮아요.",
+    "무난하게 먹기 좋고 재구매 의사 있어요.",
+    "포장 상태도 괜찮고 전체적으로 만족합니다.",
+    "생각보다 품질이 괜찮아서 잘 샀어요.",
+    "집에 두고 쓰기 좋은 상품이에요.",
+    "배송도 빠르고 상품 상태도 좋았어요.",
+  ],
+};
+
+const CATEGORY_INQUIRY_BANK = {
+  라면: [
+    {
+      question: "멀티팩 기준으로 총 몇 봉 구성인가요?",
+      answer: "상품명에 기재된 수량 기준으로 발송되며, 옵션에 따라 멀티팩 또는 낱개 구성일 수 있습니다.",
+    },
+    {
+      question: "유통기한은 보통 얼마나 남은 상품으로 오나요?",
+      answer: "출고 시점 기준으로 판매 가능한 충분한 소비기한이 남은 상품만 발송하고 있습니다.",
+    },
+    {
+      question: "박스 단위로 여러 개 구매하면 묶음배송 되나요?",
+      answer: "동일 주문 건은 가능한 한 묶음으로 발송되며, 물류 상황에 따라 분리 출고될 수 있습니다.",
+    },
+  ],
+  즉석식품: [
+    {
+      question: "전자레인지 조리만 가능한가요?",
+      answer: "상품에 따라 전자레인지 또는 중탕 조리가 가능하며, 상세 설명의 조리 방법을 참고해 주세요.",
+    },
+    {
+      question: "실온 보관 상품인가요?",
+      answer: "상품 유형에 따라 상이하지만, 일반적으로 표시사항에 기재된 보관 방법에 따라 보관해 주세요.",
+    },
+    {
+      question: "한 박스 단위로 구매 가능한가요?",
+      answer: "재고 상황에 따라 가능하며, 여러 개 주문 시 묶음 발송으로 처리됩니다.",
+    },
+  ],
+  스낵과자: [
+    {
+      question: "과자 파손 없이 오나요?",
+      answer: "완충 포장 후 출고하지만 택배 이동 중 일부 파손이 발생할 수 있는 점 양해 부탁드립니다.",
+    },
+    {
+      question: "유통기한 짧은 상품은 아닌가요?",
+      answer: "판매 가능한 충분한 소비기한이 남은 상품만 출고하고 있습니다.",
+    },
+    {
+      question: "여러 개 주문하면 박스로 오나요?",
+      answer: "수량에 따라 박스 또는 묶음 포장으로 출고될 수 있습니다.",
+    },
+  ],
+  소시지: [
+    {
+      question: "냉장 상품인가요?",
+      answer: "상품 특성상 냉장 보관 기준으로 안내되며, 수령 후 즉시 냉장 보관 부탁드립니다.",
+    },
+    {
+      question: "아이스팩 포함되어 오나요?",
+      answer: "냉장/신선 상품은 보냉 포장 상태로 출고됩니다.",
+    },
+    {
+      question: "소비기한은 어느 정도 남은 상품으로 오나요?",
+      answer: "출고 기준 판매 가능한 충분한 소비기한이 남은 상품으로 발송됩니다.",
+    },
+  ],
+  탄산음료: [
+    {
+      question: "캔/페트 중 어떤 형태인가요?",
+      answer: "상품명에 표기된 규격 기준으로 발송됩니다.",
+    },
+    {
+      question: "묶음 포장 상태로 오나요?",
+      answer: "기본 포장 상태를 유지해 발송하며, 물류 상황에 따라 보조 포장이 추가될 수 있습니다.",
+    },
+    {
+      question: "유통기한 넉넉한 편인가요?",
+      answer: "판매 가능한 충분한 소비기한이 남은 상품만 출고됩니다.",
+    },
+  ],
+  카레: [
+    {
+      question: "매운맛인가요?",
+      answer: "상품별 맛 강도는 상이하며, 상품명 및 상세 설명을 참고해 주세요.",
+    },
+    {
+      question: "실온 보관 가능한가요?",
+      answer: "상품 표시사항 기준으로 보관해 주시면 되며, 일반적으로 실온 보관이 가능합니다.",
+    },
+    {
+      question: "한 끼 분량으로 보기 괜찮나요?",
+      answer: "개인차는 있지만 일반적으로 1인 1식 기준으로 많이 찾는 상품입니다.",
+    },
+  ],
+  default: [
+    {
+      question: "재입고 예정이 있나요?",
+      answer: "재고 상황에 따라 순차적으로 입고되며, 판매 페이지를 통해 확인 부탁드립니다.",
+    },
+    {
+      question: "유통기한은 넉넉한가요?",
+      answer: "판매 가능한 충분한 소비기한이 남은 상품만 출고하고 있습니다.",
+    },
+    {
+      question: "묶음배송 가능한가요?",
+      answer: "동일 주문 건은 가능한 범위 내에서 묶음배송 처리됩니다.",
+    },
+  ],
+};
+
+const MOCK_AUTHORS = [
+  "우민*",
+  "이상*",
+  "이현*",
+  "이용*",
+  "김경*",
+  "박경*",
+  "김하*",
+  "이준*",
+  "박민*",
+  "이서*",
+  "최유*",
+  "정다*",
+  "서현*",
+  "윤지*",
+  "임수*",
+];
 
 const REVIEW_IMAGES = [
   "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=300&q=80",
@@ -28,23 +211,7 @@ const REVIEW_IMAGES = [
   "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=300&q=80",
 ];
 
-const TABS = [
-  "상품상세",
-  REVIEW_COUNT_TEXT,
-  INQUIRY_COUNT_TEXT,
-  "교환/반품 안내",
-];
 
-const PRODUCT_INQUIRIES = Array.from({ length: 4 }).map((_, index) => ({
-  id: index + 1,
-  author: "김하* (hari***@naver.com)",
-  questionDate: "2026/04/02 09:24:09",
-  answerDate: "2026/04/02 10:30:30",
-  question:
-    "5개들이 멀티팩이 20개 필요해요.\n50개를 구매하면 멀티팩이 10개인가요?\n하나씩 낱개포장인가요?\n빠른답변 바랍니다^^",
-  answer:
-    "안녕하세요. 해당 상품은 5개들이 멀티팩 10개로 총 50개가 발송됩니다. 낱개 포장이 아닌 멀티팩 형태로 제공되니 참고 부탁드립니다. 감사합니다.",
-}));
 
 const RETURN_INFO_ROWS = [
   {
@@ -254,6 +421,64 @@ function buildFallbackDescription(product) {
   `;
 }
 
+function getCategoryKey(categoryName = "") {
+  const normalized = String(categoryName).trim();
+  if (CATEGORY_REVIEW_BANK[normalized]) return normalized;
+  return "default";
+}
+
+function seededNumber(seed, min, max) {
+  const base = Math.abs(Number(seed || 1));
+  const value = (base * 9301 + 49297) % 233280;
+  const ratio = value / 233280;
+  return Math.floor(min + ratio * (max - min + 1));
+}
+
+function seededPick(list, seed) {
+  if (!list.length) return "";
+  const index = Math.abs(Number(seed || 0)) % list.length;
+  return list[index];
+}
+
+function buildMockReviews(product) {
+  if (!product) return [];
+
+  const categoryKey = getCategoryKey(product.category_name);
+  const source = CATEGORY_REVIEW_BANK[categoryKey] || CATEGORY_REVIEW_BANK.default;
+  const count = seededNumber(product.id, 22, 29);
+
+  return Array.from({ length: count }).map((_, index) => {
+    const author = seededPick(MOCK_AUTHORS, product.id + index);
+    const body = seededPick(source, product.id * (index + 1));
+    const day = seededNumber(product.id + index, 1, 28);
+
+    return {
+      id: index + 1,
+      author: `${author} (user${100 + index}***@naver.com)`,
+      date: `Posted on April ${day}, 2026`,
+      body: `${body}`,
+    };
+  });
+}
+
+function buildMockInquiries(product) {
+  if (!product) return [];
+
+  const categoryKey = getCategoryKey(product.category_name);
+  const source =
+    CATEGORY_INQUIRY_BANK[categoryKey] || CATEGORY_INQUIRY_BANK.default;
+  const count = Math.min(source.length, seededNumber(product.id + 7, 3, 5));
+
+  return source.slice(0, count).map((item, index) => ({
+    id: index + 1,
+    author: `${seededPick(MOCK_AUTHORS, product.id + index + 30)} (hari***@naver.com)`,
+    questionDate: `2026/04/${String(10 + index).padStart(2, "0")} 09:24:09`,
+    answerDate: `2026/04/${String(10 + index).padStart(2, "0")} 10:30:30`,
+    question: `${product.name} 관련 문의입니다.\n${item.question}`,
+    answer: item.answer,
+  }));
+}
+
 export default function ProductDetailPage() {
   const navigate = useNavigate();
   const { productId } = useParams();
@@ -261,22 +486,27 @@ export default function ProductDetailPage() {
 
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState("상품상세");
+  const [activeTab, setActiveTab] = useState(TAB_KEYS.DETAIL);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const reviews = useMemo(
-    () =>
-      Array.from({ length: 6 }).map((_, index) => ({
-        id: index + 1,
-        author: "김하* (hari***@naver.com)",
-        date: "Posted on August 14, 2023",
-        body: "라면을 워낙 좋아하는 터라 여러 종류의 라면을 구비해 두고 즐기는데요. 신라면만의 진한 표고 버섯 풍미와 매콤한 맛이 가장 손이 자주 갑니다. 특유의 감칠맛과 국물 밸런스가 좋아 무난하게 먹기 좋고, 전체적으로는 꾸준히 찾게 되는 제품이에요.",
-      })),
-    [],
-  );
+const reviews = useMemo(() => buildMockReviews(product), [product]);
+const inquiries = useMemo(() => buildMockInquiries(product), [product]);
+
+const reviewTabLabel = `상품평(${reviews.length})`;
+const inquiryTabLabel = `상품문의(${inquiries.length})`;
+
+const tabs = useMemo(
+  () => [
+    { key: TAB_KEYS.DETAIL, label: "상품상세" },
+    { key: TAB_KEYS.REVIEW, label: reviewTabLabel },
+    { key: TAB_KEYS.INQUIRY, label: inquiryTabLabel },
+    { key: TAB_KEYS.RETURN, label: "교환/반품 안내" },
+  ],
+  [reviewTabLabel, inquiryTabLabel]
+);
 
   const pages = Array.from({ length: 10 }, (_, i) => i + 1);
 
@@ -406,18 +636,29 @@ export default function ProductDetailPage() {
     <S.Page>
       <S.Content>
         <S.Breadcrumb>
-          <span>Home</span>
+          <BreadcrumbButton type="button" onClick={() => navigate("/")}>
+            Home
+          </BreadcrumbButton>
           <S.Divider>›</S.Divider>
-          <span>{product.category_name}</span>
+          <BreadcrumbButton
+            type="button"
+            onClick={() =>
+              navigate(
+                `/products?categoryName=${encodeURIComponent(product.category_name)}`
+              )
+            }
+          >
+            {product.category_name}
+          </BreadcrumbButton>
           <S.Divider>›</S.Divider>
           <S.CurrentCategory>{product.name}</S.CurrentCategory>
         </S.Breadcrumb>
 
         <S.HeroSection>
           <S.ImagePanel>
-            <S.ImagePanelInner>
-              <S.ProductImage src={thumbnailImage} alt={product.name} />
-            </S.ImagePanelInner>
+            <HeroThumbFrame>
+              <HeroThumbImage src={thumbnailImage} alt={product.name} />
+            </HeroThumbFrame>
           </S.ImagePanel>
 
           <S.InfoPanel>
@@ -610,19 +851,19 @@ export default function ProductDetailPage() {
         </S.AnalysisSection>
 
         <S.TabBar>
-          {TABS.map((tab) => (
+          {tabs.map((tab) => (
             <S.TabButton
-              key={tab}
+              key={tab.key}
               type="button"
-              $active={activeTab === tab}
-              onClick={() => setActiveTab(tab)}
+              $active={activeTab === tab.key}
+              onClick={() => setActiveTab(tab.key)}
             >
-              {tab}
+              {tab.label}
             </S.TabButton>
           ))}
         </S.TabBar>
 
-        {activeTab === "상품상세" && (
+        {activeTab === TAB_KEYS.DETAIL && (
           <DetailContentSection>
             <QuillHtmlPreview
               dangerouslySetInnerHTML={{ __html: descriptionHtml }}
@@ -631,7 +872,7 @@ export default function ProductDetailPage() {
           </DetailContentSection>
         )}
 
-        {activeTab === REVIEW_COUNT_TEXT && (
+        {activeTab === TAB_KEYS.REVIEW && (
           <>
             <S.ReviewGrid>
               {reviews.map((review) => (
@@ -651,19 +892,6 @@ export default function ProductDetailPage() {
                       <MoreHorizontal size={16} />
                     </S.MoreButton>
                   </S.ReviewTop>
-
-                  <S.ThumbGrid>
-                    {REVIEW_IMAGES.map((image, index) => (
-                      <S.ThumbWrap key={`${review.id}-${index}`}>
-                        <S.ThumbImage src={image} alt={`review-${index}`} />
-                        {index === REVIEW_IMAGES.length - 1 && (
-                          <S.ThumbOverlay>
-                            <ChevronRight size={12} />
-                          </S.ThumbOverlay>
-                        )}
-                      </S.ThumbWrap>
-                    ))}
-                  </S.ThumbGrid>
 
                   <S.ReviewBody>{review.body}</S.ReviewBody>
                   <S.ReviewDate>{review.date}</S.ReviewDate>
@@ -700,10 +928,10 @@ export default function ProductDetailPage() {
           </>
         )}
 
-        {activeTab === INQUIRY_COUNT_TEXT && (
+        {activeTab === TAB_KEYS.INQUIRY && (
           <>
             <S.InquiryList>
-              {PRODUCT_INQUIRIES.map((item) => (
+              {inquiries.map((item) => (
                 <S.InquiryCard key={item.id}>
                   <S.InquiryRowTop>
                     <S.QuestionMeta>
@@ -777,7 +1005,7 @@ export default function ProductDetailPage() {
           </>
         )}
 
-        {activeTab === "교환/반품 안내" && (
+        {activeTab === TAB_KEYS.RETURN && (
           <S.ReturnSection>
             <S.ReturnTitle>반품/교환 정보</S.ReturnTitle>
 
@@ -1207,4 +1435,36 @@ const QuillHtmlPreview = styled.div`
     color: #111827;
     font-weight: 800;
   }
+`;
+
+const BreadcrumbButton = styled.button`
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #8b8b8b;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    color: #111827;
+  }
+`;
+
+const HeroThumbFrame = styled.div`
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  overflow: hidden;
+  background: #f6f6f6;
+
+  @media (max-width: 900px) {
+    min-height: 380px;
+  }
+`;
+
+const HeroThumbImage = styled.img`
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;

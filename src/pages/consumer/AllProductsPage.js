@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import * as S from "./AllProductsPage.styles";
 import { getProductList } from "../../api/product";
@@ -14,6 +15,7 @@ const REVIEW_MOCKS = [
   { rating: 4.9, reviewCount: 141 },
   { rating: 4.2, reviewCount: 39 },
 ];
+
 
 const FALLBACK_IMAGE =
   "data:image/svg+xml;utf8," +
@@ -60,6 +62,8 @@ export default function AllProductsPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
 
   const pageSize = 8;
 
@@ -126,10 +130,39 @@ export default function AllProductsPage() {
     productCategories.find((category) => category.id === selectedCategory)
       ?.name || "전체";
 
+  useEffect(() => {
+    const categoryNameParam = searchParams.get("categoryName");
+    if (!categoryNameParam || productCategories.length === 0) return;
+
+    const matched = productCategories.find(
+      (category) => category.name === categoryNameParam
+    );
+
+    if (matched && matched.id !== selectedCategory) {
+      setSelectedCategory(matched.id);
+      setCurrentPage(1);
+    }
+  }, [searchParams, productCategories, selectedCategory]);
+
   const handleChangeCategory = (categoryId) => {
     setSelectedCategory(categoryId);
     setKeyword("");
     setCurrentPage(1);
+
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (categoryId === "all") {
+      nextParams.delete("categoryName");
+    } else {
+      const matchedCategory = productCategories.find(
+        (category) => category.id === categoryId
+      );
+      if (matchedCategory) {
+        nextParams.set("categoryName", matchedCategory.name);
+      }
+    }
+
+    setSearchParams(nextParams);
   };
 
   const handleChangeKeyword = (event) => {
