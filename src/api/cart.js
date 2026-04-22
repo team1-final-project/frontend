@@ -1,5 +1,13 @@
 import api from "./axios";
 
+export const addCartItem = async (productId, quantity) => {
+  const response = await api.post("/cart/items", {
+    product_id: productId,
+    quantity,
+  });
+  return response.data;
+};
+
 export const getMyCart = async () => {
   const response = await api.get("/cart/me");
   return response.data;

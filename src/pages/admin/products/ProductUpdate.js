@@ -58,6 +58,18 @@ const FIXED_SHIPPING_FROM =
 const FIXED_RETURN_ADDRESS =
   "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
 
+function insertImageWithLineBreak(editor, imageUrl) {
+  if (!editor) return;
+
+  const range = editor.getSelection(true);
+  const insertIndex = range ? range.index : editor.getLength();
+
+  editor.insertText(insertIndex, "\n", "user");
+  editor.insertEmbed(insertIndex + 1, "image", imageUrl, "user");
+  editor.insertText(insertIndex + 2, "\n", "user");
+  editor.setSelection(insertIndex + 3, 0, "user");
+}
+
 export default function ProductUpdate() {
   const nav = useNavigate();
   const { productCode } = useParams();
@@ -340,13 +352,7 @@ export default function ProductUpdate() {
 
         const result = await uploadAdminDetailImage(file);
         const editor = quillRef.current?.getEditor();
-        const range = editor?.getSelection(true);
-
-        if (editor) {
-          const insertIndex = range ? range.index : editor.getLength();
-          editor.insertEmbed(insertIndex, "image", result.image_url);
-          editor.setSelection(insertIndex + 1);
-        }
+        insertImageWithLineBreak(editor, result.image_url);
 
         setDetailImageUrls((prev) => {
           if (prev.includes(result.image_url)) return prev;
@@ -367,11 +373,13 @@ export default function ProductUpdate() {
     () => ({
       toolbar: {
         container: [
-          [{ header: [1, 2, false] }],
+          [{ header: [1, 2, 3, false] }],
           [{ size: ["small", false, "large", "huge"] }],
           ["bold", "italic", "underline", "strike"],
+          [{ color: [] }, { background: [] }],
           ["blockquote", "code-block"],
           [{ list: "ordered" }, { list: "bullet" }],
+          [{ indent: "-1" }, { indent: "+1" }],
           [{ align: [] }],
           ["link", "image"],
           ["clean"],
@@ -381,6 +389,14 @@ export default function ProductUpdate() {
         },
       },
       blotFormatter: {},
+      clipboard: {
+        matchVisual: false,
+      },
+      history: {
+        delay: 500,
+        maxStack: 100,
+        userOnly: true,
+      },
     }),
     [],
   );
@@ -392,10 +408,13 @@ export default function ProductUpdate() {
     "italic",
     "underline",
     "strike",
+    "color",
+    "background",
     "blockquote",
     "code-block",
     "list",
     "bullet",
+    "indent",
     "align",
     "link",
     "image",
@@ -1248,18 +1267,61 @@ const EditorWrap = styled.div`
     border-top-left-radius: 14px;
     border-top-right-radius: 14px;
   }
+
   .ql-container.ql-snow {
     border: 1px solid var(--border);
     border-top: none;
     border-bottom-left-radius: 14px;
     border-bottom-right-radius: 14px;
-    min-height: 280px;
+    min-height: 320px;
     background: white;
   }
+
   .ql-editor {
-    min-height: 280px;
+    min-height: 320px;
     font-size: 14px;
+    line-height: 1.8;
     color: var(--font);
+    word-break: break-word;
+  }
+
+  .ql-editor img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 14px 0;
+    float: none !important;
+  }
+
+  .ql-editor p,
+  .ql-editor h1,
+  .ql-editor h2,
+  .ql-editor h3,
+  .ql-editor h4,
+  .ql-editor h5,
+  .ql-editor h6,
+  .ql-editor ul,
+  .ql-editor ol,
+  .ql-editor blockquote,
+  .ql-editor pre {
+    clear: both;
+  }
+
+  .ql-editor .ql-align-center img {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ql-editor .ql-align-right img {
+    margin-left: auto;
+  }
+
+  .ql-editor pre.ql-syntax {
+    background: #111827;
+    color: #f9fafb;
+    padding: 14px 16px;
+    border-radius: 12px;
+    overflow-x: auto;
   }
 `;
 const EditorNotice = styled.div`

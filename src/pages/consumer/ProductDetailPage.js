@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
+import styled from "styled-components";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   BadgeCheck,
-  Bell,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -11,11 +12,13 @@ import {
   Plus,
 } from "lucide-react";
 import * as S from "./ProductDetailPageStyles.js";
+import { getProductDetail } from "../../api/product";
+import { addCartItem } from "../../api/cart";
 import shinramyunImg from "../../assets/shinramyeon.jpg";
 
-const PRODUCT_IMAGE = shinramyunImg;
-const DETAIL_IMAGE_TOP = shinramyunImg;
-const DETAIL_IMAGE_BOTTOM = shinramyunImg;
+const STATIC_RATING = 4.5;
+const REVIEW_COUNT_TEXT = "상품평(788,617)";
+const INQUIRY_COUNT_TEXT = "상품문의";
 
 const REVIEW_IMAGES = [
   "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=300&q=80",
@@ -25,15 +28,11 @@ const REVIEW_IMAGES = [
   "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=300&q=80",
 ];
 
-const TABS = ["상품상세", "상품평(788,617)", "상품문의", "교환/반품 안내"];
-
-const PRICE_TREND_POINTS = [24, 23, 31, 34, 46];
-const PRICE_TREND_LABELS = ["4주전", "3주전", "2주전", "1주전", "현재"];
-
-const BUY_TIMING_DATA = [
-  { label: "오늘", value: 4150, status: "추천" },
-  { label: "3일 후", value: 4280, status: "보통" },
-  { label: "7일 후", value: 4410, status: "상승 가능성" },
+const TABS = [
+  "상품상세",
+  REVIEW_COUNT_TEXT,
+  INQUIRY_COUNT_TEXT,
+  "교환/반품 안내",
 ];
 
 const PRODUCT_INQUIRIES = Array.from({ length: 4 }).map((_, index) => ({
@@ -51,7 +50,7 @@ const RETURN_INFO_ROWS = [
   {
     label: "반품/교환 배송비",
     value:
-      "(구매자귀책) 3,000원 / 6,000원 초기도배송비 무료시 반품배송비 부과방법 : 편도",
+      "(구매자 귀책) 3,000원 / 6,000원, 무료배송 상품의 경우 최초 배송비 포함 편도 기준으로 부과될 수 있습니다.",
   },
   {
     label: "반품/교환지 주소",
@@ -59,7 +58,7 @@ const RETURN_INFO_ROWS = [
   },
   {
     label: "반품/교환 안내",
-    value: "상품상세설명 참조",
+    value: "상품 상태 확인 후 처리되며, 상세 기준은 아래 안내를 참고해 주세요.",
   },
 ];
 
@@ -75,34 +74,198 @@ const RETURN_DENIED_RULES = [
   "고객 귀책 사유 (단순 변심, 주소 오기재, 주문 착오, 보관 부주의 및 상품 사용으로 가치 하락한 경우 등)",
   "소비자의 사용 또는 소비에 의해 상품 등의 가치가 현저히 감소한 경우",
   "다른 옵션 상품으로 교환을 요청하는 경우",
-  "슈팅셀러 상품의 배송완료 후 24시간 이내에 사진 포함 반품(교환) 신청이 누락된 경우",
-  "슈팅셀러 상품의 반품(교환) 신청 후 72시간 이내에 연락이 닿지 않은 경우",
-  "슈팅셀러 상품의 배송 받은 아이스박스, 냉매제, 상품을 임의로 폐기한 경우",
-  "슈팅배송 상품의 교환을 요청하는 경우",
+  "배송완료 후 반품/교환 신청이 누락된 경우",
+  "반품/교환 신청 후 일정 기간 내 연락이 닿지 않은 경우",
+  "상품 구성품을 임의로 폐기한 경우",
+  "교환이 불가능한 일부 프로모션 상품을 요청하는 경우",
 ];
 
-function buildLinePoints(values) {
+function formatCurrency(value) {
+  return `${Number(value || 0).toLocaleString()}원`;
+}
+
+function getChartPoints(data, width = 640, height = 220) {
+  const paddingX = 38;
+  const paddingTop = 36;
+  const paddingBottom = 34;
+
+  const values = data.map((item) => item.value);
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = Math.max(max - min, 1);
 
-  return values
-    .map((value, index) => {
-      const x = values.length === 1 ? 0 : (index / (values.length - 1)) * 100;
-      const y = 42 - ((value - min) / range) * 28;
-      return `${x},${y}`;
-    })
-    .join(" ");
+  return data.map((item, index) => {
+    const x =
+      paddingX +
+      (index * (width - paddingX * 2)) / Math.max(data.length - 1, 1);
+
+    const normalized = (item.value - min) / range;
+    const y =
+      height - paddingBottom - normalized * (height - paddingTop - paddingBottom);
+
+    return {
+      ...item,
+      x,
+      y,
+    };
+  });
+}
+
+function decodeHtmlEntities(value = "") {
+  if (typeof window === "undefined") return value;
+  const textarea = document.createElement("textarea");
+  textarea.innerHTML = value;
+  return textarea.value;
+}
+
+function normalizeDescriptionHtml(rawHtml) {
+  if (!rawHtml) return "";
+  if (typeof window === "undefined") return rawHtml;
+
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = rawHtml;
+
+  wrapper.querySelectorAll("pre.ql-syntax, pre").forEach((pre) => {
+    const rawText = (pre.textContent || "").trim();
+    if (!rawText) return;
+
+    const decoded = decodeHtmlEntities(rawText);
+    const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(decoded);
+    if (!looksLikeHtml) return;
+
+    const temp = document.createElement("div");
+    temp.innerHTML = decoded;
+
+    if (!temp.childNodes.length) return;
+    pre.replaceWith(...Array.from(temp.childNodes));
+  });
+
+  return wrapper.innerHTML;
+}
+
+function buildSmoothPath(points) {
+  if (!points.length) return "";
+
+  let d = `M ${points[0].x} ${points[0].y}`;
+
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const current = points[i];
+    const next = points[i + 1];
+    const controlX = (current.x + next.x) / 2;
+
+    d += ` C ${controlX} ${current.y}, ${controlX} ${next.y}, ${next.x} ${next.y}`;
+  }
+
+  return d;
+}
+
+function buildExpectedLowestWindow(product) {
+  if (!product) return "가격 추이 확인";
+  if (product.recent_lowest_price == null) return "가격 추이 확인";
+
+  const gap = Number(product.price || 0) - Number(product.recent_lowest_price || 0);
+
+  if (gap <= 100) return "지금";
+  if (gap <= 300) return "이번 주";
+  return "가격 추이 확인";
+}
+
+function buildAiContent(product) {
+  if (!product) {
+    return {
+      headline: "가격 추이 확인 추천",
+      summary: "상품 정보를 불러오는 중입니다.",
+    };
+  }
+
+  if (product.recent_lowest_price == null) {
+    return {
+      headline: "가격 추이 확인 추천",
+      summary:
+        "최근 최저가 정보가 충분하지 않아 가격 추이를 함께 확인하는 것이 좋아요.",
+    };
+  }
+
+  const gap = Number(product.price || 0) - Number(product.recent_lowest_price || 0);
+
+  if (gap <= 0) {
+    return {
+      headline: "지금 구매 추천",
+      summary:
+        "현재 판매가가 최근 최저가 수준이에요. 지금 구매해도 부담이 적은 구간입니다.",
+    };
+  }
+
+  if (gap <= 200) {
+    return {
+      headline: "지금 구매 추천",
+      summary:
+        "현재 판매가가 최근 최저가에 가까운 편이에요. 단기 변동을 고려하면 지금 구매가 유리할 수 있어요.",
+    };
+  }
+
+  return {
+    headline: "가격 추이 확인 추천",
+    summary:
+      "현재 판매가가 최근 최저가보다 다소 높아요. 급하지 않다면 가격 추이를 조금 더 지켜보는 것도 좋아요.",
+  };
+}
+
+function buildTimingData(product) {
+  if (!product) return [];
+
+  const current = Number(product.price || 0);
+  const recentLowest = Number(product.recent_lowest_price || current);
+  const nearLowest = current - recentLowest <= 200;
+
+  const after3Days = current + Math.max(100, Math.round(current * 0.02));
+  const after7Days = current + Math.max(250, Math.round(current * 0.05));
+
+  return [
+    { label: "오늘", value: current, status: nearLowest ? "추천" : "보통" },
+    { label: "3일 후", value: after3Days, status: nearLowest ? "보통" : "추천" },
+    { label: "7일 후", value: after7Days, status: "상승 가능성" },
+  ];
+}
+
+function buildFallbackDescription(product) {
+  if (!product) {
+    return "<p>상품 상세 설명이 준비 중입니다.</p>";
+  }
+
+  return `
+    <h2>상품 소개</h2>
+    <p>
+      ${product.name} 상품 상세 설명이 준비 중입니다. 현재는 상품 기본 정보와 가격 정보를 우선 제공하고 있어요.
+    </p>
+
+    <h3>상품 정보</h3>
+    <ul>
+      <li><strong>브랜드</strong> : ${product.brand ?? "-"}</li>
+      <li><strong>원산지</strong> : ${product.origin_country ?? "-"}</li>
+      <li><strong>소비기한</strong> : ${product.expiration_date ?? "-"}</li>
+      <li><strong>원가</strong> : ${formatCurrency(product.cost_price)}</li>
+      <li><strong>최근 최저가</strong> : ${
+        product.recent_lowest_price != null
+          ? formatCurrency(product.recent_lowest_price)
+          : "-"
+      }</li>
+    </ul>
+  `;
 }
 
 export default function ProductDetailPage() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  const navigate = useNavigate();
+  const { productId } = useParams();
+  const [searchParams] = useSearchParams();
 
+  const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("상품상세");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const reviews = useMemo(
     () =>
@@ -117,10 +280,127 @@ export default function ProductDetailPage() {
 
   const pages = Array.from({ length: 10 }, (_, i) => i + 1);
 
-  const decreaseQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
-  const increaseQuantity = () => setQuantity((prev) => prev + 1);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
-  const linePoints = buildLinePoints(PRICE_TREND_POINTS);
+  useEffect(() => {
+    const fetchProductDetail = async () => {
+      setLoading(true);
+      setErrorMessage("");
+
+      try {
+        const numericProductId =
+          productId && !Number.isNaN(Number(productId)) ? Number(productId) : null;
+        const productCode = searchParams.get("productCode");
+
+        const data = await getProductDetail({
+          productId: numericProductId,
+          productCode: productCode || undefined,
+        });
+
+        setProduct(data);
+        setQuantity(1);
+      } catch (error) {
+        setErrorMessage(
+          error?.response?.data?.detail || "상품 정보를 불러오지 못했습니다."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetail();
+  }, [productId, searchParams]);
+
+  const decreaseQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
+  const increaseQuantity = () => {
+    if (!product) return;
+    setQuantity((prev) => Math.min(prev + 1, Number(product.stock_qty || prev + 1)));
+  };
+
+  const handleAddToCart = async () => {
+    if (!product) return;
+
+    try {
+      setAdding(true);
+      await addCartItem(product.id, quantity);
+      alert("장바구니에 담았습니다.");
+    } catch (error) {
+      const status = error?.response?.status;
+      const detail =
+        error?.response?.data?.detail || "장바구니 담기에 실패했습니다.";
+
+      if (status === 401) {
+        alert("로그인이 필요합니다.");
+        navigate("/login");
+        return;
+      }
+
+      alert(detail);
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const aiContent = useMemo(() => buildAiContent(product), [product]);
+  const expectedLowestWindow = useMemo(
+    () => buildExpectedLowestWindow(product),
+    [product]
+  );
+  const buyTimingData = useMemo(() => buildTimingData(product), [product]);
+
+  const trendData = useMemo(() => {
+    if (!product) return [];
+    if (product.trend_points?.length) return product.trend_points;
+    return [{ label: "현재", value: Number(product.price || 0) }];
+  }, [product]);
+
+  const chartWidth = 640;
+  const chartHeight = 220;
+  const chartPoints = useMemo(
+    () => getChartPoints(trendData, chartWidth, chartHeight),
+    [trendData]
+  );
+  const chartPath = useMemo(() => buildSmoothPath(chartPoints), [chartPoints]);
+
+  const totalPrice = Number(product?.price || 0) * quantity;
+
+  const discountRate =
+    product?.original_price && product.original_price > product.price
+      ? Math.round(
+          ((product.original_price - product.price) / product.original_price) * 100
+        )
+      : null;
+
+  const thumbnailImage = product?.thumbnail_image_url || shinramyunImg;
+  const descriptionHtml = useMemo(
+    () =>
+      normalizeDescriptionHtml(
+        product?.description_html || buildFallbackDescription(product)
+      ),
+    [product]
+  );
+
+  if (loading) {
+    return (
+      <S.Page>
+        <S.Content>
+          <StatusBox>상품 정보를 불러오는 중입니다.</StatusBox>
+        </S.Content>
+      </S.Page>
+    );
+  }
+
+  if (!product || errorMessage) {
+    return (
+      <S.Page>
+        <S.Content>
+          <StatusBox>{errorMessage || "상품 정보를 찾을 수 없습니다."}</StatusBox>
+        </S.Content>
+      </S.Page>
+    );
+  }
 
   return (
     <S.Page>
@@ -128,86 +408,115 @@ export default function ProductDetailPage() {
         <S.Breadcrumb>
           <span>Home</span>
           <S.Divider>›</S.Divider>
-          <span>라면</span>
+          <span>{product.category_name}</span>
           <S.Divider>›</S.Divider>
-          <S.CurrentCategory>농심 신라면</S.CurrentCategory>
+          <S.CurrentCategory>{product.name}</S.CurrentCategory>
         </S.Breadcrumb>
 
         <S.HeroSection>
           <S.ImagePanel>
             <S.ImagePanelInner>
-              <S.ProductImage src={PRODUCT_IMAGE} alt="농심 신라면" />
+              <S.ProductImage src={thumbnailImage} alt={product.name} />
             </S.ImagePanelInner>
           </S.ImagePanel>
 
           <S.InfoPanel>
-            <S.Title>농심 신라면, 120g, 5개</S.Title>
+            <S.Title>{product.name}</S.Title>
 
             <S.RatingRow>
               <S.Stars>★★★★★</S.Stars>
-              <S.RatingText>4.5/5</S.RatingText>
+              <S.RatingText>{STATIC_RATING}/5</S.RatingText>
             </S.RatingRow>
 
             <S.PriceRow>
-              <S.CurrentPrice>4,150원</S.CurrentPrice>
-              <S.OriginalPrice>5,000원</S.OriginalPrice>
-              <S.DiscountBadge>-17%</S.DiscountBadge>
+              <S.CurrentPrice>{formatCurrency(product.price)}</S.CurrentPrice>
+              {product.original_price ? (
+                <>
+                  <S.OriginalPrice>
+                    {formatCurrency(product.original_price)}
+                  </S.OriginalPrice>
+                  {discountRate !== null && (
+                    <S.DiscountBadge>-{discountRate}%</S.DiscountBadge>
+                  )}
+                </>
+              ) : null}
             </S.PriceRow>
 
             <S.AIBadgeRow>
-              <S.AIBadge $tone="primary">AI 추천</S.AIBadge>
-              <S.AIBadge $tone="accent">최저가 근접</S.AIBadge>
+              {product.ai_pricing_enabled ? (
+                <S.AIBadge $tone="primary">AI 추천</S.AIBadge>
+              ) : null}
+              {product.recent_lowest_price != null &&
+              product.price - product.recent_lowest_price <= 200 ? (
+                <S.AIBadge $tone="accent">최저가 근접</S.AIBadge>
+              ) : null}
             </S.AIBadgeRow>
 
             <S.AISummaryCard>
               <S.AISummaryTitle>AI 구매 추천</S.AISummaryTitle>
-              <S.AISummaryHeadline>지금 구매 추천</S.AISummaryHeadline>
-              <S.AISummaryText>
-                최근 7일 평균 대비 가격이 충분히 낮고, 다음 주에는 소폭 상승
-                가능성이 있어 지금 구매하는 편이 유리해요.
-              </S.AISummaryText>
+              <S.AISummaryHeadline>{aiContent.headline}</S.AISummaryHeadline>
+              <S.AISummaryText>{aiContent.summary}</S.AISummaryText>
             </S.AISummaryCard>
 
             <S.SpecGrid>
               <S.SpecCard>
                 <S.SpecLabel>현재가</S.SpecLabel>
-                <S.SpecValue>4,150원</S.SpecValue>
+                <S.SpecValue>{formatCurrency(product.price)}</S.SpecValue>
               </S.SpecCard>
               <S.SpecCard>
                 <S.SpecLabel>최근 최저가</S.SpecLabel>
-                <S.SpecValue>3,980원</S.SpecValue>
+                <S.SpecValue>
+                  {product.recent_lowest_price != null
+                    ? formatCurrency(product.recent_lowest_price)
+                    : "-"}
+                </S.SpecValue>
               </S.SpecCard>
               <S.SpecCard>
                 <S.SpecLabel>예상 최저가 시점</S.SpecLabel>
-                <S.SpecValue>이번 주</S.SpecValue>
+                <S.SpecValue>{expectedLowestWindow}</S.SpecValue>
               </S.SpecCard>
             </S.SpecGrid>
 
             <S.Specs>
-              <li>중량 : 120g</li>
-              <li>칼로리 : 500kcal</li>
-              <li>소비기한 : 6개월</li>
-              <li>출시년도 : 1986.10</li>
+              <li>브랜드 : {product.brand ?? "-"}</li>
+              <li>원산지 : {product.origin_country ?? "-"}</li>
+              <li>소비기한 : {product.expiration_date ?? "-"}</li>
             </S.Specs>
 
-            <S.ActionArea>
-              <S.QuantityBox>
-                <S.QtyButton type="button" onClick={decreaseQuantity}>
-                  <Minus size={15} strokeWidth={2.3} />
-                </S.QtyButton>
-                <S.QtyValue>{quantity}</S.QtyValue>
-                <S.QtyButton type="button" onClick={increaseQuantity}>
-                  <Plus size={15} strokeWidth={2.3} />
-                </S.QtyButton>
-              </S.QuantityBox>
+            <ActionRow>
+              <TotalPriceCard>
+                <TotalPriceLabel>총 상품금액</TotalPriceLabel>
+                <TotalPriceValue>{formatCurrency(totalPrice)}</TotalPriceValue>
+              </TotalPriceCard>
 
-              <S.SecondaryButton type="button">
-                <Bell size={16} />
-                가격 알림
-              </S.SecondaryButton>
+              <ActionRight>
+                <S.QuantityBox>
+                  <S.QtyButton type="button" onClick={decreaseQuantity}>
+                    <Minus size={15} strokeWidth={2.3} />
+                  </S.QtyButton>
+                  <S.QtyValue>{quantity}</S.QtyValue>
+                  <S.QtyButton
+                    type="button"
+                    onClick={increaseQuantity}
+                    disabled={quantity >= Number(product.stock_qty || 0)}
+                  >
+                    <Plus size={15} strokeWidth={2.3} />
+                  </S.QtyButton>
+                </S.QuantityBox>
 
-              <S.CartButton type="button">장바구니 담기</S.CartButton>
-            </S.ActionArea>
+                <S.CartButton
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={adding || Number(product.stock_qty || 0) < 1}
+                >
+                  {Number(product.stock_qty || 0) < 1
+                    ? "품절"
+                    : adding
+                    ? "담는 중..."
+                    : "장바구니 담기"}
+                </S.CartButton>
+              </ActionRight>
+            </ActionRow>
           </S.InfoPanel>
         </S.HeroSection>
 
@@ -216,62 +525,75 @@ export default function ProductDetailPage() {
             <S.AnalysisCard>
               <S.AnalysisCardTitle>최근 가격 추이</S.AnalysisCardTitle>
               <S.AnalysisCardSub>
-                최근 4주 기준으로 현재 가격이 가장 낮은 구간에 가까워요.
+                최근 가격 이력을 기준으로 현재 가격 흐름을 확인할 수 있어요.
               </S.AnalysisCardSub>
 
-              <S.SimpleTrendChart>
-                <S.SimpleTrendSvg
-                  viewBox="0 0 100 48"
-                  preserveAspectRatio="none"
-                >
-                  <polyline
-                    fill="none"
-                    stroke="#2f6fd6"
-                    strokeWidth="2.5"
-                    points={linePoints}
-                  />
-                  {PRICE_TREND_POINTS.map((_, index) => {
-                    const x =
-                      PRICE_TREND_POINTS.length === 1
-                        ? 0
-                        : (index / (PRICE_TREND_POINTS.length - 1)) * 100;
+              <TrendChartCard>
+                <TrendCanvas>
+                  <TrendSvg
+                    viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                    preserveAspectRatio="none"
+                  >
+                    {[0, 1, 2].map((idx) => {
+                      const y = 52 + idx * 40;
+                      return (
+                        <line
+                          key={idx}
+                          x1="38"
+                          y1={y}
+                          x2={chartWidth - 38}
+                          y2={y}
+                          stroke="#edf1f6"
+                          strokeWidth="1"
+                        />
+                      );
+                    })}
 
-                    const min = Math.min(...PRICE_TREND_POINTS);
-                    const max = Math.max(...PRICE_TREND_POINTS);
-                    const range = Math.max(max - min, 1);
-                    const y =
-                      42 - ((PRICE_TREND_POINTS[index] - min) / range) * 28;
+                    <path
+                      d={chartPath}
+                      fill="none"
+                      stroke="#356dce"
+                      strokeWidth="5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
 
-                    return (
-                      <circle
-                        key={index}
-                        cx={x}
-                        cy={y}
-                        r="1.8"
-                        fill="#ffffff"
-                        stroke="#2f6fd6"
-                        strokeWidth="1.4"
-                      />
-                    );
-                  })}
-                </S.SimpleTrendSvg>
-              </S.SimpleTrendChart>
+                    {chartPoints.map((point, index) => (
+                      <g key={point.label}>
+                        <circle
+                          cx={point.x}
+                          cy={point.y}
+                          r={index === chartPoints.length - 1 ? 8 : 7}
+                          fill="#ffffff"
+                          stroke="#356dce"
+                          strokeWidth="4"
+                        />
+                      </g>
+                    ))}
+                  </TrendSvg>
 
-              <S.TrendLabelRow>
-                {PRICE_TREND_LABELS.map((label) => (
-                  <S.TrendLabel key={label}>{label}</S.TrendLabel>
-                ))}
-              </S.TrendLabelRow>
+                  <TrendLabelRail>
+                    {chartPoints.map((point) => (
+                      <TrendLabelMarker
+                        key={point.label}
+                        style={{ left: `${(point.x / chartWidth) * 100}%` }}
+                      >
+                        {point.label}
+                      </TrendLabelMarker>
+                    ))}
+                  </TrendLabelRail>
+                </TrendCanvas>
+              </TrendChartCard>
             </S.AnalysisCard>
 
             <S.AnalysisCard>
               <S.AnalysisCardTitle>구매 타이밍 예측</S.AnalysisCardTitle>
               <S.AnalysisCardSub>
-                AI 분석 기준으로 이번 주 구매가 가장 유리할 가능성이 높아요.
+                현재가와 최근 최저가를 바탕으로 구매 타이밍을 참고용으로 보여줘요.
               </S.AnalysisCardSub>
 
               <S.TimingList>
-                {BUY_TIMING_DATA.map((item) => (
+                {buyTimingData.map((item) => (
                   <S.TimingItem key={item.label}>
                     <S.TimingLabelWrap>
                       <S.TimingLabel>{item.label}</S.TimingLabel>
@@ -279,9 +601,7 @@ export default function ProductDetailPage() {
                         {item.status}
                       </S.TimingStatus>
                     </S.TimingLabelWrap>
-                    <S.TimingPrice>
-                      {item.value.toLocaleString()}원
-                    </S.TimingPrice>
+                    <S.TimingPrice>{formatCurrency(item.value)}</S.TimingPrice>
                   </S.TimingItem>
                 ))}
               </S.TimingList>
@@ -303,98 +623,15 @@ export default function ProductDetailPage() {
         </S.TabBar>
 
         {activeTab === "상품상세" && (
-          <S.DetailSection>
-            <S.DetailImageHero>
-              <S.DetailHeroImage
-                src={DETAIL_IMAGE_TOP}
-                alt="신라면 메인 이미지"
-              />
-            </S.DetailImageHero>
+          <DetailContentSection>
+            <QuillHtmlPreview
+              dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+            />
 
-            <S.BrandStorySection>
-              <S.BrandStoryEyebrow>Brand Story</S.BrandStoryEyebrow>
-              <S.BrandStoryTitle>
-                신라면
-                <br />
-                브랜드 이야기
-              </S.BrandStoryTitle>
-
-              <S.BrandStoryGrid>
-                <S.BrandStoryImageWrap>
-                  <S.BrandStoryImage
-                    src={DETAIL_IMAGE_BOTTOM}
-                    alt="신라면 브랜드 이미지"
-                  />
-                </S.BrandStoryImageWrap>
-
-                <S.BrandStoryTextWrap>
-                  <S.BrandStoryHeadline>
-                    Spicy Happiness In Noodles
-                  </S.BrandStoryHeadline>
-
-                  <S.BrandStoryText>
-                    1986년 한국인의 입맛에 맞춘 매운맛 라면으로 시작한 신라면은
-                    진한 소고기 육수와 깊은 양념의 조화로 전 세계인의 입맛까지
-                    사로잡은 K-푸드 대표 아이콘입니다.
-                  </S.BrandStoryText>
-
-                  <S.BrandStoryText>
-                    이제 신라면 한 그릇이 전하는 매콤하지만 행복한 순간을 담아,
-                    <strong> SHIN : Spicy Happiness In Noodles</strong>라는
-                    슬로건으로 그 가치를 새롭게 이야기합니다.
-                  </S.BrandStoryText>
-
-                  <S.BrandStoryText>
-                    전 세계 100여 국가에서 사랑받는 신라면.
-                    <br />
-                    <strong>Spicy Happiness In Noodles.</strong>
-                    <br />
-                    그리고, 당신의 입맛을 맛있게.
-                  </S.BrandStoryText>
-                </S.BrandStoryTextWrap>
-              </S.BrandStoryGrid>
-            </S.BrandStorySection>
-
-            <S.CheckPointSection>
-              <S.CheckPointEyebrow>Check Point</S.CheckPointEyebrow>
-              <S.CheckPointTitle>
-                신라면
-                <br />
-                특별한 매력
-              </S.CheckPointTitle>
-
-              <S.CheckPointCardGrid>
-                <S.CheckPointCard>
-                  <S.CheckPointCardTitle>진한 국물 맛</S.CheckPointCardTitle>
-                  <S.CheckPointCardText>
-                    소고기 육수와 버섯 풍미가 더해져 깊고 균형감 있는 국물 맛을
-                    느낄 수 있어요.
-                  </S.CheckPointCardText>
-                </S.CheckPointCard>
-
-                <S.CheckPointCard>
-                  <S.CheckPointCardTitle>꾸준한 인기</S.CheckPointCardTitle>
-                  <S.CheckPointCardText>
-                    오랜 시간 사랑받아온 대표 라면으로, 호불호 적고 만족도가
-                    높은 제품이에요.
-                  </S.CheckPointCardText>
-                </S.CheckPointCard>
-
-                <S.CheckPointCard>
-                  <S.CheckPointCardTitle>
-                    AI 추천 구매 구간
-                  </S.CheckPointCardTitle>
-                  <S.CheckPointCardText>
-                    현재 가격은 최근 하락 구간에 위치해 있어 재구매용으로도
-                    부담이 적은 편이에요.
-                  </S.CheckPointCardText>
-                </S.CheckPointCard>
-              </S.CheckPointCardGrid>
-            </S.CheckPointSection>
-          </S.DetailSection>
+          </DetailContentSection>
         )}
 
-        {activeTab === "상품평(788,617)" && (
+        {activeTab === REVIEW_COUNT_TEXT && (
           <>
             <S.ReviewGrid>
               {reviews.map((review) => (
@@ -463,7 +700,7 @@ export default function ProductDetailPage() {
           </>
         )}
 
-        {activeTab === "상품문의" && (
+        {activeTab === INQUIRY_COUNT_TEXT && (
           <>
             <S.InquiryList>
               {PRODUCT_INQUIRIES.map((item) => (
@@ -588,3 +825,386 @@ export default function ProductDetailPage() {
     </S.Page>
   );
 }
+
+const StatusBox = styled.div`
+  margin-top: 32px;
+  padding: 56px 24px;
+  border-radius: 24px;
+  border: 1px solid #ebe5dc;
+  background: #ffffff;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #666666;
+`;
+
+const ActionRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 18px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #e6e0d7;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    align-items: stretch;
+    gap: 12px;
+  }
+`;
+
+const ActionRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+`;
+
+const TotalPriceCard = styled.div`
+  width: 285px;
+  min-width: 190px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  background: #f8f6f2;
+  border: 1px solid #eee7dd;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+`;
+
+const TotalPriceLabel = styled.p`
+  margin: 0;
+  font-size: 11px;
+  color: #8f887f;
+  font-weight: 700;
+`;
+
+const TotalPriceValue = styled.p`
+  margin: 6px 0 0;
+  font-size: 24px;
+  color: #111111;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+`;
+
+const TrendChartCard = styled.div`
+  margin-top: 16px;
+  padding: 10px 4px 0;
+`;
+
+const TrendSvg = styled.svg`
+  width: 100%;
+  height: auto;
+  display: block;
+`;
+
+const TrendCanvas = styled.div`
+  width: 100%;
+`;
+
+const TrendLabelRail = styled.div`
+  position: relative;
+  width: 100%;
+  height: 26px;
+  margin-top: 8px;
+`;
+
+const TrendLabelMarker = styled.div`
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 700;
+  color: #8b6b4e;
+  white-space: nowrap;
+`;
+
+const UnifiedDetailSection = styled.section`
+  margin-top: 34px;
+  padding: 28px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid #ebe5dc;
+
+  @media (max-width: 720px) {
+    padding: 22px 18px;
+  }
+`;
+
+const UnifiedDetailHeader = styled.div`
+  margin-bottom: 24px;
+`;
+
+const UnifiedDetailEyebrow = styled.p`
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: #77726b;
+`;
+
+const UnifiedDetailTitle = styled.h2`
+  margin: 10px 0 0;
+  font-size: 40px;
+  line-height: 1.08;
+  font-weight: 900;
+  color: #111111;
+  letter-spacing: -0.05em;
+
+  @media (max-width: 720px) {
+    font-size: 32px;
+  }
+`;
+
+const UnifiedDetailDesc = styled.p`
+  margin: 12px 0 0;
+  color: #666666;
+  font-size: 14px;
+  line-height: 1.7;
+`;
+
+const UnifiedDetailBody = styled.div`
+  display: grid;
+  grid-template-columns: 420px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+
+  @media (max-width: 980px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const UnifiedImageArea = styled.div`
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid #ebe5dc;
+  background: #f7f7f7;
+`;
+
+const UnifiedImage = styled.img`
+  display: block;
+  width: 100%;
+  height: auto;
+`;
+
+const UnifiedTextArea = styled.div`
+  min-width: 0;
+`;
+
+const UnifiedDivider = styled.div`
+  margin: 26px 0 22px;
+  border-bottom: 1px solid #e8e1d8;
+`;
+
+const UnifiedPointWrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+const UnifiedPointTitle = styled.h4`
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: #111111;
+`;
+
+const UnifiedPointList = styled.ul`
+  margin: 0;
+  padding-left: 18px;
+  color: #666666;
+  font-size: 14px;
+  line-height: 1.8;
+
+  li {
+    margin-bottom: 4px;
+  }
+`;
+
+const DetailImageGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+`;
+
+const DetailContentSection = styled.section`
+  margin-top: 34px;
+  padding: 28px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid #ebe5dc;
+
+  @media (max-width: 720px) {
+    padding: 20px 16px;
+  }
+`;
+
+const QuillHtmlPreview = styled.div`
+  width: 100%;
+  color: #374151;
+  font-size: 15px;
+  line-height: 1.8;
+  overflow: hidden;
+
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: #111827;
+    margin: 0 0 14px;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  h3 {
+    font-size: 20px;
+  }
+
+  p {
+    margin: 0 0 14px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  ul,
+  ol {
+    margin: 0 0 18px 18px;
+    padding: 0;
+  }
+
+  li {
+    margin-bottom: 8px;
+    overflow-wrap: anywhere;
+  }
+
+  blockquote {
+    margin: 20px 0;
+    padding: 16px 18px;
+    border-left: 4px solid #2f6fd6;
+    background: #f7faff;
+    color: #1f2937;
+    border-radius: 10px;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 14px 0;
+  }
+
+  video,
+  iframe {
+    display: block;
+    max-width: 100%;
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    margin: 16px 0;
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin: 18px 0;
+  }
+
+  th,
+  td {
+    border: 1px solid #e5e7eb;
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  pre,
+  pre.ql-syntax {
+    margin: 16px 0;
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: #111827;
+    color: #f9fafb;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-x: auto;
+  }
+
+  code {
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: #f3f4f6;
+    color: #111827;
+    font-size: 0.95em;
+  }
+
+  pre code {
+    padding: 0;
+    background: transparent;
+    color: inherit;
+  }
+
+  .ql-align-center {
+    text-align: center;
+  }
+
+  .ql-align-center img {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ql-align-right {
+    text-align: right;
+  }
+
+  .ql-align-right img {
+    margin-left: auto;
+  }
+
+  .ql-align-justify {
+    text-align: justify;
+  }
+
+  .ql-indent-1 {
+    padding-left: 3em;
+  }
+
+  .ql-indent-2 {
+    padding-left: 6em;
+  }
+
+  .ql-indent-3 {
+    padding-left: 9em;
+  }
+
+  .ql-indent-4 {
+    padding-left: 12em;
+  }
+
+  .ql-video {
+    width: 100%;
+    min-height: 360px;
+  }
+
+  strong {
+    color: #111827;
+    font-weight: 800;
+  }
+`;
