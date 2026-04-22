@@ -85,6 +85,7 @@ export default function ProductRegist() {
 
     catalogExternalId: "",
     catalogName: "",
+    currentLowestPrice: "",
 
     salePrice: "",
     costPrice: "",
@@ -191,7 +192,11 @@ export default function ProductRegist() {
 
     if (!catalogId) {
       setCatalogError("");
-      handleChange("catalogName", "");
+      setForm((prev) => ({
+        ...prev,
+        catalogName: "",
+        currentLowestPrice: "",
+      }));
       return;
     }
 
@@ -201,13 +206,30 @@ export default function ProductRegist() {
 
       const data = await resolveCatalogName(catalogId);
 
-      handleChange("catalogName", data.catalog_name ?? "");
+      const nextLowestPrice =
+        data?.current_lowest_price != null
+          ? String(data.current_lowest_price)
+          : "";
+
+      setForm((prev) => ({
+        ...prev,
+        catalogName: data?.catalog_name ?? "",
+        currentLowestPrice: nextLowestPrice,
+        salePrice:
+          !String(prev.salePrice ?? "").trim() && nextLowestPrice
+            ? nextLowestPrice
+            : prev.salePrice,
+      }));
     } catch (error) {
       console.error(error);
       setCatalogError(
         error?.response?.data?.detail || "카탈로그 이름 조회에 실패했습니다.",
       );
-      handleChange("catalogName", "");
+      setForm((prev) => ({
+        ...prev,
+        catalogName: "",
+        currentLowestPrice: "",
+      }));
     } finally {
       setIsCatalogLoading(false);
     }
@@ -359,6 +381,10 @@ export default function ProductRegist() {
 
         catalog_external_id: form.catalogExternalId.trim() || null,
         catalog_name: form.catalogName.trim() || null,
+        
+        current_lowest_price: form.currentLowestPrice
+          ? Number(form.currentLowestPrice)
+          : null,
 
         sale_price: Number(form.salePrice || 0),
         cost_price: Number(form.costPrice || 0),

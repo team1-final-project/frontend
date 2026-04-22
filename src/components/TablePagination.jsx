@@ -1,6 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 
 export default function TablePagination({
   page = 1,
@@ -15,10 +21,18 @@ export default function TablePagination({
   const startCount = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const endCount = Math.min(currentPage * pageSize, totalCount);
 
+  const PAGE_GROUP_SIZE = 10;
+
+  const currentGroup = Math.ceil(currentPage / PAGE_GROUP_SIZE);
+  const totalGroups = Math.ceil(totalPages / PAGE_GROUP_SIZE);
+
+  const startPage = (currentGroup - 1) * PAGE_GROUP_SIZE + 1;
+  const endPage = Math.min(currentGroup * PAGE_GROUP_SIZE, totalPages);
+
   const renderPagination = () => {
     const pages = [];
 
-    for (let i = 1; i <= totalPages; i += 1) {
+    for (let i = startPage; i <= endPage; i += 1) {
       pages.push(
         <PageButton
           key={i}
@@ -30,8 +44,20 @@ export default function TablePagination({
         </PageButton>,
       );
     }
-
     return pages;
+  };
+
+  /* 10페이지씩 앞/뒤로 이동 */
+  const handlePrevGroup = () => {
+    if (currentGroup > 1) {
+      onPageChange?.((currentGroup - 2) * PAGE_GROUP_SIZE + 1);
+    }
+  };
+
+  const handleNextGroup = () => {
+    if (currentGroup < totalGroups) {
+      onPageChange?.(currentGroup * PAGE_GROUP_SIZE + 1);
+    }
   };
 
   return (
@@ -66,6 +92,14 @@ export default function TablePagination({
       <Pagination>
         <ArrowButton
           type="button"
+          onClick={handlePrevGroup}
+          disabled={currentGroup <= 1}
+        >
+          <ChevronsLeft size={14} />
+        </ArrowButton>
+
+        <ArrowButton
+          type="button"
           onClick={() => onPageChange?.(currentPage - 1)}
           disabled={currentPage <= 1}
         >
@@ -81,13 +115,21 @@ export default function TablePagination({
         >
           <ChevronRight size={14} />
         </ArrowButton>
+
+        <ArrowButton
+          type="button"
+          onClick={handleNextGroup}
+          disabled={currentGroup >= totalGroups}
+        >
+          <ChevronsRight size={14} />
+        </ArrowButton>
       </Pagination>
     </Footer>
   );
 }
 
 const Footer = styled.div`
-  margin-top: 14px;
+  margin-top: 20px;
   padding: 0 14px 14px;
   display: flex;
   align-items: center;
@@ -101,7 +143,7 @@ const FooterLeft = styled.div`
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 13px;
   white-space: nowrap;
 `;
@@ -125,10 +167,10 @@ const PageSizeSelect = styled.select`
   height: 32px;
   min-width: 54px;
   padding: 0 28px 0 10px;
-  border: 1px solid #edf0f4;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #ffffff;
-  color: #374151;
+  background: white;
+  color: var(--font);
   font-size: 12px;
   appearance: none;
   cursor: pointer;
@@ -140,7 +182,7 @@ const SelectIcon = styled.div`
   top: 50%;
   right: 10px;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--placeholder);
   pointer-events: none;
   display: flex;
   align-items: center;
@@ -154,13 +196,21 @@ const Pagination = styled.div`
   flex-shrink: 0;
 `;
 
+const Number = styled.div`
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const ArrowButton = styled.button`
-  width: 28px;
-  height: 28px;
-  border: 1px solid #edf0f4;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
   border-radius: 8px;
   background: #ffffff;
-  color: #9ca3af;
+  color: var(--placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -173,13 +223,16 @@ const ArrowButton = styled.button`
 `;
 
 const PageButton = styled.button`
-  min-width: 28px;
-  height: 28px;
-  padding: 0 8px;
-  border: 1px solid ${({ $active }) => ($active ? "#2563eb" : "#edf0f4")};
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid
+    ${({ $active }) => ($active ? "var(--blue)" : "var(--border)")};
   border-radius: 8px;
-  background: ${({ $active }) => ($active ? "#2563eb" : "#ffffff")};
-  color: ${({ $active }) => ($active ? "#ffffff" : "#9ca3af")};
+  background: ${({ $active }) => ($active ? "var(--blue)" : "#ffffff")};
+  color: ${({ $active }) => ($active ? "#ffffff" : "var(--placeholder)")};
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;

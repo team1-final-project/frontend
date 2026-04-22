@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import styled, { css } from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { CalendarDays, AlertTriangle, Search, ChevronDown } from "lucide-react";
+import { CalendarDays, AlertTriangle, ChevronDown } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -19,6 +19,10 @@ import {
   Bar,
 } from "recharts";
 import RateBadge from "../../../components/RateBadge";
+import SearchDate from "../../../components/SearchDate";
+import SelectBar from "../../../components/SelectBar";
+import SummaryCard from "../../../components/SummaryCard";
+import SearchBar from "../../../components/SearchBar";
 
 import { getAdminSalesStat } from "../../../api/stats";
 
@@ -71,26 +75,6 @@ function formatPercent(value) {
 function formatAxisToMan(value) {
   if (!value) return "0";
   return `${Math.round(value / 10000)}만`;
-}
-
-function StatCard({ title, value, suffix, change, compareLabel }) {
-  const numericChange = Number(change || 0);
-  const isUp = numericChange >= 0;
-
-  return (
-    <StatCardWrap>
-      <StatTitle>{title}</StatTitle>
-      <StatValueRow>
-        <StatValue>{value}</StatValue>
-        {suffix ? <StatSuffix>{suffix}</StatSuffix> : null}
-      </StatValueRow>
-      <StatMeta $up={isUp}>
-        <span>{isUp ? "↑" : "↓"}</span>
-        <span>{Math.abs(numericChange).toFixed(1)}%</span>
-        <span>{compareLabel}</span>
-      </StatMeta>
-    </StatCardWrap>
-  );
 }
 
 export default function SalesStat() {
@@ -407,9 +391,7 @@ export default function SalesStat() {
 
   return (
     <PageWrap>
-      <TopRow>
-        <Title>판매 현황</Title>
-      </TopRow>
+      <Title>판매 현황</Title>
 
       <ModeTabs>
         {MODE_OPTIONS.map((item) => (
@@ -425,40 +407,19 @@ export default function SalesStat() {
       </ModeTabs>
 
       <GlobalFilterRow>
-        <DateInputWrap>
-          <DateInput
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-          <DateIconWrap>
-            <CalendarDays size={15} />
-          </DateIconWrap>
-        </DateInputWrap>
+        <SearchDate
+          startDate={startDate}
+          onStartDateChange={setStartDate}
+          endDate={endDate}
+          onEndDateChange={setEndDate}
+        />
 
-        <DateInputWrap>
-          <DateInput
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-          <DateIconWrap>
-            <CalendarDays size={15} />
-          </DateIconWrap>
-        </DateInputWrap>
-
-        <SelectWrap>
-          <Select value={period} onChange={(e) => setPeriod(e.target.value)}>
-            {PERIOD_OPTIONS.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </Select>
-          <ChevronIcon>
-            <ChevronDown size={14} />
-          </ChevronIcon>
-        </SelectWrap>
+        <SelectBar
+          value={period}
+          onChange={setPeriod}
+          options={PERIOD_OPTIONS}
+          width="120px"
+        />
       </GlobalFilterRow>
 
       {isLoading ? (
@@ -466,16 +427,24 @@ export default function SalesStat() {
       ) : null}
 
       <SummaryGrid>
-        {summary.cards.map((card) => (
-          <StatCard
-            key={card.title}
-            title={card.title}
-            value={card.value}
-            suffix={card.suffix}
-            change={card.change}
-            compareLabel={summary.compareLabel}
-          />
-        ))}
+        {summary.cards.map((card) => {
+          const numericChange = Number(card.change || 0);
+          const isUp = numericChange >= 0;
+          return (
+            <SummaryCard
+              key={card.title}
+              title={card.title}
+              value={
+                <>
+                  {card.value}
+                  {card.suffix && <span>{card.suffix}</span>}
+                </>
+              }
+              change={`${Math.abs(numericChange).toFixed(1)}% ${summary.compareLabel}`}
+              up={isUp}
+            />
+          );
+        })}
       </SummaryGrid>
 
       <ChartTwoCol>
@@ -483,8 +452,8 @@ export default function SalesStat() {
           <PanelTitleRow>
             <PanelTitle>카테고리 별 판매 추이</PanelTitle>
             <MiniLegendRow>
-              <LegendDot $color="#2563eb" /> 매출
-              <LegendDot $color="#fbbf24" /> 공헌이익
+              <LegendDot $color="var(--blue)" /> 매출
+              <LegendDot $color="var(--yellow)" /> 공헌이익
             </MiniLegendRow>
           </PanelTitleRow>
 
@@ -546,7 +515,9 @@ export default function SalesStat() {
         </Panel>
 
         <Panel>
-          <PanelTitle>카테고리 별 판매 비중</PanelTitle>
+          <PanelTitleRow>
+            <PanelTitle>카테고리 별 판매 비중</PanelTitle>
+          </PanelTitleRow>
           <ChartBox>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -582,33 +553,27 @@ export default function SalesStat() {
       </ChartTwoCol>
 
       <WidePanel>
-        <PanelHeaderSplit>
+        <PanelTitleRow>
           <PanelTitle>시간대별 최저가 변동 추이</PanelTitle>
 
           <PanelHeaderFilters>
-            <DateInputWrap $small>
-              <DateInput
-                type="date"
-                value={hourlyDate}
-                onChange={(e) => setHourlyDate(e.target.value)}
-              />
-              <DateIconWrap>
-                <CalendarDays size={15} />
-              </DateIconWrap>
-            </DateInputWrap>
+            <SearchDate
+              type="single"
+              selected={hourlyDate}
+              onChange={setHourlyDate}
+              shadow={false}
+              border={true}
+            />
 
-            <SearchInputWrap>
-              <SearchIconWrap>
-                <Search size={15} />
-              </SearchIconWrap>
-              <SearchInput
-                value={hourlyKeyword}
-                onChange={(e) => setHourlyKeyword(e.target.value)}
-                placeholder="상품명, 상품코드로 검색"
-              />
-            </SearchInputWrap>
+            <SearchBar
+              value={hourlyKeyword}
+              onChange={setHourlyKeyword}
+              placeholder="상품명, 상품코드로 검색"
+              shadow={false}
+              border={true}
+            />
           </PanelHeaderFilters>
-        </PanelHeaderSplit>
+        </PanelTitleRow>
 
         <SubInfoText>
           상품코드 : {hourlySelectedProduct.productCode || "-"} / 상품명 :{" "}
@@ -729,7 +694,9 @@ export default function SalesStat() {
         </Panel>
 
         <Panel>
-          <PanelTitle>상품별 판매 비중</PanelTitle>
+          <PanelTitleRow>
+            <PanelTitle>상품별 판매 비중</PanelTitle>
+          </PanelTitleRow>
 
           <InnerTabs>
             {categoryOptions.map((key) => (
@@ -786,60 +753,39 @@ export default function SalesStat() {
       </ChartTwoCol>
 
       <WidePanel>
-        <PanelHeaderSplit>
+        <PanelTitleRow>
           <PanelTitle>랭킹 TOP 5</PanelTitle>
 
           <PanelHeaderFilters>
-            <SelectWrap>
-              <Select
-                value={rankingType}
-                onChange={(e) => setRankingType(e.target.value)}
-              >
-                {RANKING_TYPE_OPTIONS.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </Select>
-              <ChevronIcon>
-                <ChevronDown size={14} />
-              </ChevronIcon>
-            </SelectWrap>
-
-            <SelectWrap>
-              <Select
-                value={rankingCategory}
-                onChange={(e) => setRankingCategory(e.target.value)}
-              >
-                <option value="전체">전체</option>
-                {categoryOptions.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </Select>
-              <ChevronIcon>
-                <ChevronDown size={14} />
-              </ChevronIcon>
-            </SelectWrap>
-
-            <SelectWrap>
-              <Select
-                value={rankingPeriod}
-                onChange={(e) => setRankingPeriod(e.target.value)}
-              >
-                {PERIOD_OPTIONS.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </Select>
-              <ChevronIcon>
-                <ChevronDown size={14} />
-              </ChevronIcon>
-            </SelectWrap>
+            <SelectBar
+              value={rankingType}
+              onChange={setRankingType}
+              options={RANKING_TYPE_OPTIONS}
+              width="120px"
+              border={true}
+              shadow={false}
+            />
+            <SelectBar
+              value={rankingCategory}
+              onChange={setRankingCategory}
+              options={[
+                { label: "전체", value: "전체" },
+                ...categoryOptions.map((c) => ({ label: c, value: c })),
+              ]}
+              width="120px"
+              border={true}
+              shadow={false}
+            />
+            <SelectBar
+              value={rankingPeriod}
+              onChange={setRankingPeriod}
+              options={PERIOD_OPTIONS}
+              width="120px"
+              border={true}
+              shadow={false}
+            />
           </PanelHeaderFilters>
-        </PanelHeaderSplit>
+        </PanelTitleRow>
 
         <RankingTableScroll>
           <RankingTable>
@@ -916,31 +862,28 @@ export default function SalesStat() {
 }
 
 const PageWrap = styled.div`
+  padding: 25px;
+  background: var(--background);
   min-height: 100%;
-  background: #f6f8fb;
-  padding: 24px;
-`;
-
-const TopRow = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
+  flex-direction: column;
+  gap: 25px;
 `;
 
 const Title = styled.h2`
   margin: 0;
-  color: #111827;
-  font-size: 28px;
-  font-weight: 800;
+  font-size: var(--title);
+  font-weight: 700;
 `;
 
 const ModeTabs = styled.div`
+  width: 100%;
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 6px;
   margin-bottom: 18px;
-  border-bottom: 1px solid #d9e0ea;
+  border-bottom: 1px solid var(--border);
 `;
 
 const ModeTabButton = styled.button`
@@ -1016,7 +959,7 @@ const DateIconWrap = styled.div`
   top: 50%;
   right: 12px;
   transform: translateY(-50%);
-  color: #9aa3b2;
+  color: var(--placeholder);
   pointer-events: none;
   display: flex;
   align-items: center;
@@ -1040,7 +983,7 @@ const ChevronIcon = styled.div`
   top: 50%;
   right: 10px;
   transform: translateY(-50%);
-  color: #9aa3b2;
+  color: var(--placeholder);
   pointer-events: none;
 `;
 
@@ -1054,7 +997,7 @@ const SearchIconWrap = styled.div`
   top: 50%;
   left: 12px;
   transform: translateY(-50%);
-  color: #9aa3b2;
+  color: var(--placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1141,24 +1084,23 @@ const ChartTwoCol = styled.div`
 
 const Panel = styled.section`
   padding: 16px;
-  border: 1px solid #edf1f6;
-  border-radius: 18px;
-  background: #ffffff;
+  border-radius: 16px;
+  background: white;
+  box-shadow: var(--shadow);
 `;
 
 const WidePanel = styled.section`
   padding: 16px;
-  border: 1px solid #edf1f6;
-  border-radius: 18px;
+  border-radius: 16px;
   background: #ffffff;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 `;
 
 const PanelTitle = styled.h3`
-  margin: 0;
-  color: #111827;
+  margin: 0px;
+  color: var(--font);
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
 `;
 
 const PanelTitleRow = styled.div`
@@ -1173,7 +1115,7 @@ const MiniLegendRow = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #6b7280;
+  color: var(--placeholder);
   font-size: 12px;
   font-weight: 600;
 `;
@@ -1190,6 +1132,7 @@ const LegendDot = styled.span`
 const InnerTabs = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 10px;
@@ -1218,7 +1161,7 @@ const PanelHeaderSplit = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
 `;
 
@@ -1226,7 +1169,6 @@ const PanelHeaderFilters = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
 `;
 
 const SubInfoText = styled.div`
