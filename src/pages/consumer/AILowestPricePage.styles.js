@@ -209,9 +209,9 @@ export const ProductThumb = styled.div`
 
 export const ProductImage = styled.img`
   display: block;
-  width: 74%;
-  height: 74%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   background: transparent;
 `;
 
