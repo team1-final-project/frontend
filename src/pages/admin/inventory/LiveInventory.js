@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import TableComponent from "../../../components/TableComponent";
 import StatusBadge from "../../../components/StatusBadge";
+import { Plus } from "lucide-react";
 import InboundRegisterModal from "./InboundRegisterModal";
 import {
   getAdminLiveInventoryList,
@@ -455,7 +456,6 @@ export default function LiveInventory() {
         </SummaryGrid>
 
         <TableComponent
-          variant="inventory"
           columns={columns}
           data={filteredData}
           headerAlign="center"
@@ -497,6 +497,7 @@ export default function LiveInventory() {
               type="button"
               onClick={() => setIsInboundModalOpen(true)}
             >
+              <Plus size={15} />
               입고등록
             </InboundButton>
           }
@@ -724,38 +725,24 @@ const FilterGroup = styled.div`
   flex-wrap: wrap;
 `;
 
-const ToolbarSelect = styled.select`
-  min-width: 120px;
-  height: 40px;
-  border: 1px solid #dbe2ea;
-  border-radius: 10px;
-  background: #ffffff;
-  padding: 0 12px;
-  color: #334155;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:focus {
-    outline: none;
-    border-color: #2563eb;
-  }
-`;
-
 const InboundButton = styled.button`
-  min-width: 108px;
-  height: 40px;
+  height: 35px;
+  min-width: 100px;
+  padding: 0 14px;
   border: none;
   border-radius: 10px;
-  background: #2563eb;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 700;
+  background: var(--blue);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.16);
 
   &:hover {
-    background: #1d4ed8;
+    filter: brightness(1.1);
   }
 `;
 
@@ -763,24 +750,24 @@ const CodeLink = styled.button`
   border: none;
   background: transparent;
   padding: 0;
-  color: #111827;
-  font-size: 14px;
-  font-weight: 800;
+  color: var(--font);
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
 
   &:hover {
-    color: #2563eb;
+    color: var(--blue);
   }
 `;
 
 const ProductNameLink = styled.a`
-  color: #334155;
-  font-size: 14px;
+  color: var(--font);
+  font-size: 12px;
   font-weight: 600;
   text-decoration: none;
 
   &:hover {
-    color: #2563eb;
+    color: var(--blue);
     text-decoration: underline;
   }
 `;

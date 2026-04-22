@@ -147,7 +147,15 @@ export default function ProductList() {
     };
 
     fetchProducts();
-  }, [searchValue, categoryValue, startDate, endDate, page, pageSize, reloadTick]);
+  }, [
+    searchValue,
+    categoryValue,
+    startDate,
+    endDate,
+    page,
+    pageSize,
+    reloadTick,
+  ]);
 
   const handleToggleAiPricing = async (id, nextChecked) => {
     const previousProducts = products;
@@ -193,9 +201,7 @@ export default function ProductList() {
     } catch (error) {
       console.error(error);
       setProducts(previousProducts);
-      alert(
-        error?.response?.data?.detail || "판매상태 변경에 실패했습니다.",
-      );
+      alert(error?.response?.data?.detail || "판매상태 변경에 실패했습니다.");
     }
   };
 
@@ -280,9 +286,7 @@ export default function ProductList() {
             value={row.saleStatus}
             mode="select"
             options={saleStatusOptions}
-            onChange={(nextValue) =>
-              handleChangeSaleStatus(row.id, nextValue)
-            }
+            onChange={(nextValue) => handleChangeSaleStatus(row.id, nextValue)}
             width="96px"
           />
         </CenterCell>
@@ -418,6 +422,7 @@ const Title = styled.h2`
 
 const PrimaryButton = styled.button`
   height: 35px;
+  min-width: 100px;
   padding: 0 14px;
   border: none;
   border-radius: 10px;
@@ -425,8 +430,9 @@ const PrimaryButton = styled.button`
   color: white;
   font-size: 13px;
   font-weight: 600;
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   cursor: pointer;
 
