@@ -87,7 +87,7 @@ export const RightArea = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 18px;
+  gap: 12px;
   min-width: 0;
 `;
 
@@ -133,13 +133,31 @@ export const SearchInput = styled.input`
   }
 `;
 
+export const CartIconButton = styled.button`
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid #dcdcdc;
+  background: #fff;
+  color: #222;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f8f8f8;
+  }
+`;
+
 export const ActionGroup = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
   min-width: ${({ $isAuthenticated }) =>
-    $isAuthenticated ? "280px" : "200px"};
+    $isAuthenticated ? "250px" : "252px"};
   justify-content: flex-end;
 
   @media (max-width: 980px) {

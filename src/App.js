@@ -23,6 +23,7 @@ import AILowestPricePage from "./pages/consumer/AILowestPricePage";
 import AllProductsPage from "./pages/consumer/AllProductsPage";
 import Profile from "./pages/consumer/Profile";
 import Orders from "./pages/consumer/Orders";
+import ScrollToTop from "./pages/consumer/ScrollToTop";
 
 import Dashboard from "./pages/admin/Dashboard";
 import ProductList from "./pages/admin/products/ProductList";
@@ -42,6 +43,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <AuthProvider>
         <GlobalStyle />
+        <ScrollToTop />
         <Routes>
           {/* Consumer */}
           <Route element={<MainLayout />}>

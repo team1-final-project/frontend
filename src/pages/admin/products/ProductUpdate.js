@@ -104,6 +104,7 @@ export default function ProductUpdate() {
 
     catalogExternalId: "",
     catalogName: "",
+    currentLowestPrice: "",
 
     salePrice: "",
     costPrice: "",
@@ -162,6 +163,10 @@ export default function ProductUpdate() {
 
           catalogExternalId: detail.catalog_external_id ?? "",
           catalogName: detail.catalog_name ?? "",
+          currentLowestPrice:
+            detail.current_lowest_price != null
+              ? String(detail.current_lowest_price)
+              : "",
 
           salePrice: detail.sale_price != null ? String(detail.sale_price) : "",
           costPrice: detail.cost_price != null ? String(detail.cost_price) : "",
@@ -285,7 +290,11 @@ export default function ProductUpdate() {
 
     if (!catalogId) {
       setCatalogError("");
-      handleChange("catalogName", "");
+      setForm((prev) => ({
+        ...prev,
+        catalogName: "",
+        currentLowestPrice: "",
+      }));
       return;
     }
 
@@ -295,7 +304,20 @@ export default function ProductUpdate() {
 
       const data = await resolveCatalogName(catalogId);
 
-      handleChange("catalogName", data?.catalog_name ?? "");
+      const nextLowestPrice =
+        data?.current_lowest_price != null
+          ? String(data.current_lowest_price)
+          : "";
+
+      setForm((prev) => ({
+        ...prev,
+        catalogName: data?.catalog_name ?? "",
+        currentLowestPrice: nextLowestPrice,
+        salePrice:
+          !String(prev.salePrice ?? "").trim() && nextLowestPrice
+            ? nextLowestPrice
+            : prev.salePrice,
+      }));
     } catch (error) {
       console.error(error);
 
@@ -309,7 +331,11 @@ export default function ProductUpdate() {
         );
       }
 
-      handleChange("catalogName", "");
+      setForm((prev) => ({
+        ...prev,
+        catalogName: "",
+        currentLowestPrice: "",
+      }));
     } finally {
       setIsCatalogLoading(false);
     }
@@ -458,6 +484,9 @@ export default function ProductUpdate() {
 
         catalog_external_id: form.catalogExternalId.trim() || null,
         catalog_name: form.catalogName.trim() || null,
+        current_lowest_price: form.currentLowestPrice
+          ? Number(form.currentLowestPrice)
+          : null,
 
         sale_price: Number(form.salePrice || 0),
         cost_price: Number(form.costPrice || 0),

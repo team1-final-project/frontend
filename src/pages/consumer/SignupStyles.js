@@ -3,14 +3,15 @@ import styled from "styled-components";
 export const GuideText = styled.p`
   margin-top: -2px;
   padding-left: 4px;
-  font-size: 13px;
+  font-size: 12px;
   color: #8f8477;
+  line-height: 1.5;
 `;
 
 export const Page = styled.div`
   min-height: 100vh;
   background: #f4f1eb;
-  padding: 50px 30px 200px;
+  padding: 48px 24px 200px;
 `;
 
 export const Inner = styled.div`
@@ -33,7 +34,7 @@ export const FormCard = styled.div`
   max-width: 560px;
   background: #ffffff;
   border-radius: 32px;
-  padding: 40px 32px;
+  padding: 36px 28px;
   box-shadow: 0 18px 50px rgba(25, 25, 25, 0.08);
   border: 1px solid #eee7dd;
 `;
@@ -51,8 +52,8 @@ export const InputGroup = styled.div`
 `;
 
 export const Label = styled.label`
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 800;
   color: #222;
 `;
 
@@ -63,7 +64,7 @@ export const Input = styled.input`
   border-radius: 16px;
   border: 1px solid ${({ $error }) => ($error ? "#e15b64" : "#e5ddd2")};
   background: #fcfbf8;
-  font-size: 15px;
+  font-size: 16px;
   color: #111;
 
   &::placeholder {
@@ -91,15 +92,17 @@ export const InlineRow = styled.div`
 export const ErrorText = styled.p`
   margin-top: -2px;
   padding-left: 4px;
-  font-size: 13px;
+  font-size: 12px;
   color: #e15b64;
+  line-height: 1.5;
 `;
 
 export const SuccessText = styled.p`
   margin-top: -2px;
   padding-left: 4px;
-  font-size: 13px;
+  font-size: 12px;
   color: #0f766e;
+  line-height: 1.5;
 `;
 
 export const SmallButton = styled.button`
@@ -107,8 +110,8 @@ export const SmallButton = styled.button`
   border-radius: 16px;
   background: #111;
   color: #fff;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 800;
 
   &:disabled {
     opacity: 0.55;
@@ -123,25 +126,25 @@ export const MainButton = styled.button`
   background: #111;
   color: #fff;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 800;
   margin-top: 6px;
 `;
 
 export const BottomRow = styled.div`
-  margin-top: 22px;
+  margin-top: 18px;
   display: flex;
   justify-content: center;
   gap: 8px;
 `;
 
 export const BottomText = styled.span`
-  font-size: 14px;
+  font-size: 12px;
   color: #6d655b;
 `;
 
 export const BottomLink = styled.button`
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 800;
   color: #111;
 `;
 
@@ -150,8 +153,8 @@ export const LogoArea = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
-  margin-bottom: 46px;
+  margin-top: 12px;
+  margin-bottom: 36px;
 `;
 
 export const LogoImage = styled.img`

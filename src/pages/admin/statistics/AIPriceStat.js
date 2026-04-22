@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import styled, { css } from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { CalendarDays, Search, ChevronDown } from "lucide-react";
 import InfoTooltip from "../../../components/InfoTooltip";
+import SearchDate from "../../../components/SearchDate";
+import SelectBar from "../../../components/SelectBar";
+import SummaryCard from "../../../components/SummaryCard";
+import SearchBar from "../../../components/SearchBar";
 import {
   ResponsiveContainer,
   LineChart,
@@ -50,48 +53,6 @@ function getChangeMeta(value) {
     isPositive: numeric >= 0,
     text: formatDeltaPercent(numeric),
   };
-}
-
-function SummaryCard({
-  title,
-  mainValue,
-  mainSuffix,
-  subValue,
-  change,
-  compareLabel,
-}) {
-  const { isPositive, text } = getChangeMeta(change);
-
-  return (
-    <SummaryCardWrap>
-      <SummaryCardTitle>{title}</SummaryCardTitle>
-
-      <SummaryCardValueRow>
-        <SummaryCardMainValue>{mainValue}</SummaryCardMainValue>
-        {mainSuffix ? <SummaryCardMainSuffix>{mainSuffix}</SummaryCardMainSuffix> : null}
-        {subValue ? <SummaryCardSubValue>{subValue}</SummaryCardSubValue> : null}
-      </SummaryCardValueRow>
-
-      <SummaryCardMeta $positive={isPositive}>
-        <span>{isPositive ? "↑" : "↓"}</span>
-        <span>{text.replace("+", "")}</span>
-        <span>{compareLabel}</span>
-      </SummaryCardMeta>
-    </SummaryCardWrap>
-  );
-}
-
-function MetricCell({ primary, change }) {
-  const { isPositive, text } = getChangeMeta(change);
-
-  return (
-    <MetricWrap>
-      <MetricPrimary>{primary}</MetricPrimary>
-      <MetricChange $positive={isPositive}>
-        {isPositive ? "↑" : "↓"} {text.replace("+", "")}
-      </MetricChange>
-    </MetricWrap>
-  );
 }
 
 function getDiffMeta(aiValue, manualValue, type = "currency") {
@@ -165,12 +126,18 @@ export default function AIPriceStat() {
         setDashboard(data);
 
         const options = data?.category_options || [];
-        if (options.length > 0 && (!performanceCategory || !options.includes(performanceCategory))) {
+        if (
+          options.length > 0 &&
+          (!performanceCategory || !options.includes(performanceCategory))
+        ) {
           setPerformanceCategory(options[0]);
         }
       } catch (error) {
         console.error(error);
-        alert(error?.response?.data?.detail || "AI 가격변경 분석 조회에 실패했습니다.");
+        alert(
+          error?.response?.data?.detail ||
+            "AI 가격변경 분석 조회에 실패했습니다.",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -245,7 +212,7 @@ export default function AIPriceStat() {
         change: summary.price_change_count_change_rate,
       },
     ],
-    [summary]
+    [summary],
   );
 
   return (
@@ -253,56 +220,55 @@ export default function AIPriceStat() {
       <Title>AI 가격변경 분석</Title>
 
       <TopFilterRow>
-        <DateFieldWrap>
-          <DateInput
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-          <DateIconWrap>
-            <CalendarDays size={15} />
-          </DateIconWrap>
-        </DateFieldWrap>
+        <SearchDate
+          startDate={startDate}
+          onStartDateChange={setStartDate}
+          endDate={endDate}
+          onEndDateChange={setEndDate}
+        />
 
-        <DateFieldWrap>
-          <DateInput
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-          <DateIconWrap>
-            <CalendarDays size={15} />
-          </DateIconWrap>
-        </DateFieldWrap>
-
-        <SelectWrap>
-          <Select value={period} onChange={(e) => setPeriod(e.target.value)}>
-            {PERIOD_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
-          <SelectIconWrap>
-            <ChevronDown size={14} />
-          </SelectIconWrap>
-        </SelectWrap>
+        <SelectBar
+          value={period}
+          onChange={setPeriod}
+          options={PERIOD_OPTIONS}
+          width="120px"
+        />
       </TopFilterRow>
 
-      {isLoading ? <LoadingText>데이터를 불러오는 중입니다.</LoadingText> : null}
+      {isLoading ? (
+        <LoadingText>데이터를 불러오는 중입니다.</LoadingText>
+      ) : null}
 
       <SummaryGrid>
-        {summaryCards.map((card) => (
-          <SummaryCard
-            key={card.title}
-            title={card.title}
-            mainValue={card.mainValue}
-            mainSuffix={card.mainSuffix}
-            subValue={card.subValue}
-            change={card.change}
-            compareLabel={summary.compare_label}
-          />
-        ))}
+        {summaryCards.map((card) => {
+          const numericChange = Number(card.change || 0);
+          const isUp = numericChange >= 0;
+          return (
+            <SummaryCard
+              key={card.title}
+              title={card.title}
+              value={
+                <>
+                  {card.mainValue}
+                  {card.mainSuffix && <span>{card.mainSuffix}</span>}
+                  {card.subValue && (
+                    <span
+                      style={{
+                        marginLeft: "6px",
+                        fontSize: "15px",
+                        color: "var(--font)",
+                      }}
+                    >
+                      {card.subValue}
+                    </span>
+                  )}
+                </>
+              }
+              change={`${Math.abs(numericChange).toFixed(1)}% ${summary.compare_label}`}
+              up={isUp}
+            />
+          );
+        })}
       </SummaryGrid>
 
       <LargePanel>
@@ -310,49 +276,35 @@ export default function AIPriceStat() {
           <PanelTitle>AI 가격변경 / 수동 가격변경 시뮬레이션</PanelTitle>
 
           <PanelControls>
-            <SearchInputWrap>
-              <SearchIconWrap>
-                <Search size={15} />
-              </SearchIconWrap>
-              <SearchInput
-                value={simulationKeyword}
-                onChange={(e) => setSimulationKeyword(e.target.value)}
-                placeholder="상품명, 상품코드로 검색"
-              />
-            </SearchInputWrap>
+            <SearchBar
+              value={simulationKeyword}
+              onChange={setSimulationKeyword}
+              placeholder="상품명, 상품코드로 검색"
+              width="220px"
+              border={true}
+              shadow={false}
+            />
 
-            <SelectWrap $small>
-              <Select
-                value={simulationCategory}
-                onChange={(e) => setSimulationCategory(e.target.value)}
-              >
-                <option value="전체">카테고리</option>
-                {categoryOptions.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </Select>
-              <SelectIconWrap>
-                <ChevronDown size={14} />
-              </SelectIconWrap>
-            </SelectWrap>
+            <SelectBar
+              value={simulationCategory}
+              onChange={setSimulationCategory}
+              options={[
+                { label: "카테고리 전체", value: "전체" },
+                ...categoryOptions.map((c) => ({ label: c, value: c })),
+              ]}
+              width="130px"
+              border={true}
+              shadow={false}
+            />
 
-            <SelectWrap $small>
-              <Select
-                value={simulationPeriod}
-                onChange={(e) => setSimulationPeriod(e.target.value)}
-              >
-                {PERIOD_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-              <SelectIconWrap>
-                <ChevronDown size={14} />
-              </SelectIconWrap>
-            </SelectWrap>
+            <SelectBar
+              value={simulationPeriod}
+              onChange={setSimulationPeriod}
+              options={PERIOD_OPTIONS}
+              width="120px"
+              border={true}
+              shadow={false}
+            />
           </PanelControls>
         </PanelHeaderRow>
 
@@ -360,17 +312,21 @@ export default function AIPriceStat() {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={simulationChartData}>
               <CartesianGrid stroke="#eef2f7" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#9aa3b2" }} />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 12, fill: "var(--placeholder)" }}
+              />
               <YAxis
-                tick={{ fontSize: 12, fill: "#9aa3b2" }}
+                tick={{ fontSize: 12, fill: "var(--placeholder)" }}
                 tickFormatter={(value) => `${Math.round(value / 10000)}만`}
               />
               <Tooltip
                 formatter={(value, name) => [formatCurrency(value), name]}
                 contentStyle={{
                   borderRadius: 12,
-                  border: "1px solid #e5e7eb",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                  fontSize: 12,
+                  border: "1px solid var(--border)",
+                  boxShadow: "var(--shadow)",
                 }}
               />
               <Legend
@@ -382,7 +338,7 @@ export default function AIPriceStat() {
                 type="monotone"
                 dataKey="ai_revenue"
                 name="AI 매출"
-                stroke="#2563eb"
+                stroke="var(--blue)"
                 strokeWidth={3}
                 dot={false}
               />
@@ -398,7 +354,7 @@ export default function AIPriceStat() {
                 type="monotone"
                 dataKey="manual_revenue"
                 name="수동 매출(예측)"
-                stroke="#ef5350"
+                stroke="var(--red)"
                 strokeWidth={3}
                 dot={false}
               />
@@ -419,21 +375,14 @@ export default function AIPriceStat() {
         <PanelHeaderRow>
           <PanelTitle>카테고리별 AI 성과 비교</PanelTitle>
 
-          <SelectWrap $small>
-            <Select
-              value={comparePeriod}
-              onChange={(e) => setComparePeriod(e.target.value)}
-            >
-              {PERIOD_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
-            <SelectIconWrap>
-              <ChevronDown size={14} />
-            </SelectIconWrap>
-          </SelectWrap>
+          <SelectBar
+            value={comparePeriod}
+            onChange={setComparePeriod}
+            options={PERIOD_OPTIONS}
+            width="120px"
+            border={true}
+            shadow={false}
+          />
         </PanelHeaderRow>
 
         <WideTableScroll>
@@ -512,26 +461,9 @@ export default function AIPriceStat() {
 
       <TwoColumnGrid>
         <MediumPanel>
-          <PanelTitle>AI 가격변경 성과</PanelTitle>
-
-          <LegendGuide>
-            <LegendGuideItem>
-              <LegendDot $color="#2563eb" />
-              AI 매출
-            </LegendGuideItem>
-            <LegendGuideItem>
-              <LegendDot $color="#7aa2ff" />
-              AI 이익
-            </LegendGuideItem>
-            <LegendGuideItem>
-              <LegendDot $color="#ef5350" />
-              수동 매출(예측)
-            </LegendGuideItem>
-            <LegendGuideItem>
-              <LegendDot $color="#f3a5a5" />
-              수동 이익(예측)
-            </LegendGuideItem>
-          </LegendGuide>
+          <PanelHeaderRow>
+            <PanelTitle>AI 가격변경 성과</PanelTitle>
+          </PanelHeaderRow>
 
           <CategoryTabRow>
             {categoryOptions.map((category) => (
@@ -550,24 +482,27 @@ export default function AIPriceStat() {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={performanceChartData}>
                 <CartesianGrid stroke="#eef2f7" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#9aa3b2" }} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 12, fill: "var(--placeholder)" }}
+                />
                 <YAxis
-                  tick={{ fontSize: 12, fill: "#9aa3b2" }}
+                  tick={{ fontSize: 12, fill: "var(--placeholder)" }}
                   tickFormatter={(value) => `${Math.round(value / 10000)}만`}
                 />
                 <Tooltip
                   formatter={(value, name) => [formatCurrency(value), name]}
                   contentStyle={{
                     borderRadius: 12,
-                    border: "1px solid #e5e7eb",
-                    boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                    border: "1px solid var(--border)",
+                    boxShadow: "var(--shadow)",
                   }}
                 />
                 <Line
                   type="monotone"
                   dataKey="ai_revenue"
                   name="AI 매출"
-                  stroke="#2563eb"
+                  stroke="var(--blue)"
                   strokeWidth={3}
                   dot={false}
                 />
@@ -583,7 +518,7 @@ export default function AIPriceStat() {
                   type="monotone"
                   dataKey="manual_revenue"
                   name="수동 매출(예측)"
-                  stroke="#ef5350"
+                  stroke="var(--red)"
                   strokeWidth={3}
                   dot={false}
                 />
@@ -598,6 +533,24 @@ export default function AIPriceStat() {
               </LineChart>
             </ResponsiveContainer>
           </ChartWrap>
+          <LegendGuide>
+            <LegendGuideItem>
+              <LegendDot $color="(var--blue)" />
+              AI 매출
+            </LegendGuideItem>
+            <LegendGuideItem>
+              <LegendDot $color="#7aa2ff" />
+              AI 이익
+            </LegendGuideItem>
+            <LegendGuideItem>
+              <LegendDot $color="var(--red)" />
+              수동 매출(예측)
+            </LegendGuideItem>
+            <LegendGuideItem>
+              <LegendDot $color="#f3a5a5" />
+              수동 이익(예측)
+            </LegendGuideItem>
+          </LegendGuide>
         </MediumPanel>
 
         <MediumPanel>
@@ -606,34 +559,41 @@ export default function AIPriceStat() {
             <TinyHint>&lt; 전략 수정 추천 &gt;</TinyHint>
           </PanelHeaderRow>
 
-          <HistoryTable>
-            <thead>
-              <tr>
-                <th>순서</th>
-                <th>상품코드</th>
-                <th>상품명</th>
-                <th>사유</th>
-              </tr>
-            </thead>
-            <tbody>
-              {historyRows.map((row) => (
-                <tr key={`${row.product_code}-${row.rank}`}>
-                  <td>{row.rank}</td>
-                  <td>
-                    <CodeButton type="button" onClick={() => handleProductClick(row.product_code)}>
-                      {row.product_code}
-                    </CodeButton>
-                  </td>
-                  <td>{row.product_name}</td>
-                  <td>
-                    <ReasonText $type={row.direction === "up" ? "up" : "down"}>
-                      {row.direction === "up" ? "▲" : "▼"} {row.reason}
-                    </ReasonText>
-                  </td>
+          <HistoryTableScroll>
+            <HistoryTable>
+              <thead>
+                <tr>
+                  <th>순서</th>
+                  <th>상품코드</th>
+                  <th>상품명</th>
+                  <th>사유</th>
                 </tr>
-              ))}
-            </tbody>
-          </HistoryTable>
+              </thead>
+              <tbody>
+                {historyRows.map((row) => (
+                  <tr key={`${row.product_code}-${row.rank}`}>
+                    <td>{row.rank}</td>
+                    <td>
+                      <CodeButton
+                        type="button"
+                        onClick={() => handleProductClick(row.product_code)}
+                      >
+                        {row.product_code}
+                      </CodeButton>
+                    </td>
+                    <td>{row.product_name}</td>
+                    <td>
+                      <ReasonText
+                        $type={row.direction === "up" ? "up" : "down"}
+                      >
+                        {row.direction === "up" ? "▲" : "▼"} {row.reason}
+                      </ReasonText>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </HistoryTable>
+          </HistoryTableScroll>
         </MediumPanel>
       </TwoColumnGrid>
 
@@ -675,7 +635,10 @@ export default function AIPriceStat() {
                 <tr key={`${row.product_code}-${row.rank}`}>
                   <td>{row.rank}</td>
                   <td>
-                    <CodeButton type="button" onClick={() => handleProductClick(row.product_code)}>
+                    <CodeButton
+                      type="button"
+                      onClick={() => handleProductClick(row.product_code)}
+                    >
                       {row.product_code}
                     </CodeButton>
                   </td>
@@ -705,16 +668,18 @@ export default function AIPriceStat() {
 }
 
 const PageWrap = styled.div`
+  padding: 25px;
+  background: var(--background);
   min-height: 100%;
-  padding: 24px;
-  background: #f6f8fb;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
 `;
 
 const Title = styled.h2`
-  margin: 0 0 22px;
-  color: #111827;
-  font-size: 28px;
-  font-weight: 800;
+  margin: 0;
+  font-size: var(--title);
+  font-weight: 700;
 `;
 
 const TopFilterRow = styled.div`
@@ -727,80 +692,29 @@ const TopFilterRow = styled.div`
 
 const LoadingText = styled.div`
   margin-bottom: 12px;
-  color: #6b7280;
+  color: var(--placeholder);
   font-size: 13px;
   font-weight: 700;
 `;
 
 const sharedField = css`
   height: 40px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #ffffff;
-  color: #374151;
+  background: white;
+  color: var(--font);
   font-size: 13px;
   outline: none;
 
   &:focus {
-    border-color: #cfd8e3;
+    border-color: var(--focus-border);
   }
-`;
-
-const DateFieldWrap = styled.div`
-  position: relative;
-  width: 150px;
-`;
-
-const DateInput = styled.input`
-  ${sharedField};
-  width: 100%;
-  padding: 0 36px 0 12px;
-
-  &::-webkit-calendar-picker-indicator {
-    opacity: 0;
-    cursor: pointer;
-  }
-`;
-
-const DateIconWrap = styled.div`
-  position: absolute;
-  top: 50%;
-  right: 11px;
-  transform: translateY(-50%);
-  color: #9aa3b2;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-`;
-
-const SelectWrap = styled.div`
-  position: relative;
-  width: ${({ $small }) => ($small ? "110px" : "120px")};
-`;
-
-const Select = styled.select`
-  ${sharedField};
-  width: 100%;
-  padding: 0 34px 0 12px;
-  appearance: none;
-`;
-
-const SelectIconWrap = styled.div`
-  position: absolute;
-  top: 50%;
-  right: 11px;
-  transform: translateY(-50%);
-  color: #9aa3b2;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
 `;
 
 const SummaryGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
-  margin-bottom: 22px;
 
   @media (max-width: 1200px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -811,73 +725,18 @@ const SummaryGrid = styled.div`
   }
 `;
 
-const SummaryCardWrap = styled.div`
-  padding: 18px 18px 16px;
-  border-radius: 18px;
-  border: 1px solid #edf1f6;
-  background: #ffffff;
-`;
-
-const SummaryCardTitle = styled.div`
-  color: #374151;
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 12px;
-`;
-
-const SummaryCardValueRow = styled.div`
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-`;
-
-const SummaryCardMainValue = styled.div`
-  color: #111827;
-  font-size: 26px;
-  font-weight: 900;
-`;
-
-const SummaryCardMainSuffix = styled.div`
-  color: #374151;
-  font-size: 18px;
-  font-weight: 700;
-`;
-
-const SummaryCardSubValue = styled.div`
-  color: #374151;
-  font-size: 15px;
-  font-weight: 700;
-`;
-
-const SummaryCardMeta = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: ${({ $positive }) => ($positive ? "#22c55e" : "#ef4444")};
-  font-size: 12px;
-  font-weight: 700;
-
-  span:last-child {
-    color: #9aa3b2;
-    font-weight: 600;
-  }
-`;
-
 const LargePanel = styled.section`
   padding: 16px;
-  border: 1px solid #edf1f6;
-  border-radius: 18px;
-  background: #ffffff;
-  margin-bottom: 22px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  background: white;
 `;
 
 const MediumPanel = styled.section`
   padding: 16px;
-  border: 1px solid #edf1f6;
-  border-radius: 18px;
-  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  background: white;
 `;
 
 const PanelHeaderRow = styled.div`
@@ -885,15 +744,14 @@ const PanelHeaderRow = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
+  margin-bottom: 12px;
 `;
 
 const PanelTitle = styled.h3`
-  margin: 0;
-  color: #111827;
-  font-size: 18px;
-  font-weight: 800;
+  margin: 0px;
+  color: var(--font);
+  font-size: 15px;
+  font-weight: 700;
 `;
 
 const PanelControls = styled.div`
@@ -913,7 +771,7 @@ const SearchIconWrap = styled.div`
   top: 50%;
   left: 11px;
   transform: translateY(-50%);
-  color: #9aa3b2;
+  color: var(--placeholder);
   display: flex;
   align-items: center;
 `;
@@ -938,7 +796,7 @@ const CompareTable = styled.table`
   min-width: 1180px;
   border-collapse: separate;
   border-spacing: 0;
-  border: 1px solid #dfe5ee;
+  border: 1px solid var(--border);
   border-radius: 14px;
   background: #ffffff;
   overflow: hidden;
@@ -949,18 +807,18 @@ const CompareTable = styled.table`
     text-align: center;
     white-space: nowrap;
     font-size: 13px;
-    border-right: 1px solid #e5e7eb;
-    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
   }
 
   thead th {
-    color: #9aa3b2;
+    color: var(--placeholder);
     font-weight: 700;
     background: #ffffff;
   }
 
   tbody td {
-    color: #1f2937;
+    color: var(--font);
     font-weight: 500;
   }
 
@@ -986,12 +844,12 @@ const MetricWrap = styled.div`
 `;
 
 const MetricPrimary = styled.span`
-  color: #111827;
+  color: var(--font);
   font-weight: 700;
 `;
 
 const MetricChange = styled.span`
-  color: ${({ $positive }) => ($positive ? "#22c55e" : "#ef4444")};
+  color: ${({ $positive }) => ($positive ? "var(--green);" : "var(--red)")};
   font-size: 12px;
   font-weight: 700;
 `;
@@ -1000,7 +858,6 @@ const TwoColumnGrid = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 14px;
-  margin-bottom: 22px;
 
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
@@ -1010,10 +867,11 @@ const TwoColumnGrid = styled.div`
 const LegendGuide = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 16px;
   flex-wrap: wrap;
   margin-bottom: 10px;
-  color: #6b7280;
+  color: var(--placeholder);
   font-size: 12px;
   font-weight: 600;
 `;
@@ -1035,6 +893,7 @@ const LegendDot = styled.span`
 const CategoryTabRow = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 12px;
@@ -1044,20 +903,25 @@ const CategoryTabButton = styled.button`
   min-width: 60px;
   height: 32px;
   border: none;
-  border-bottom: 2px solid ${({ $active }) => ($active ? "#2563eb" : "transparent")};
+  border-bottom: 2px solid
+    ${({ $active }) => ($active ? "var(--blue)" : "transparent")};
   background: transparent;
-  color: ${({ $active }) => ($active ? "#2563eb" : "#4b5563")};
+  color: ${({ $active }) => ($active ? "var(--blue)" : "#4b5563")};
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
 `;
 
 const TinyHint = styled.div`
-  color: #6b7280;
+  color: var(--placeholder);
   font-size: 12px;
   font-weight: 700;
 `;
 
+const HistoryTableScroll = styled.div`
+  overflow-x: auto;
+  width: 100%;
+`;
 const HistoryTable = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -1065,19 +929,19 @@ const HistoryTable = styled.table`
   th,
   td {
     padding: 14px 10px;
-    border-bottom: 1px solid #eef2f7;
+    border-bottom: 1px solid var(--border);
     font-size: 13px;
     text-align: left;
     white-space: nowrap;
   }
 
   th {
-    color: #9aa3b2;
+    color: var(--placeholder);
     font-weight: 700;
   }
 
   td {
-    color: #1f2937;
+    color: var(--font);
   }
 `;
 
@@ -1085,7 +949,7 @@ const CodeButton = styled.button`
   border: none;
   background: transparent;
   padding: 0;
-  color: #111827;
+  color: var(--font);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -1096,7 +960,7 @@ const CodeButton = styled.button`
 `;
 
 const ReasonText = styled.span`
-  color: ${({ $type }) => ($type === "up" ? "#ef5350" : "#22c55e")};
+  color: ${({ $type }) => ($type === "up" ? "var(--red)" : "var(--green)")};
   font-size: 12px;
   font-weight: 700;
 `;
@@ -1109,24 +973,24 @@ const StrategyTable = styled.table`
   th,
   td {
     padding: 14px 12px;
-    border-bottom: 1px solid #eef2f7;
+    border-bottom: 1px solid var(--border);
     text-align: center;
     white-space: nowrap;
     font-size: 13px;
   }
 
   th {
-    color: #9aa3b2;
+    color: var(--placeholder);
     font-weight: 700;
   }
 
   td {
-    color: #1f2937;
+    color: var(--font);
   }
 `;
 
 const StrategyReason = styled.span`
-  color: #22c55e;
+  color: var(--green);
   font-size: 12px;
   font-weight: 700;
 `;
@@ -1142,11 +1006,11 @@ const DeltaBadge = styled.span`
   font-size: 12px;
   font-weight: 800;
   background: ${({ $negative }) => ($negative ? "#ffe7e7" : "#dcf7e8")};
-  color: ${({ $negative }) => ($negative ? "#ef5350" : "#18b663")};
+  color: ${({ $negative }) => ($negative ? "var(--red)" : "var(--green)")};
 `;
 
 const InfoIconWrap = styled.div`
-  color: #9aa3b2;
+  color: var(--placeholder);
   display: flex;
   align-items: center;
 `;
@@ -1156,7 +1020,7 @@ const PerformanceDiff = styled.div`
   align-items: center;
   justify-content: center;
   gap: 4px;
-  color: ${({ $positive }) => ($positive ? "#22c55e" : "#ef4444")};
+  color: ${({ $positive }) => ($positive ? "var(--red)" : "var(--green)")};
   font-size: 14px;
   font-weight: 700;
 `;

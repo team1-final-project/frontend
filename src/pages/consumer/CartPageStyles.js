@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const Page = styled.div`
   min-height: 100vh;
   background: #f7f4ee;
-  padding: 50px 30px 200px;
+  padding: 50px 24px 200px;
 `;
 
 export const Inner = styled.div`
@@ -12,10 +12,11 @@ export const Inner = styled.div`
 `;
 
 export const Title = styled.h1`
-  font-size: 32px;
-  font-weight: 800;
+  font-size: 30px;
+  font-weight: 900;
   color: #111;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
+  letter-spacing: -0.04em;
 `;
 
 export const ContentGrid = styled.div`
@@ -46,7 +47,7 @@ export const TopBar = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 `;
 
 export const TopBarLeft = styled.div`
@@ -60,13 +61,13 @@ export const CheckboxLabel = styled.label`
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 15px;
+  font-size: 16px;
   color: #222;
-  font-weight: 600;
+  font-weight: 700;
 `;
 
 export const SelectedMeta = styled.div`
-  font-size: 14px;
+  font-size: 12px;
   color: #6f675d;
 
   strong {
@@ -78,21 +79,22 @@ export const SelectedMeta = styled.div`
 export const ListSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 `;
 
 export const CartCard = styled.div`
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
   background: #fff;
   border: 1px solid #ece5db;
-  border-radius: 22px;
-  padding: 20px;
+  border-radius: 24px;
+  padding: 24px;
 
   @media (max-width: 680px) {
     align-items: flex-start;
     flex-wrap: wrap;
+    padding: 20px;
   }
 `;
 
@@ -102,16 +104,16 @@ export const CheckArea = styled.div`
 `;
 
 export const Thumb = styled.img`
-  width: 120px;
-  height: 120px;
+  width: 132px;
+  height: 132px;
   object-fit: cover;
-  border-radius: 16px;
+  border-radius: 18px;
   background: #f3efe8;
   flex-shrink: 0;
 
   @media (max-width: 680px) {
-    width: 96px;
-    height: 96px;
+    width: 104px;
+    height: 104px;
   }
 `;
 
@@ -121,15 +123,16 @@ export const InfoArea = styled.div`
 `;
 
 export const ProductName = styled.h3`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
   color: #111;
   margin-bottom: 10px;
-  line-height: 1.4;
+  line-height: 1.45;
+  letter-spacing: -0.02em;
 `;
 
 export const ProductPrice = styled.p`
-  font-size: 15px;
+  font-size: 16px;
   color: #555;
   margin-bottom: 16px;
 `;
@@ -161,11 +164,12 @@ export const QtyButton = styled.button`
 export const QtyText = styled.span`
   min-width: 20px;
   text-align: center;
+  font-size: 16px;
   font-weight: 800;
 `;
 
 export const RightArea = styled.div`
-  min-width: 120px;
+  min-width: 132px;
   text-align: right;
   align-self: stretch;
   display: flex;
@@ -183,31 +187,27 @@ export const RightArea = styled.div`
 
 export const ItemTotal = styled.p`
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 900;
   color: #111;
 `;
 
 export const DeleteButton = styled.button`
-  font-size: 14px;
+  font-size: 12px;
   color: #8a8176;
   align-self: flex-end;
-
-  @media (max-width: 680px) {
-    align-self: auto;
-  }
 `;
 
 export const SummaryCard = styled.div`
   background: #fff;
   border: 1px solid #ece5db;
-  border-radius: 22px;
+  border-radius: 24px;
   padding: 24px;
   margin-top: 40px;
 `;
 
 export const SummaryTitle = styled.h2`
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 20px;
+  font-weight: 900;
   color: #111;
   margin-bottom: 20px;
 `;
@@ -222,7 +222,7 @@ export const SummaryRow = styled.div`
 `;
 
 export const TotalPrice = styled.span`
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 900;
   color: #111;
 `;
@@ -246,7 +246,7 @@ export const OrderButton = styled.button`
 export const StateCard = styled.div`
   background: #fff;
   border: 1px solid #ece5db;
-  border-radius: 22px;
+  border-radius: 24px;
   padding: 44px 24px;
   text-align: center;
   color: #777;
@@ -269,14 +269,14 @@ export const EmptyCard = styled.div`
 `;
 
 export const EmptyTitle = styled.h2`
-  font-size: 28px;
-  font-weight: 800;
+  font-size: 24px;
+  font-weight: 900;
   color: #111;
   margin-bottom: 12px;
 `;
 
 export const EmptyDescription = styled.p`
-  font-size: 15px;
+  font-size: 16px;
   color: #6f675d;
   line-height: 1.7;
   margin-bottom: 24px;
@@ -289,6 +289,6 @@ export const EmptyButton = styled.button`
   border-radius: 16px;
   background: #111;
   color: #fff;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
 `;

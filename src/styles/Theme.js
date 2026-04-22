@@ -10,7 +10,7 @@ const theme = {
     text: "#111111",
     subText: "#6f685f",
     mutedText: "#8b847c",
-    placeholder: "#9b948b",
+    placeholder: "#8b909a",
 
     border: "#ebe5dc",
     borderStrong: "#d9cfc1",
@@ -31,10 +31,13 @@ const theme = {
   layout: {
     containerWidth: "1180px",
     containerWideWidth: "1265px",
+
     pageTopPadding: "48px",
     pageSidePadding: "24px",
     pageBottomPadding: "200px",
-    sectionGapLg: "48px",
+
+    sectionGapXl: "56px",
+    sectionGapLg: "50px",
     sectionGapMd: "32px",
     sectionGapSm: "24px",
     contentGap: "16px",
@@ -42,11 +45,12 @@ const theme = {
     cardRadiusXl: "32px",
     cardRadiusLg: "24px",
     cardRadiusMd: "18px",
-    cardRadiusSm: "14px",
+    cardRadiusSm: "16px",
+    cardRadiusXs: "12px",
     pillRadius: "999px",
 
-    inputHeight: "54px",
-    buttonHeight: "48px",
+    inputHeight: "56px",
+    buttonHeight: "56px",
     headerHeight: "72px",
   },
 
