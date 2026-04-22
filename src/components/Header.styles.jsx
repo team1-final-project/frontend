@@ -72,7 +72,7 @@ export const Nav = styled.nav`
 export const NavItem = styled(Link)`
   text-decoration: none;
   color: #222;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   white-space: nowrap;
   transition: color 0.2s ease;
@@ -124,11 +124,12 @@ export const SearchInput = styled.input`
   border: none;
   outline: none;
   background: transparent;
-  font-size: 14px;
+  font-size: 12px;
   color: #111;
 
   &::placeholder {
     color: #9b9b9b;
+    font-size: 12px;
   }
 `;
 
@@ -154,7 +155,7 @@ const buttonBase = css`
   height: 38px;
   padding: 0 16px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   text-decoration: none;
   display: inline-flex;
