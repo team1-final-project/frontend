@@ -15,6 +15,10 @@ export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleGoToDetail = (item) => {
+    navigate(`/products/${item.productId}`);
+  };
+
   const fetchCart = async () => {
     try {
       setIsLoading(true);
@@ -175,10 +179,17 @@ export default function CartPage() {
                 <S.Thumb
                   src={item.image || "https://via.placeholder.com/120"}
                   alt={item.name}
+                  onClick={() => handleGoToDetail(item)}
+                  style={{ cursor: "pointer" }}
                 />
 
                 <S.InfoArea>
-                  <S.ProductName>{item.name}</S.ProductName>
+                  <S.ProductName
+                    onClick={() => handleGoToDetail(item)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {item.name}
+                  </S.ProductName>
                   <S.ProductPrice>
                     {item.price.toLocaleString()}원
                   </S.ProductPrice>
