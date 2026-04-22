@@ -229,6 +229,11 @@ export const ProductName = styled.h3`
   font-weight: 900;
   color: #111111;
   letter-spacing: -0.02em;
+
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const badgeTone = {
@@ -475,4 +480,53 @@ export const EmptyBox = styled.div`
   color: #7a736b;
   font-size: 15px;
   font-weight: 600;
+`;
+
+export const TrendChartCard = styled.div`
+  margin-top: 16px;
+  padding: 10px 4px 0;
+`;
+
+export const TrendCanvas = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+export const TrendSvg = styled.svg`
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+`;
+
+export const TrendTooltip = styled.div`
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 14px));
+  min-width: 88px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.14);
+  z-index: 5;
+
+  strong {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 10px;
+    color: #d6d6d6;
+    font-weight: 700;
+  }
+
+  span {
+    display: block;
+    font-size: 12px;
+    color: #ffffff;
+    font-weight: 800;
+  }
 `;

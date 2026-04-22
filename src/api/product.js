@@ -5,6 +5,11 @@ export const getProductList = async (params = {}) => {
   return response.data;
 };
 
+export const getAILowestProducts = async (params = {}) => {
+  const response = await plainApi.get("/products/ai-lowest", { params });
+  return response.data;
+};
+
 export const getProductDetail = async ({ productId, productCode }) => {
   if (productId) {
     const response = await plainApi.get(`/products/${productId}`);

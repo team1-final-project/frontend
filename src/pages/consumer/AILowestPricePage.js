@@ -1,62 +1,251 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import * as S from "./AILowestPricePage.styles";
-import { aiLowestCategories, aiLowestProducts } from "./aiLowestPriceMock";
+import { getAILowestProducts } from "../../api/product";
+
+const FALLBACK_IMAGE =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+      <rect width="100%" height="100%" fill="#f4f6f8"/>
+      <text x="50%" y="50%" text-anchor="middle" dy=".3em"
+        fill="#a0a8b0" font-size="28" font-family="Arial, sans-serif">
+        No Image
+      </text>
+    </svg>
+  `);
+
+const CHART_WIDTH = 640;
+const CHART_HEIGHT = 220;
 
 function formatPrice(value) {
-  return `${value.toLocaleString()}원`;
+  return `${Number(value).toLocaleString()}원`;
 }
 
-// 0원을 하단 기준으로 두고, 최고가를 상단 기준으로 잡아
-// 선이 축과 자연스럽게 맞도록 좌표를 계산
-function getTrendPoints(points) {
-  const max = Math.max(...points);
-  const min = 0;
+function truncateText(text, maxLength = 22) {
+  const value = String(text || "").trim();
+
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  return `${value.slice(0, maxLength)}...`;
+}
+
+function getChartPoints(data, width = CHART_WIDTH, height = CHART_HEIGHT) {
+  const paddingX = 38;
+  const paddingTop = 36;
+  const paddingBottom = 34;
+
+  const values = data.map((item) => Number(item.value || 0));
+  const min = Math.min(...values);
+  const max = Math.max(...values);
   const range = Math.max(max - min, 1);
 
-  return points.map((value, index, array) => {
-    const x = array.length === 1 ? 0 : (index / (array.length - 1)) * 100;
-    // 위아래 여백 확보
-    const y = 36 - ((value - min) / range) * 28;
-    return { x, y };
+  return data.map((item, index) => {
+    const x =
+      paddingX +
+      (index * (width - paddingX * 2)) / Math.max(data.length - 1, 1);
+
+    const normalized = (Number(item.value || 0) - min) / range;
+    const y =
+      height -
+      paddingBottom -
+      normalized * (height - paddingTop - paddingBottom);
+
+    return {
+      ...item,
+      x,
+      y,
+    };
   });
 }
 
+function buildSmoothPath(points) {
+  if (!points.length) return "";
+
+  let d = `M ${points[0].x} ${points[0].y}`;
+
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const current = points[i];
+    const next = points[i + 1];
+    const controlX = (current.x + next.x) / 2;
+
+    d += ` C ${controlX} ${current.y}, ${controlX} ${next.y}, ${next.x} ${next.y}`;
+  }
+
+  return d;
+}
+
+function AILowestTrendChart({ trendPoints, trendLabels, currentPrice }) {
+  const [hoveredPoint, setHoveredPoint] = useState(null);
+
+  const normalizedTrendData = useMemo(() => {
+    if (Array.isArray(trendPoints) && trendPoints.length > 0) {
+      return trendPoints.map((value, index) => ({
+        label: trendLabels?.[index] ?? `${index + 1}`,
+        value: Number(value || 0),
+      }));
+    }
+
+    return [
+      {
+        label: "현재",
+        value: Number(currentPrice || 0),
+      },
+    ];
+  }, [trendPoints, trendLabels, currentPrice]);
+
+  const chartPoints = useMemo(
+    () => getChartPoints(normalizedTrendData, CHART_WIDTH, CHART_HEIGHT),
+    [normalizedTrendData],
+  );
+
+  const chartPath = useMemo(() => buildSmoothPath(chartPoints), [chartPoints]);
+
+  return (
+    <S.TrendChartCard>
+      <S.TrendCanvas>
+        <S.TrendSvg
+          viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {[0, 1, 2].map((idx) => {
+            const y = 52 + idx * 40;
+            return (
+              <line
+                key={idx}
+                x1="38"
+                y1={y}
+                x2={CHART_WIDTH - 38}
+                y2={y}
+                stroke="#ddd4c7"
+                strokeWidth="1"
+              />
+            );
+          })}
+
+          <path
+            d={chartPath}
+            fill="none"
+            stroke="#2f6fd6"
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {chartPoints.map((point, index) => (
+            <g key={`${point.label}-${index}`}>
+              <circle
+                cx={point.x}
+                cy={point.y}
+                r={index === chartPoints.length - 1 ? 8 : 7}
+                fill="#ffffff"
+                stroke="#2f6fd6"
+                strokeWidth="4"
+              />
+              <circle
+                cx={point.x}
+                cy={point.y}
+                r="18"
+                fill="transparent"
+                onMouseEnter={() => setHoveredPoint(point)}
+                onMouseLeave={() => setHoveredPoint(null)}
+              />
+            </g>
+          ))}
+        </S.TrendSvg>
+
+        {hoveredPoint ? (
+          <S.TrendTooltip
+            style={{
+              left: `${(hoveredPoint.x / CHART_WIDTH) * 100}%`,
+              top: `${(hoveredPoint.y / CHART_HEIGHT) * 100}%`,
+            }}
+          >
+            <strong>{hoveredPoint.label}</strong>
+            <span>{formatPrice(hoveredPoint.value)}</span>
+          </S.TrendTooltip>
+        ) : null}
+      </S.TrendCanvas>
+
+      <S.TrendBottomWrap>
+        <S.TrendDateRow>
+          {normalizedTrendData.map((point) => (
+            <S.TrendDate key={point.label}>{point.label}</S.TrendDate>
+          ))}
+        </S.TrendDateRow>
+      </S.TrendBottomWrap>
+    </S.TrendChartCard>
+  );
+}
+
 export default function AILowestPricePage() {
+  const [categories, setCategories] = useState([{ id: "all", name: "전체" }]);
+  const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [keyword, setKeyword] = useState("");
   const [sortType, setSortType] = useState("drop");
+  const [totalCount, setTotalCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const filteredProducts = useMemo(() => {
-    const normalizedKeyword = keyword.trim().toLowerCase();
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
 
-    let result = aiLowestProducts.filter((product) => {
-      const matchesCategory =
-        selectedCategory === "all" || product.categoryId === selectedCategory;
+        const data = await getAILowestProducts({
+          keyword: keyword.trim() || undefined,
+          category_id:
+            selectedCategory === "all" ? undefined : Number(selectedCategory),
+          sort: sortType,
+        });
 
-      const matchesKeyword =
-        !normalizedKeyword ||
-        product.name.toLowerCase().includes(normalizedKeyword) ||
-        product.brand.toLowerCase().includes(normalizedKeyword);
+        setCategories([
+          { id: "all", name: "전체" },
+          ...((data.categories || []).map((category) => ({
+            id: String(category.id),
+            name: category.name,
+          })) || []),
+        ]);
 
-      return matchesCategory && matchesKeyword;
-    });
+        setProducts(
+          (data.items || []).map((item) => ({
+            id: item.id,
+            categoryId: String(item.category_id),
+            name: item.name,
+            brand: item.brand || "",
+            image: item.thumbnail_image_url || FALLBACK_IMAGE,
+            currentPrice: Number(item.current_price || 0),
+            lowestPrice: Number(item.lowest_price || 0),
+            dropAmount: Number(item.drop_amount || 0),
+            dropRate: Number(item.drop_rate || 0),
+            aiRecommendation: item.ai_recommendation || "",
+            aiDescription: item.ai_description || "",
+            badgeType: item.badge_tone || "default",
+            trendPoints: (item.trend_points || []).map((point) =>
+              Number(point.value || 0),
+            ),
+            trendLabels: (item.trend_points || []).map((point) => point.label),
+          })),
+        );
 
-    result = [...result].sort((a, b) => {
-      if (sortType === "priceLow") return a.currentPrice - b.currentPrice;
-      if (sortType === "lowest") return a.lowestPrice - b.lowestPrice;
-      if (sortType === "recommend") {
-        return a.badgeType.localeCompare(b.badgeType);
+        setTotalCount(Number(data.total || 0));
+      } catch (error) {
+        console.error(error);
+        setProducts([]);
+        setTotalCount(0);
+      } finally {
+        setIsLoading(false);
       }
-      return b.dropAmount - a.dropAmount;
-    });
+    };
 
-    return result;
+    fetchProducts();
   }, [selectedCategory, keyword, sortType]);
 
   const selectedCategoryName =
-    aiLowestCategories.find((category) => category.id === selectedCategory)
-      ?.name || "전체";
+    categories.find((category) => category.id === selectedCategory)?.name ||
+    "전체";
 
   const handleChangeCategory = (categoryId) => {
     setSelectedCategory(categoryId);
@@ -77,7 +266,7 @@ export default function AILowestPricePage() {
           <S.SectionLabel>카테고리 선택</S.SectionLabel>
 
           <S.CategoryRow>
-            {aiLowestCategories.map((category) => (
+            {categories.map((category) => (
               <S.CategoryButton
                 key={category.id}
                 type="button"
@@ -115,154 +304,86 @@ export default function AILowestPricePage() {
           <S.ResultRow>
             <S.ResultText>
               <S.ResultStrong>{selectedCategoryName}</S.ResultStrong> 카테고리 ·
-              총 <S.ResultStrong>{filteredProducts.length}</S.ResultStrong>개
-              상품
+              총 <S.ResultStrong>{totalCount}</S.ResultStrong>개 상품
             </S.ResultText>
           </S.ResultRow>
         </S.FilterPanel>
 
         <S.GridSection>
-          {filteredProducts.length > 0 ? (
+          {isLoading ? (
+            <S.EmptyBox>상품을 불러오는 중이에요.</S.EmptyBox>
+          ) : products.length > 0 ? (
             <S.ProductGrid>
-              {filteredProducts.map((product) => {
-                const chartPoints = getTrendPoints(product.trendPoints);
-                const polylinePoints = chartPoints
-                  .map((point) => `${point.x},${point.y}`)
-                  .join(" ");
+              {products.map((product) => (
+                <S.ProductCard key={product.id}>
+                  <S.ProductTop>
+                    <S.ProductThumb>
+                      <S.ProductImage src={product.image} alt={product.name} />
+                    </S.ProductThumb>
 
-                const leftMaxPrice = Math.max(...product.trendPoints);
+                    <S.ProductMain>
+                      <S.BrandText>{product.brand}</S.BrandText>
+                      <S.ProductName title={product.name}>
+                        {product.name}
+                      </S.ProductName>
 
-                return (
-                  <S.ProductCard key={product.id}>
-                    <S.ProductTop>
-                      <S.ProductThumb>
-                        <S.ProductImage
-                          src={product.image}
-                          alt={product.name}
-                        />
-                      </S.ProductThumb>
+                      <S.AITag $tone={product.badgeType}>
+                        {product.aiRecommendation}
+                      </S.AITag>
 
-                      <S.ProductMain>
-                        <S.BrandText>{product.brand}</S.BrandText>
-                        <S.ProductName>{product.name}</S.ProductName>
+                      <S.PriceSummary>
+                        <S.InfoCard>
+                          <S.InfoLabel>현재가</S.InfoLabel>
+                          <S.InfoValue>
+                            {formatPrice(product.currentPrice)}
+                          </S.InfoValue>
+                        </S.InfoCard>
 
-                        <S.AITag $tone={product.badgeType}>
-                          {product.aiRecommendation}
-                        </S.AITag>
+                        <S.InfoCard>
+                          <S.InfoLabel>최근 최저가</S.InfoLabel>
+                          <S.InfoValue>
+                            {formatPrice(product.lowestPrice)}
+                          </S.InfoValue>
+                        </S.InfoCard>
 
-                        <S.PriceSummary>
-                          <S.InfoCard>
-                            <S.InfoLabel>현재가</S.InfoLabel>
-                            <S.InfoValue>
-                              {formatPrice(product.currentPrice)}
-                            </S.InfoValue>
-                          </S.InfoCard>
+                        <S.InfoCard>
+                          <S.InfoLabel>하락폭</S.InfoLabel>
+                          <S.DropValue>
+                            -{formatPrice(product.dropAmount)}
+                          </S.DropValue>
+                        </S.InfoCard>
+                      </S.PriceSummary>
+                    </S.ProductMain>
+                  </S.ProductTop>
 
-                          <S.InfoCard>
-                            <S.InfoLabel>최근 최저가</S.InfoLabel>
-                            <S.InfoValue>
-                              {formatPrice(product.lowestPrice)}
-                            </S.InfoValue>
-                          </S.InfoCard>
+                  <S.ProductBottom>
+                    <S.AIBox>
+                      <S.AIBoxTitle>AI 추천 코멘트</S.AIBoxTitle>
+                      <S.AIBoxDescription>
+                        {product.aiDescription}
+                      </S.AIBoxDescription>
+                    </S.AIBox>
 
-                          <S.InfoCard>
-                            <S.InfoLabel>하락폭</S.InfoLabel>
-                            <S.DropValue>
-                              -{formatPrice(product.dropAmount)}
-                            </S.DropValue>
-                          </S.InfoCard>
-                        </S.PriceSummary>
-                      </S.ProductMain>
-                    </S.ProductTop>
+                    <S.TrendSection>
+                      <S.TrendHeaderRow>
+                        <S.TrendLabel>최근 가격 추이</S.TrendLabel>
+                      </S.TrendHeaderRow>
 
-                    <S.ProductBottom>
-                      <S.AIBox>
-                        <S.AIBoxTitle>AI 추천 코멘트</S.AIBoxTitle>
-                        <S.AIBoxDescription>
-                          {product.aiDescription}
-                        </S.AIBoxDescription>
-                      </S.AIBox>
+                      <AILowestTrendChart
+                        trendPoints={product.trendPoints}
+                        trendLabels={product.trendLabels}
+                        currentPrice={product.currentPrice}
+                      />
+                    </S.TrendSection>
 
-                      <S.TrendSection>
-                        <S.TrendHeaderRow>
-                          <S.TrendLabel>최근 가격 추이</S.TrendLabel>
-
-                          <S.PeriodTabRow>
-                            <S.PeriodChip $active>1개월</S.PeriodChip>
-                            <S.PeriodChip>3개월</S.PeriodChip>
-                            <S.PeriodChip>6개월</S.PeriodChip>
-                          </S.PeriodTabRow>
-                        </S.TrendHeaderRow>
-
-                        <S.TrendChartWrap>
-                          <S.TrendYAxis>
-                            <S.TrendYAxisValue>
-                              {leftMaxPrice.toLocaleString()}원
-                            </S.TrendYAxisValue>
-                            <S.TrendYAxisValue>&nbsp;</S.TrendYAxisValue>
-                            <S.TrendYAxisValue>
-                              {product.currentPrice.toLocaleString()}원
-                            </S.TrendYAxisValue>
-                            <S.TrendYAxisValue>&nbsp;</S.TrendYAxisValue>
-                            <S.TrendYAxisValue>0원</S.TrendYAxisValue>
-                          </S.TrendYAxis>
-
-                          <S.ChartArea>
-                            <S.SimpleTrendChart>
-                              <S.ChartGuideLine $top="0%" />
-                              <S.ChartGuideLine $top="25%" />
-                              <S.ChartGuideLine $top="50%" />
-                              <S.ChartGuideLine $top="75%" />
-                              <S.ChartGuideLine $top="100%" />
-
-                              <S.SimpleTrendSvg
-                                viewBox="0 0 100 40"
-                                preserveAspectRatio="none"
-                              >
-                                <polyline
-                                  fill="none"
-                                  stroke="#2f6fd6"
-                                  strokeWidth="1.4"
-                                  strokeLinejoin="round"
-                                  strokeLinecap="round"
-                                  points={polylinePoints}
-                                />
-
-                                {chartPoints.map((point, index) => (
-                                  <circle
-                                    key={index}
-                                    cx={point.x}
-                                    cy={point.y}
-                                    r="1.6"
-                                    fill="#ffffff"
-                                    stroke="#2f6fd6"
-                                    strokeWidth="1.2"
-                                    vectorEffect="non-scaling-stroke"
-                                  />
-                                ))}
-                              </S.SimpleTrendSvg>
-                            </S.SimpleTrendChart>
-
-                            <S.TrendBottomWrap>
-                              <S.TrendDateRow>
-                                {product.trendLabels.map((label) => (
-                                  <S.TrendDate key={label}>{label}</S.TrendDate>
-                                ))}
-                              </S.TrendDateRow>
-                            </S.TrendBottomWrap>
-                          </S.ChartArea>
-                        </S.TrendChartWrap>
-                      </S.TrendSection>
-
-                      <S.ButtonRow>
-                        <S.DetailButton to={`/products/${product.id}`}>
-                          상세 보기
-                        </S.DetailButton>
-                      </S.ButtonRow>
-                    </S.ProductBottom>
-                  </S.ProductCard>
-                );
-              })}
+                    <S.ButtonRow>
+                      <S.DetailButton to={`/products/${product.id}`}>
+                        상세 보기
+                      </S.DetailButton>
+                    </S.ButtonRow>
+                  </S.ProductBottom>
+                </S.ProductCard>
+              ))}
             </S.ProductGrid>
           ) : (
             <S.EmptyBox>조건에 맞는 상품이 없어요.</S.EmptyBox>
