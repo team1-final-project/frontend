@@ -12,6 +12,7 @@ import {
   Receipt,
   MapPin,
 } from "lucide-react";
+import OrderDetailModal from "../../components/OrderDetailModal";
 import { getMe, logout } from "../../api/auth";
 import { getMyCart } from "../../api/cart";
 import { getMyOrders } from "../../api/orderRead";
@@ -113,6 +114,8 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
   const [orders, setOrders] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -307,7 +310,21 @@ export default function Profile() {
           ) : (
             <OrderList>
               {summary.recentOrders.map((order) => (
-                <OrderItem key={order.id}>
+                <OrderItem
+                  key={order.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => {
+                    setSelectedOrder(order);
+                    setIsModalOpen(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      setSelectedOrder(order);
+                      setIsModalOpen(true);
+                    }
+                  }}
+                >
                   <OrderMain>
                     <OrderNo>{order.orderNumber}</OrderNo>
                     <OrderDate>{formatDate(order.createdAt)}</OrderDate>
@@ -357,6 +374,14 @@ export default function Profile() {
           </MenuList>
         </SectionCard>
       </BottomGrid>
+      <OrderDetailModal
+        open={isModalOpen}
+        order={selectedOrder}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedOrder(null);
+        }}
+      />
     </PageWrap>
   );
 }
@@ -635,6 +660,15 @@ const OrderItem = styled.div`
   border: 1px solid #eef2f7;
   border-radius: 14px;
   padding: 16px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background: #fafcff;
+    border-color: #dbe4f0;
+  }
 `;
 
 const OrderMain = styled.div`
