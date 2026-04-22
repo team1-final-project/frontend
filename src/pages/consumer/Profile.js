@@ -96,13 +96,16 @@ function normalizeOrders(orderData) {
     id: item.id || index,
     orderNumber: item.order_number || item.orderNo || item.order_no || "-",
     status: item.status || item.order_status || item.payment_status || "-",
+    totalProductAmount:
+      item.total_product_amount ?? item.totalProductAmount ?? 0,
+    shippingFee: item.total_shipping_fee ?? item.shippingFee ?? 3000,
     totalAmount:
-      item.total_amount ||
-      item.totalAmount ||
-      item.final_amount ||
-      item.amount ||
+      item.total_payment_amount ??
+      item.total_amount ??
+      item.totalAmount ??
+      item.amount ??
       0,
-    createdAt: item.created_at || item.createdAt || null,
+    createdAt: item.ordered_at || item.created_at || item.createdAt || null,
   }));
 }
 
