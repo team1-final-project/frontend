@@ -515,7 +515,9 @@ export default function SalesStat() {
         </Panel>
 
         <Panel>
-          <PanelTitle>카테고리 별 판매 비중</PanelTitle>
+          <PanelTitleRow>
+            <PanelTitle>카테고리 별 판매 비중</PanelTitle>
+          </PanelTitleRow>
           <ChartBox>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -551,7 +553,7 @@ export default function SalesStat() {
       </ChartTwoCol>
 
       <WidePanel>
-        <PanelHeaderSplit>
+        <PanelTitleRow>
           <PanelTitle>시간대별 최저가 변동 추이</PanelTitle>
 
           <PanelHeaderFilters>
@@ -571,7 +573,7 @@ export default function SalesStat() {
               border={true}
             />
           </PanelHeaderFilters>
-        </PanelHeaderSplit>
+        </PanelTitleRow>
 
         <SubInfoText>
           상품코드 : {hourlySelectedProduct.productCode || "-"} / 상품명 :{" "}
@@ -692,7 +694,9 @@ export default function SalesStat() {
         </Panel>
 
         <Panel>
-          <PanelTitle>상품별 판매 비중</PanelTitle>
+          <PanelTitleRow>
+            <PanelTitle>상품별 판매 비중</PanelTitle>
+          </PanelTitleRow>
 
           <InnerTabs>
             {categoryOptions.map((key) => (
@@ -749,7 +753,7 @@ export default function SalesStat() {
       </ChartTwoCol>
 
       <WidePanel>
-        <PanelHeaderSplit>
+        <PanelTitleRow>
           <PanelTitle>랭킹 TOP 5</PanelTitle>
 
           <PanelHeaderFilters>
@@ -781,7 +785,7 @@ export default function SalesStat() {
               shadow={false}
             />
           </PanelHeaderFilters>
-        </PanelHeaderSplit>
+        </PanelTitleRow>
 
         <RankingTableScroll>
           <RankingTable>
@@ -1089,11 +1093,11 @@ const WidePanel = styled.section`
   padding: 16px;
   border-radius: 16px;
   background: #ffffff;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 `;
 
 const PanelTitle = styled.h3`
-  margin-bottom: 20px;
+  margin: 0px;
   color: var(--font);
   font-size: 18px;
   font-weight: 700;
@@ -1111,7 +1115,7 @@ const MiniLegendRow = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #6b7280;
+  color: var(--placeholder);
   font-size: 12px;
   font-weight: 600;
 `;
@@ -1157,7 +1161,7 @@ const PanelHeaderSplit = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
 `;
 
