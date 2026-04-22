@@ -750,7 +750,7 @@ const PanelHeaderRow = styled.div`
 const PanelTitle = styled.h3`
   margin: 0px;
   color: var(--font);
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
 `;
 

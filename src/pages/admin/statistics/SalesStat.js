@@ -888,12 +888,13 @@ const ModeTabs = styled.div`
 
 const ModeTabButton = styled.button`
   min-width: 160px;
+  width: 100%;
   height: 44px;
   border: none;
   background: transparent;
-  color: ${({ $active }) => ($active ? "#2563eb" : "#1f2937")};
-  font-size: 18px;
-  font-weight: 800;
+  color: ${({ $active }) => ($active ? "var(--blue)" : "var(--font)")};
+  font-size: 16px;
+  font-weight: 600;
   position: relative;
   cursor: pointer;
 
@@ -904,7 +905,7 @@ const ModeTabButton = styled.button`
     right: 0;
     bottom: -1px;
     height: 3px;
-    background: ${({ $active }) => ($active ? "#2563eb" : "transparent")};
+    background: ${({ $active }) => ($active ? "var(--blue)" : "transparent")};
     border-radius: 999px;
   }
 `;
@@ -1099,7 +1100,7 @@ const WidePanel = styled.section`
 const PanelTitle = styled.h3`
   margin: 0px;
   color: var(--font);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
 `;
 
