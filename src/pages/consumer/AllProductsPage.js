@@ -41,8 +41,34 @@ function getDiscountRate(price, originalPrice) {
 }
 
 function renderStars(rating) {
-  const rounded = Math.round(rating);
-  return "★".repeat(rounded) + "☆".repeat(5 - rounded);
+  const safeRating = Math.max(0, Math.min(5, Number(rating) || 0));
+
+  const fullStars = Math.floor(safeRating);
+  const decimal = safeRating - fullStars;
+  const hasHalfStar = decimal >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  return (
+    <>
+      {Array.from({ length: fullStars }, (_, index) => (
+        <S.StarChar key={`full-${index}`} $type="full">
+          ★
+        </S.StarChar>
+      ))}
+
+      {hasHalfStar ? (
+        <S.StarChar key="half" $type="half">
+          ★
+        </S.StarChar>
+      ) : null}
+
+      {Array.from({ length: emptyStars }, (_, index) => (
+        <S.StarChar key={`empty-${index}`} $type="empty">
+          ★
+        </S.StarChar>
+      ))}
+    </>
+  );
 }
 
 function getMockReviewMeta(productId) {

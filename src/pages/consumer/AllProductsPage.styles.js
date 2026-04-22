@@ -183,9 +183,9 @@ export const ProductThumb = styled.div`
 
 export const ProductImage = styled.img`
   display: block;
-  width: 68%;
-  height: 68%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   background: transparent;
 `;
 
@@ -209,9 +209,27 @@ export const RatingRow = styled.div`
 `;
 
 export const Stars = styled.span`
-  color: #ffbf1a;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  line-height: 1;
+`;
+
+export const StarChar = styled.span`
+  display: inline-block;
   font-size: 13px;
   line-height: 1;
+  color: ${({ $type }) => ($type === "empty" ? "#d9d4cc" : "#ffbf1a")};
+
+  ${({ $type }) =>
+    $type === "half" &&
+    css`
+      background: linear-gradient(90deg, #ffbf1a 50%, #d9d4cc 50%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    `}
 `;
 
 export const RatingText = styled.span`
