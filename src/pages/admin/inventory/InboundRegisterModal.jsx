@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { Search, X } from "lucide-react";
 import { getAdminProductDetail } from "../../../api/adminProduct";
+import SearchDate from "../../../components/SearchDate";
 
 const formatCount = (value) => Number(value || 0).toLocaleString();
 
@@ -167,96 +168,102 @@ export default function InboundRegisterModal({
         </ModalHeader>
 
         <Form onSubmit={handleSubmit}>
-          <SectionTitle>상품정보</SectionTitle>
+          <Section>
+            <SectionTitle>상품정보</SectionTitle>
 
-          <FormRow>
-            <FormLabel>상품코드</FormLabel>
-            <FormField>
-              <CodeInputRow>
+            <FormRow>
+              <FormLabel>상품코드</FormLabel>
+              <FormField>
+                <CodeInputRow>
+                  <Input
+                    value={form.productCode}
+                    onChange={(e) =>
+                      handleChange("productCode", e.target.value)
+                    }
+                    onKeyDown={handleProductCodeKeyDown}
+                    placeholder="상품코드를 입력하세요"
+                    disabled={isSubmitting || isFetchingProduct}
+                  />
+                  <SearchButton
+                    type="button"
+                    onClick={handleFetchProductByCode}
+                    disabled={isSubmitting || isFetchingProduct}
+                  >
+                    <Search size={15} />
+                    조회
+                  </SearchButton>
+                </CodeInputRow>
+
+                {lookupError ? <ErrorText>{lookupError}</ErrorText> : null}
+              </FormField>
+            </FormRow>
+
+            <FormRow>
+              <FormLabel>상품명</FormLabel>
+              <FormField>
                 <Input
-                  value={form.productCode}
-                  onChange={(e) => handleChange("productCode", e.target.value)}
-                  onKeyDown={handleProductCodeKeyDown}
-                  placeholder="상품코드를 입력하세요"
-                  disabled={isSubmitting || isFetchingProduct}
+                  value={form.productName}
+                  placeholder="상품코드 조회 시 자동 표시"
+                  readOnly
                 />
-                <SearchButton
-                  type="button"
-                  onClick={handleFetchProductByCode}
-                  disabled={isSubmitting || isFetchingProduct}
-                >
-                  <Search size={15} />
-                  조회
-                </SearchButton>
-              </CodeInputRow>
+              </FormField>
+            </FormRow>
+          </Section>
 
-              {lookupError ? <ErrorText>{lookupError}</ErrorText> : null}
-            </FormField>
-          </FormRow>
+          <Section>
+            <SectionTitle>입고정보</SectionTitle>
 
-          <FormRow>
-            <FormLabel>상품명</FormLabel>
-            <FormField>
-              <Input
-                value={form.productName}
-                placeholder="상품코드 조회 시 자동 표시"
-                readOnly
-              />
-            </FormField>
-          </FormRow>
+            <FormRow>
+              <FormLabel>현재재고</FormLabel>
+              <FormField>
+                <UnitInputWrap>
+                  <Input value={formatCount(form.currentStock)} readOnly />
+                  <UnitText>개</UnitText>
+                </UnitInputWrap>
+              </FormField>
+            </FormRow>
 
-          <SectionTitle>입고정보</SectionTitle>
+            <FormRow>
+              <FormLabel>입고 수량</FormLabel>
+              <FormField>
+                <UnitInputWrap>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={form.inboundQty}
+                    onChange={(e) => handleChange("inboundQty", e.target.value)}
+                    placeholder="입고 수량 입력"
+                    disabled={isSubmitting}
+                  />
+                  <UnitText>개</UnitText>
+                </UnitInputWrap>
+              </FormField>
+            </FormRow>
 
-          <FormRow>
-            <FormLabel>현재재고</FormLabel>
-            <FormField>
-              <UnitInputWrap>
-                <Input value={formatCount(form.currentStock)} readOnly />
-                <UnitText>개</UnitText>
-              </UnitInputWrap>
-            </FormField>
-          </FormRow>
+            <FormRow>
+              <FormLabel>총 수량</FormLabel>
+              <FormField>
+                <UnitInputWrap>
+                  <Input value={formatCount(totalStock)} readOnly />
+                  <UnitText>개</UnitText>
+                </UnitInputWrap>
+              </FormField>
+            </FormRow>
 
-          <FormRow>
-            <FormLabel>입고 수량</FormLabel>
-            <FormField>
-              <UnitInputWrap>
-                <Input
-                  type="number"
-                  min="1"
-                  value={form.inboundQty}
-                  onChange={(e) => handleChange("inboundQty", e.target.value)}
-                  placeholder="입고 수량 입력"
-                  disabled={isSubmitting}
+            <FormRow>
+              <FormLabel>유통기한</FormLabel>
+              <FormField>
+                <SearchDate
+                  type="single"
+                  selected={form.expirationDate}
+                  onChange={(date) => handleChange("expirationDate", date)}
+                  width="100%"
+                  border={true}
+                  shadow={false}
                 />
-                <UnitText>개</UnitText>
-              </UnitInputWrap>
-            </FormField>
-          </FormRow>
-
-          <FormRow>
-            <FormLabel>총 수량</FormLabel>
-            <FormField>
-              <UnitInputWrap>
-                <Input value={formatCount(totalStock)} readOnly />
-                <UnitText>개</UnitText>
-              </UnitInputWrap>
-            </FormField>
-          </FormRow>
-
-          <FormRow>
-            <FormLabel>유통기한</FormLabel>
-            <FormField>
-              <Input
-                type="date"
-                value={form.expirationDate}
-                onChange={(e) =>
-                  handleChange("expirationDate", e.target.value)
-                }
-                disabled={isSubmitting}
-              />
-            </FormField>
-          </FormRow>
+              </FormField>
+            </FormRow>
+          </Section>
 
           <ButtonRow>
             <CancelButton
@@ -293,11 +300,17 @@ const Overlay = styled.div`
 const ModalCard = styled.div`
   width: 100%;
   max-width: 560px;
-  background: #ffffff;
+  background: white;
   border-radius: 20px;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  box-shadow: var(--shadow);
   padding: 28px 28px 24px;
   box-sizing: border-box;
+`;
+
+const Section = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 `;
 
 const ModalHeader = styled.div`
@@ -309,9 +322,9 @@ const ModalHeader = styled.div`
 
 const ModalTitle = styled.h3`
   margin: 0;
-  color: #111827;
-  font-size: 18px;
-  font-weight: 800;
+  color: var(--font);
+  font-size: 20px;
+  font-weight: 600;
 `;
 
 const CloseButton = styled.button`
@@ -319,8 +332,7 @@ const CloseButton = styled.button`
   height: 34px;
   border: none;
   border-radius: 10px;
-  background: #f3f4f6;
-  color: #475569;
+  color: var(--font);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -335,15 +347,15 @@ const CloseButton = styled.button`
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 40px;
 `;
 
 const SectionTitle = styled.div`
   margin-top: 6px;
   margin-bottom: 2px;
-  color: #111827;
+  color: var(--font);
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
 `;
 
 const FormRow = styled.div`
@@ -354,9 +366,9 @@ const FormRow = styled.div`
 `;
 
 const FormLabel = styled.label`
-  color: #334155;
+  color: var(--font);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
 `;
 
 const FormField = styled.div`
@@ -372,35 +384,36 @@ const CodeInputRow = styled.div`
 const Input = styled.input`
   width: 100%;
   height: 42px;
-  border: 1px solid #dbe2ea;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 0 14px;
   box-sizing: border-box;
-  color: #111827;
+  color: var(--font);
   font-size: 14px;
-  background: ${({ readOnly }) => (readOnly ? "#f8fafc" : "#ffffff")};
+  background: ${({ readOnly }) => (readOnly ? "var(--read-only)" : "#ffffff")};
 
   &:focus {
     outline: none;
-    border-color: #2563eb;
+    border-color: var(--blue);
   }
 
   &:read-only {
-    color: #475569;
+    color: var(--read-only);
   }
 
   &::placeholder {
-    color: #94a3b8;
+    color: var(--placeholder);
   }
 `;
 
 const SearchButton = styled.button`
-  height: 42px;
+  min-width: 96px;
+  height: 40px;
   border: none;
   border-radius: 10px;
-  background: #2563eb;
-  color: #ffffff;
-  font-size: 14px;
+  background: var(--blue);
+  color: white;
+  font-size: 13px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
@@ -423,17 +436,17 @@ const UnitText = styled.span`
   top: 50%;
   right: 14px;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: var(--placeholder);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   pointer-events: none;
 `;
 
 const ErrorText = styled.div`
   margin-top: 6px;
-  color: #dc2626;
+  color: var(--red);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
 `;
 
 const ButtonRow = styled.div`
@@ -459,11 +472,30 @@ const BaseButton = styled.button`
 `;
 
 const CancelButton = styled(BaseButton)`
-  background: #e5e7eb;
-  color: #374151;
+  min-width: 96px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  color: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
 `;
 
 const SubmitButton = styled(BaseButton)`
-  background: #2563eb;
-  color: #ffffff;
+  min-width: 96px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: var(--blue);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;

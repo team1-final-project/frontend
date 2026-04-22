@@ -63,6 +63,11 @@ export default function TableComponent({
   filterOptions2 = [],
   filterPlaceholder2 = "Filter 2",
 
+  filterValue3 = "",
+  onFilterChange3,
+  filterOptions3 = [],
+  filterPlaceholder3 = "Filter 3",
+
   startDate = "",
   onStartDateChange,
   endDate = "",
@@ -267,6 +272,17 @@ export default function TableComponent({
                   onChange={onFilterChange2}
                   options={filterOptions2}
                   placeholder={filterPlaceholder2}
+                  shadow={true}
+                />
+              )}
+
+              {typeof onFilterChange3 === "function" && (
+                <SelectBar
+                  variant={variant}
+                  value={filterValue3}
+                  onChange={onFilterChange3}
+                  options={filterOptions3}
+                  placeholder={filterPlaceholder3}
                   shadow={true}
                 />
               )}

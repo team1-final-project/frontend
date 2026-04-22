@@ -5,7 +5,7 @@ import { ChevronDown, Check } from "lucide-react";
 
 const STATUS_PALETTE = {
   판매종료: { color: "#33189D", bg: "#EFECFA", variant: "purple" },
-  판매중지: { color: "#FFC600", bg: "#FFF6D6", variant: "warning" },
+  판매중지: { color: "#b99306", bg: "#FFF6D6", variant: "warning" },
   판매중: { color: "#1EB564", bg: "#EEFBF4", variant: "success" },
   품절: { color: "#EA5455 ", bg: "#fceeef", variant: "danger" },
   판매예정: { color: "#0FB7FF", bg: "#F0FAFF", variant: "info" },
@@ -14,7 +14,7 @@ const STATUS_PALETTE = {
 const VARIANT_COLOR_MAP = {
   success: { color: "#1EB564", bg: "#EEFBF4" },
   info: { color: "#0FB7FF", bg: "#F0FAFF" },
-  warning: { color: "#FFC600", bg: "#FFF6D6" },
+  warning: { color: "#b99306", bg: "#FFF6D6" },
   danger: { color: "#EA5455 ", bg: "#fceeef" },
   purple: { color: "#33189D", bg: "#EFECFA" },
 };
