@@ -1,15 +1,41 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import * as S from "./AllProductsPage.styles";
-import { allProducts, productCategories } from "./allProductsMock";
+import { getProductList } from "../../api/product";
+
+const REVIEW_MOCKS = [
+  { rating: 4.8, reviewCount: 128 },
+  { rating: 4.6, reviewCount: 83 },
+  { rating: 4.5, reviewCount: 57 },
+  { rating: 4.7, reviewCount: 96 },
+  { rating: 5.0, reviewCount: 211 },
+  { rating: 4.4, reviewCount: 73 },
+  { rating: 4.3, reviewCount: 64 },
+  { rating: 4.9, reviewCount: 141 },
+  { rating: 4.2, reviewCount: 39 },
+];
+
+const FALLBACK_IMAGE =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+      <rect width="100%" height="100%" fill="#f4f6f8"/>
+      <text x="50%" y="50%" text-anchor="middle" dy=".3em"
+        fill="#a0a8b0" font-size="28" font-family="Arial, sans-serif">
+        No Image
+      </text>
+    </svg>
+  `);
 
 function formatPrice(value) {
-  return `${value.toLocaleString()}원`;
+  return `${Number(value).toLocaleString()}원`;
 }
 
 function getDiscountRate(price, originalPrice) {
-  if (!originalPrice || originalPrice <= price) return null;
-  return Math.round(((originalPrice - price) / originalPrice) * 100);
+  if (!originalPrice || Number(originalPrice) <= Number(price)) return null;
+  return Math.round(
+    ((Number(originalPrice) - Number(price)) / Number(originalPrice)) * 100,
+  );
 }
 
 function renderStars(rating) {
@@ -17,45 +43,84 @@ function renderStars(rating) {
   return "★".repeat(rounded) + "☆".repeat(5 - rounded);
 }
 
+function getMockReviewMeta(productId) {
+  const index = Math.abs(Number(productId || 0)) % REVIEW_MOCKS.length;
+  return REVIEW_MOCKS[index];
+}
+
 export default function AllProductsPage() {
+  const [productCategories, setProductCategories] = useState([
+    { id: "all", name: "전체" },
+  ]);
+  const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [keyword, setKeyword] = useState("");
   const [sortType, setSortType] = useState("latest");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   const pageSize = 8;
 
-  const filteredProducts = useMemo(() => {
-    const normalizedKeyword = keyword.trim().toLowerCase();
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
 
-    let result = allProducts.filter((product) => {
-      const matchesCategory =
-        selectedCategory === "all" || product.categoryId === selectedCategory;
+        const data = await getProductList({
+          keyword: keyword.trim() || undefined,
+          category_id:
+            selectedCategory === "all" ? undefined : Number(selectedCategory),
+          sort: sortType,
+          page: currentPage,
+          size: pageSize,
+        });
 
-      const matchesKeyword =
-        !normalizedKeyword ||
-        product.name.toLowerCase().includes(normalizedKeyword) ||
-        product.brand.toLowerCase().includes(normalizedKeyword);
+        const categories = [
+          { id: "all", name: "전체" },
+          ...((data.categories || []).map((category) => ({
+            id: String(category.id),
+            name: category.name,
+          })) || []),
+        ];
 
-      return matchesCategory && matchesKeyword;
-    });
+        const mappedItems = (data.items || []).map((item) => {
+          const mockReview = getMockReviewMeta(item.id);
 
-    result = [...result].sort((a, b) => {
-      if (sortType === "priceLow") return a.price - b.price;
-      if (sortType === "priceHigh") return b.price - a.price;
-      if (sortType === "ai") return a.badgeType.localeCompare(b.badgeType);
-      return b.id - a.id;
-    });
+          return {
+            id: item.id,
+            productCode: item.product_code,
+            categoryId: String(item.category_id),
+            name: item.name,
+            brand: item.brand || "",
+            price: Number(item.price || 0),
+            originalPrice:
+              item.original_price != null ? Number(item.original_price) : null,
+            rating: mockReview.rating,
+            reviewCount: mockReview.reviewCount,
+            image: item.thumbnail_image_url || FALLBACK_IMAGE,
+            aiTag: item.badge_label || null,
+            badgeType: item.badge_tone || "default",
+          };
+        });
 
-    return result;
-  }, [selectedCategory, keyword, sortType]);
+        setProductCategories(categories);
+        setProducts(mappedItems);
+        setTotalCount(Number(data.total || 0));
+        setTotalPages(Math.max(1, Number(data.total_pages || 1)));
+      } catch (error) {
+        console.error(error);
+        setProducts([]);
+        setTotalCount(0);
+        setTotalPages(1);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
-
-  const pagedProducts = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredProducts.slice(start, start + pageSize);
-  }, [filteredProducts, currentPage]);
+    fetchProducts();
+  }, [selectedCategory, keyword, sortType, currentPage]);
 
   const selectedCategoryName =
     productCategories.find((category) => category.id === selectedCategory)
@@ -126,26 +191,24 @@ export default function AllProductsPage() {
           <S.ResultRow>
             <S.ResultText>
               <S.ResultStrong>{selectedCategoryName}</S.ResultStrong> 카테고리 ·
-              총 <S.ResultStrong>{filteredProducts.length}</S.ResultStrong>개
-              상품
+              총 <S.ResultStrong>{totalCount}</S.ResultStrong>개 상품
             </S.ResultText>
           </S.ResultRow>
         </S.FilterPanel>
 
         <S.GridSection>
-          {pagedProducts.length > 0 ? (
+          {isLoading ? (
+            <S.EmptyBox>상품을 불러오는 중이에요.</S.EmptyBox>
+          ) : products.length > 0 ? (
             <S.ProductGrid>
-              {pagedProducts.map((product) => {
+              {products.map((product) => {
                 const discountRate = getDiscountRate(
                   product.price,
                   product.originalPrice,
                 );
 
                 return (
-                  <S.ProductCard
-                    key={product.id}
-                    to={`/products/${product.id}`}
-                  >
+                  <S.ProductCard key={product.id} to={`/products/${product.id}`}>
                     <S.ProductThumb>
                       <S.ProductImage src={product.image} alt={product.name} />
                     </S.ProductThumb>
@@ -174,11 +237,13 @@ export default function AllProductsPage() {
                         ) : null}
                       </S.PriceRow>
 
-                      <S.TagRow>
-                        <S.ProductTag $tone={product.badgeType}>
-                          {product.aiTag}
-                        </S.ProductTag>
-                      </S.TagRow>
+                      {product.aiTag ? (
+                        <S.TagRow>
+                          <S.ProductTag $tone={product.badgeType}>
+                            {product.aiTag}
+                          </S.ProductTag>
+                        </S.TagRow>
+                      ) : null}
                     </S.ProductBody>
                   </S.ProductCard>
                 );
@@ -189,7 +254,7 @@ export default function AllProductsPage() {
           )}
         </S.GridSection>
 
-        {filteredProducts.length > pageSize ? (
+        {totalCount > pageSize ? (
           <S.PaginationRow>
             {Array.from({ length: totalPages }, (_, index) => index + 1).map(
               (page) => (
