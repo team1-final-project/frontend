@@ -95,7 +95,9 @@ const GlobalStyle = createGlobalStyle`
 
 
 
-  /* consumer ui colors */
+ /* =========================
+       Consumer UI Color
+    ========================= */
     --bg-page: #efefef;
     --bg-section: #f5f1ea;
     --bg-card: #ffffff;
@@ -104,6 +106,7 @@ const GlobalStyle = createGlobalStyle`
 
     --border: #eaeaea;
     --border-soft: #ebe5dc;
+    --border-strong: #d9cfc1;
     --focus-border: #b7cdeb;
 
     --font: #111111;
@@ -129,6 +132,7 @@ const GlobalStyle = createGlobalStyle`
     --page-side-padding: 24px;
     --page-top-padding: 48px;
     --page-bottom-padding: 200px;
+    --section-gap-xl: 56px;
     --section-gap-lg: 48px;
     --section-gap-md: 32px;
     --section-gap-sm: 24px;
