@@ -8,13 +8,13 @@ import React, {
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import TableComponent from "../../../components/TableComponent";
+import SummaryCard from "../../../components/SummaryCard";
 import {
   getAdminInventoryHistoryList,
   getAdminInventoryHistorySummary,
 } from "../../../api/adminInventory";
 
 const movementTypeOptions = [
-  { label: "입출고 구분", value: "" },
   { label: "입고", value: "INBOUND" },
   { label: "출고", value: "ORDER_OUT" },
 ];
@@ -429,49 +429,43 @@ export default function InventoryHistory() {
       <Title>입출고 이력 조회</Title>
 
       <SummaryGrid>
-        <StatCard>
-          <CardTitle>입고</CardTitle>
-          <BigLine>
-            <BigNumber>{summaryData.inbound_sku_count}</BigNumber>
-            <Unit>SKU</Unit>
-            <Slash>/</Slash>
-            <SubNumber>{summaryData.inbound_qty.toLocaleString()}개</SubNumber>
-          </BigLine>
-          <ChangeRow $up={isInboundUp} $neutral={isInboundNoChange}>
-            <ChangeArrow>
-              {isInboundNoChange ? "-" : isInboundUp ? "↑" : "↓"}
-            </ChangeArrow>
-            <span>
-              {formatHistoryChange(
-                summaryData.inbound_sku_diff,
-                summaryData.inbound_qty_diff,
-              )}
-            </span>
-            <ChangeMuted>vs Yesterday</ChangeMuted>
-          </ChangeRow>
-        </StatCard>
+        <SummaryCard
+          title="입고"
+          value={
+            <>
+              {summaryData.inbound_sku_count}
+              <span>SKU / {summaryData.inbound_qty.toLocaleString()}개</span>
+            </>
+          }
+          change={
+            isInboundNoChange
+              ? "-"
+              : formatHistoryChange(
+                  summaryData.inbound_sku_diff,
+                  summaryData.inbound_qty_diff,
+                )
+          }
+          up={isInboundUp}
+        />
 
-        <StatCard>
-          <CardTitle>출고</CardTitle>
-          <BigLine>
-            <BigNumber>{summaryData.outbound_sku_count}</BigNumber>
-            <Unit>SKU</Unit>
-            <Slash>/</Slash>
-            <SubNumber>{summaryData.outbound_qty.toLocaleString()}개</SubNumber>
-          </BigLine>
-          <ChangeRow $up={isOutboundUp} $neutral={isOutboundNoChange}>
-            <ChangeArrow>
-              {isOutboundNoChange ? "-" : isOutboundUp ? "↑" : "↓"}
-            </ChangeArrow>
-            <span>
-              {formatHistoryChange(
-                summaryData.outbound_sku_diff,
-                summaryData.outbound_qty_diff,
-              )}
-            </span>
-            <ChangeMuted>vs Yesterday</ChangeMuted>
-          </ChangeRow>
-        </StatCard>
+        <SummaryCard
+          title="출고"
+          value={
+            <>
+              {summaryData.outbound_sku_count}
+              <span>SKU / {summaryData.outbound_qty.toLocaleString()}개</span>
+            </>
+          }
+          change={
+            isOutboundNoChange
+              ? "-"
+              : formatHistoryChange(
+                  summaryData.outbound_sku_diff,
+                  summaryData.outbound_qty_diff,
+                )
+          }
+          up={isOutboundUp}
+        />
 
         <TrendCard>
           <TrendHeader>입출고 추이</TrendHeader>
@@ -479,11 +473,11 @@ export default function InventoryHistory() {
           <TrendInner>
             <LegendArea>
               <LegendItem>
-                <LegendDot $color="#2563eb" />
+                <LegendDot $color="var(--blue)" />
                 입고
               </LegendItem>
               <LegendItem>
-                <LegendDot $color="#ef4444" />
+                <LegendDot $color="var(--red)" />
                 출고
               </LegendItem>
             </LegendArea>
@@ -503,7 +497,7 @@ export default function InventoryHistory() {
                   <TooltipTitle>{tooltipData.label}</TooltipTitle>
                   <TooltipRow>
                     <TooltipLabel>
-                      <LegendDot $color="#2563eb" />
+                      <LegendDot $color="var(--blue)" />
                       입고
                     </TooltipLabel>
                     <TooltipValue>
@@ -512,7 +506,7 @@ export default function InventoryHistory() {
                   </TooltipRow>
                   <TooltipRow>
                     <TooltipLabel>
-                      <LegendDot $color="#ef4444" />
+                      <LegendDot $color="var(--red)" />
                       출고
                     </TooltipLabel>
                     <TooltipValue>
@@ -534,8 +528,8 @@ export default function InventoryHistory() {
 
                 <polyline
                   fill="none"
-                  stroke="#2563eb"
-                  strokeWidth="4"
+                  stroke="var(--blue)"
+                  strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   points={buildPolylinePoints(
@@ -548,8 +542,8 @@ export default function InventoryHistory() {
                 />
                 <polyline
                   fill="none"
-                  stroke="#ef4444"
-                  strokeWidth="4"
+                  stroke="var(--red)"
+                  strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   points={buildPolylinePoints(
@@ -566,8 +560,8 @@ export default function InventoryHistory() {
                     key={`inbound-${index}`}
                     cx={point.x}
                     cy={point.y}
-                    r={hoveredIndex === index ? 4.5 : 0}
-                    fill="#2563eb"
+                    r={hoveredIndex === index ? 3 : 0}
+                    fill="var(--blue)"
                   />
                 ))}
 
@@ -576,8 +570,8 @@ export default function InventoryHistory() {
                     key={`outbound-${index}`}
                     cx={point.x}
                     cy={point.y}
-                    r={hoveredIndex === index ? 4.5 : 0}
-                    fill="#ef4444"
+                    r={hoveredIndex === index ? 3 : 0}
+                    fill="var(--red)"
                   />
                 ))}
               </TrendSvg>
@@ -605,6 +599,33 @@ export default function InventoryHistory() {
         headerAlign="center"
         cellAlign="center"
         rowKey="id"
+        // 검색바
+        searchValue={searchValue}
+        onSearchChange={(val) => {
+          setSearchValue(val);
+          setPage(1);
+        }}
+        searchPlaceholder="상품명, 상품코드, 비고 검색"
+        // 날짜
+        startDate={startDate}
+        onStartDateChange={(val) => {
+          setStartDate(val);
+          setPage(1);
+        }}
+        endDate={endDate}
+        onEndDateChange={(val) => {
+          setEndDate(val);
+          setPage(1);
+        }}
+        // 입출고 구분
+        filterValue={movementType}
+        onFilterChange={(val) => {
+          setMovementType(val);
+          setPage(1);
+        }}
+        filterOptions={movementTypeOptions}
+        filterPlaceholder="입출고 구분 전체"
+        // 페이지네이션
         page={page}
         pageSize={pageSize}
         onPageChange={setPage}
@@ -612,41 +633,6 @@ export default function InventoryHistory() {
           setPageSize(size);
           setPage(1);
         }}
-        customToolbar={
-          <CustomToolbar>
-            <DateInput
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-
-            <DateDivider>~</DateDivider>
-
-            <DateInput
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-
-            <KeywordInput
-              type="text"
-              placeholder="상품명, 상품코드, 비고로 검색"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-            />
-
-            <FilterSelect
-              value={movementType}
-              onChange={(e) => setMovementType(e.target.value)}
-            >
-              {movementTypeOptions.map((option) => (
-                <option key={option.value || "all"} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </FilterSelect>
-          </CustomToolbar>
-        }
       />
 
       {loading ? <LoadingText>불러오는 중...</LoadingText> : null}
@@ -671,7 +657,7 @@ const Title = styled.h2`
 const SummaryGrid = styled.div`
   margin-bottom: 18px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1.5fr;
+  grid-template-columns: 1fr 1fr 2fr;
   gap: 16px;
 
   @media (max-width: 1100px) {
@@ -681,7 +667,6 @@ const SummaryGrid = styled.div`
 
 const StatCard = styled.div`
   background: white;
-  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 20px 22px;
   box-shadow: var(--shadow);
@@ -749,7 +734,13 @@ const ChangeMuted = styled.span`
 `;
 
 const TrendCard = styled(StatCard)`
-  min-height: 180px;
+  background: white;
+  border-radius: 20px;
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 `;
 
 const TrendHeader = styled.div`
@@ -760,14 +751,14 @@ const TrendHeader = styled.div`
 `;
 
 const TrendInner = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 16px;
+  display: flex;
+  gap: 10px;
   align-items: stretch;
 `;
 
 const LegendArea = styled.div`
   display: flex;
+  height: 100px;
   flex-direction: column;
   gap: 10px;
   justify-content: center;
@@ -777,14 +768,14 @@ const LegendItem = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #4b5563;
+  color: var(--placeholder);
   font-size: 13px;
   font-weight: 600;
 `;
 
 const LegendDot = styled.span`
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 999px;
   background: ${({ $color }) => $color};
   flex-shrink: 0;
@@ -792,6 +783,9 @@ const LegendDot = styled.span`
 
 const ChartArea = styled.div`
   position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 80px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -799,7 +793,7 @@ const ChartArea = styled.div`
 
 const TrendSvg = styled.svg`
   width: 100%;
-  height: 96px;
+  height: 70px;
   overflow: visible;
 `;
 
@@ -816,9 +810,10 @@ const ChartTooltip = styled.div`
   min-width: 120px;
   padding: 10px 12px;
   border-radius: 12px;
-  background: rgba(17, 24, 39, 0.94);
-  color: #ffffff;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+  background: white;
+  color: var(--font);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
   pointer-events: none;
 `;
 
@@ -858,14 +853,14 @@ const XAxis = styled.div`
   grid-template-columns: repeat(7, 1fr);
   gap: 8px;
   margin-top: 8px;
-  color: #9ca3af;
+  color: var(--placeholder);
   font-size: 11px;
   font-weight: 700;
   text-align: center;
 `;
 
 const XAxisLabel = styled.span`
-  color: ${({ $active }) => ($active ? "#111827" : "#9ca3af")};
+  color: ${({ $active }) => ($active ? "var(--font)" : "var(--placeholder)")};
   font-weight: ${({ $active }) => ($active ? 800 : 700)};
 `;
 
@@ -877,65 +872,28 @@ const CustomToolbar = styled.div`
   align-items: center;
 `;
 
-const DateInput = styled.input`
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #111827;
-  font-size: 14px;
-  outline: none;
-`;
-
-const DateDivider = styled.span`
-  color: #9ca3af;
-  font-size: 14px;
-  font-weight: 700;
-`;
-
-const KeywordInput = styled.input`
-  flex: 1 1 280px;
-  min-width: 220px;
-  height: 40px;
-  padding: 0 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #111827;
-  font-size: 14px;
-  outline: none;
-`;
-
-const FilterSelect = styled.select`
-  min-width: 140px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #111827;
-  font-size: 14px;
-  outline: none;
-`;
-
 const CodeLink = styled.button`
   border: 0;
   padding: 0;
   background: none;
-  color: #111827;
-  font-size: 13px;
-  font-weight: 700;
+  color: var(--font);
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
+  &:hover {
+    color: var(--blue);
+    text-decoration: underline;
+  }
 `;
 
 const ProductNameLink = styled.a`
-  color: #111827;
-  font-size: 13px;
+  color: var(--font);
+  font-size: 12px;
   font-weight: 600;
   text-decoration: none;
 
   &:hover {
+    color: var(--blue);
     text-decoration: underline;
   }
 `;
