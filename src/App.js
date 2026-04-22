@@ -21,6 +21,8 @@ import PaymentFailPage from "./pages/consumer/PaymentFailPage";
 import OrderCompletePage from "./pages/consumer/OrderCompletePage";
 import AILowestPricePage from "./pages/consumer/AILowestPricePage";
 import AllProductsPage from "./pages/consumer/AllProductsPage";
+import Profile from "./pages/consumer/Profile";
+import Orders from "./pages/consumer/Orders";
 
 import Dashboard from "./pages/admin/Dashboard";
 import ProductList from "./pages/admin/products/ProductList";
@@ -54,6 +56,8 @@ function App() {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkoutPage" element={<CheckoutPage />} />
             <Route path="/order-complete" element={<OrderCompletePage />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/orders" element={<Orders />} />
           </Route>
 
           <Route path="/login" element={<Login />} />
