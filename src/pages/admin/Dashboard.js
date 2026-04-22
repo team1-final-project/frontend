@@ -803,14 +803,14 @@ export default function Dashboard() {
               ))}
             </ChartSvg>
 
-            <XAxis>
+            <ShareXAxis>
               {(dashboard?.share_points?.length
                 ? dashboard.share_points
                 : weekLabels.map((label) => ({ label }))
               ).map((item, index) => (
                 <span key={`${item.label}-${index}`}>{item.label}</span>
               ))}
-            </XAxis>
+            </ShareXAxis>
           </ChartCanvasOnly>
         </Card>
       </BottomGrid>
@@ -1032,6 +1032,17 @@ const XAxis = styled.div`
   margin-top: 6px;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
+  color: #9ca3af;
+  font-size: 11px;
+  text-align: center;
+`;
+
+const ShareXAxis = styled.div`
+  margin-top: 6px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  padding: 0 5.385%;
+  box-sizing: border-box;
   color: #9ca3af;
   font-size: 11px;
   text-align: center;
