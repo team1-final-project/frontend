@@ -6,7 +6,7 @@ export const Page = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 50px 30px 200px;
+  padding: 48px 24px 200px;
 `;
 
 export const Card = styled.div`
@@ -14,7 +14,7 @@ export const Card = styled.div`
   max-width: 520px;
   background: #ffffff;
   border-radius: 28px;
-  padding: 40px 32px;
+  padding: 36px 28px;
   box-shadow: 0 18px 50px rgba(25, 25, 25, 0.08);
   border: 1px solid #eee7dd;
   text-align: center;
@@ -22,12 +22,14 @@ export const Card = styled.div`
 
 export const Title = styled.h1`
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 900;
   color: #111111;
+  letter-spacing: -0.03em;
 `;
 
 export const Desc = styled.p`
   margin-top: 12px;
   color: #6f675d;
-  font-size: 15px;
+  font-size: 16px;
+  line-height: 1.6;
 `;

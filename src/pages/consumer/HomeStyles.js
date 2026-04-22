@@ -232,7 +232,7 @@ export const SectionTitle = styled.h2`
 export const HotDealSection = styled.section`
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0px 20px 22px;
+  padding: 0px 20px 50px;
 `;
 
 export const CardGrid = styled.div`
@@ -389,7 +389,7 @@ export const SalesSection = styled.section`
 export const SalesPanel = styled.div`
   border-radius: 28px;
   background: #dedede;
-  padding: 22px;
+  padding: 50px;
 
   @media (max-width: 640px) {
     padding: 14px;
@@ -399,7 +399,7 @@ export const SalesPanel = styled.div`
 export const SalesTopRow = styled.div`
   display: grid;
   grid-template-columns: 0.74fr 1.26fr;
-  gap: 12px;
+  gap: 20px;
 
   @media (max-width: 700px) {
     grid-template-columns: 1fr;
@@ -409,8 +409,8 @@ export const SalesTopRow = styled.div`
 export const SalesBottomRow = styled.div`
   display: grid;
   grid-template-columns: 1.36fr 0.84fr;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 20px;
+  margin-top: 20px;
 
   @media (max-width: 700px) {
     grid-template-columns: 1fr;
@@ -445,15 +445,15 @@ const SalesImageCardBase = styled(Link)`
 `;
 
 export const SalesImageCard = styled(SalesImageCardBase)`
-  height: 350px;
+  height: 500px;
 `;
 
 export const SalesWideImageCard = styled(SalesImageCardBase)`
-  height: 280px;
+  height: 500px;
 `;
 
 export const SalesSmallImageCard = styled(SalesImageCardBase)`
-  height: 280px;
+  height: 500px;
 `;
 
 export const SalesImage = styled.img`

@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, ShoppingCart } from "lucide-react";
 import logo from "../assets/stocker-logo.svg";
 import { useAuth } from "../context/AuthContext";
 import * as S from "./Header.styles.jsx";
@@ -61,15 +61,32 @@ export default function Header() {
               {!isInitializing &&
                 (isAuthenticated ? (
                   <>
-                    <S.GhostActionLink to="/cart">장바구니</S.GhostActionLink>
                     <S.GhostActionLink to="/profile">프로필</S.GhostActionLink>
+
+                    <S.CartIconButton
+                      type="button"
+                      aria-label="장바구니"
+                      onClick={() => navigate("/cart")}
+                    >
+                      <ShoppingCart size={18} />
+                    </S.CartIconButton>
+
                     <S.LogoutButton type="button" onClick={handleLogout}>
                       로그아웃
                     </S.LogoutButton>
                   </>
                 ) : (
                   <>
+                    <S.CartIconButton
+                      type="button"
+                      aria-label="장바구니"
+                      onClick={() => navigate("/cart")}
+                    >
+                      <ShoppingCart size={18} />
+                    </S.CartIconButton>
+
                     <S.GhostActionLink to="/login">로그인</S.GhostActionLink>
+
                     <S.PrimaryActionLink to="/signup">
                       회원가입
                     </S.PrimaryActionLink>

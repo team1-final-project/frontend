@@ -23,7 +23,7 @@ function StarRating({ rating }) {
   );
 }
 
-function AIRankingSection({ data }) {
+function AIRankingSection({ data, onViewMore }) {
   const [selectedDropCategoryId, setSelectedDropCategoryId] = useState(
     data.priceDropTop5ByCategory?.[0]?.categoryId || "",
   );
@@ -173,7 +173,9 @@ function AIRankingSection({ data }) {
                 <S.SelectArrow />
               </S.SelectWrap>
 
-              <S.MoreLink type="button">더보기</S.MoreLink>
+              <S.MoreLink type="button" onClick={onViewMore}>
+                더보기
+              </S.MoreLink>
             </S.TopActions>
           </S.CardTop>
 
@@ -303,44 +305,15 @@ function AIRankingSection({ data }) {
         </S.AIRankingCard>
       </S.AIRankingGrid>
 
-      <S.ViewAllButton type="button">더보기</S.ViewAllButton>
+      <S.ViewAllButton type="button" onClick={onViewMore}>
+        더보기
+      </S.ViewAllButton>
     </S.AIRankingSection>
   );
 }
 
 function ProductCard({ item }) {
   const isPositive = item.discount.trim().startsWith("+");
-
-  const salesItems = {
-    shin: {
-      name: "신라면",
-      image:
-        bestItems.find((item) => item.name.includes("신라면"))?.image ||
-        salesShinramyunImg,
-      to: "/products/4",
-      variant: "shin",
-    },
-    hetban: {
-      name: "햇반",
-      image: salesHetbanImg, // 실제 햇반 썸네일 생기면 이 값만 교체
-      to: "/products/hetban",
-      variant: "hetban",
-    },
-    curry: {
-      name: "3분카레",
-      image: salesCurryImg, // 실제 3분카레 썸네일 생기면 이 값만 교체
-      to: "/products/curry",
-      variant: "curry",
-    },
-    cokezero: {
-      name: "코카콜라제로",
-      image:
-        hotDealItems.find((item) => item.name.includes("코카콜라"))?.image ||
-        salesCokezeroImg,
-      to: "/products/cokezero",
-      variant: "cokezero",
-    },
-  };
 
   return (
     <S.ProductCardWrap>
@@ -352,7 +325,7 @@ function ProductCard({ item }) {
         />
       </S.ProductThumb>
 
-      <S.ProductName to="/product-detail">{item.name}</S.ProductName>
+      <S.ProductName to={`/products/${item.id}`}>{item.name}</S.ProductName>
 
       <S.RatingRow>
         <StarRating rating={item.rating} />
@@ -492,7 +465,10 @@ export default function Home() {
       </S.BrandBar>
 
       <S.MainSection>
-        <AIRankingSection data={aiRanking} />
+        <AIRankingSection
+          data={aiRanking}
+          onViewMore={() => navigate("/ai-lowest-price")}
+        />
 
         <S.SectionDivider />
 
@@ -504,7 +480,9 @@ export default function Home() {
           ))}
         </S.CardGrid>
 
-        <S.ViewAllButton type="button">View All</S.ViewAllButton>
+        <S.ViewAllButton type="button" onClick={() => navigate("/products")}>
+          View All
+        </S.ViewAllButton>
       </S.MainSection>
 
       <S.SectionDivider />
@@ -518,7 +496,9 @@ export default function Home() {
           ))}
         </S.CardGrid>
 
-        <S.ViewAllButton type="button">View All</S.ViewAllButton>
+        <S.ViewAllButton type="button" onClick={() => navigate("/products")}>
+          View All
+        </S.ViewAllButton>
       </S.HotDealSection>
 
       <S.SalesSection>

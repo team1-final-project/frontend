@@ -6,7 +6,7 @@ export const Page = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 50px 30px 200px;
+  padding: 50px 24px 200px;
 `;
 
 export const Card = styled.div`
@@ -15,7 +15,7 @@ export const Card = styled.div`
   background: #fff;
   border: 1px solid #ece5db;
   border-radius: 24px;
-  padding: 36px 24px;
+  padding: 32px 24px;
   text-align: center;
 `;
 
@@ -32,14 +32,15 @@ export const IconWrap = styled.div`
 `;
 
 export const Title = styled.h1`
-  font-size: 28px;
-  font-weight: 800;
+  font-size: 30px;
+  font-weight: 900;
   color: #111;
   margin-bottom: 12px;
+  letter-spacing: -0.04em;
 `;
 
 export const Description = styled.p`
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.7;
   color: #666;
 `;
@@ -56,7 +57,7 @@ export const InfoRow = styled.div`
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #f4eaea;
 
   &:last-child {
@@ -66,14 +67,14 @@ export const InfoRow = styled.div`
 
 export const InfoLabel = styled.span`
   color: #777;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
 `;
 
 export const InfoValue = styled.span`
   color: #111;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 800;
   text-align: right;
   word-break: break-all;
 `;
@@ -82,14 +83,18 @@ export const ButtonRow = styled.div`
   display: flex;
   gap: 12px;
   margin-top: 24px;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+  }
 `;
 
 export const BaseButton = styled.button`
   flex: 1;
-  height: 54px;
+  height: 56px;
   border-radius: 16px;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 800;
 `;
 
 export const PrimaryButton = styled(BaseButton)`
