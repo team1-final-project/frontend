@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
-import { Info, Search } from "lucide-react";
+import { Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getAdminDashboard } from "../../api/adminDashboard";
 import InfoTooltip from "../../components/InfoTooltip";
+import SearchBar from "../../components/SearchBar";
 
 const weekLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const hourLabels = [
@@ -528,17 +529,16 @@ export default function Dashboard() {
         <Card>
           <CardTopRow>
             <SectionTitle>가격 변화에 따른 공헌이익</SectionTitle>
-            <SearchWrap>
-              <SearchInput
-                value={searchKeyword}
-                onChange={(e) => setSearchKeyword(e.target.value)}
-                placeholder="상품명, 상품코드로 검색"
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              />
-              <SearchIconWrap role="button" onClick={handleSearch}>
-                <Search size={15} />
-              </SearchIconWrap>
-            </SearchWrap>
+            <SearchBar
+              value={searchKeyword}
+              onChange={setSearchKeyword}
+              onSearch={handleSearch}
+              placeholder="상품명, 상품코드로 검색"
+              variant="default"
+              width="220px"
+              border
+              shadow={false}
+            />
           </CardTopRow>
 
           <InfoText>
@@ -1100,34 +1100,6 @@ const CodeButton = styled.button`
   padding: 0;
   color: #374151;
   font-size: 12px;
-  cursor: pointer;
-`;
-
-const SearchWrap = styled.div`
-  width: 220px;
-  display: flex;
-  align-items: center;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #ffffff;
-`;
-
-const SearchInput = styled.input`
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: 9px 10px;
-  font-size: 12px;
-  color: #374151;
-  background: transparent;
-`;
-
-const SearchIconWrap = styled.div`
-  width: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #9ca3af;
   cursor: pointer;
 `;
 
