@@ -111,10 +111,6 @@ export default function Footer() {
         <S.BottomSection>
           <S.Copyright>© STOCK+er ALL RIGHTS RESERVED</S.Copyright>
 
-          <S.PaymentArea>
-            <S.PaymentBadge>toss pay</S.PaymentBadge>
-            <S.PaymentBadge>pay</S.PaymentBadge>
-          </S.PaymentArea>
         </S.BottomSection>
       </S.Inner>
     </S.FooterWrap>

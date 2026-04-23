@@ -15,8 +15,10 @@ import * as S from "./ProductDetailPageStyles.js";
 import { getProductDetail } from "../../api/product";
 import { addCartItem } from "../../api/cart";
 import shinramyunImg from "../../assets/shinramyeon.jpg";
-
-const STATIC_RATING = 4.5;
+import {
+  getProductReviewMeta,
+  formatRatingText,
+} from "../../mocks/productReviewMeta";
 
 const TAB_KEYS = {
   DETAIL: "상품상세",
@@ -436,7 +438,8 @@ function buildMockReviews(product) {
 
   const categoryKey = getCategoryKey(product.category_name);
   const source = CATEGORY_REVIEW_BANK[categoryKey] || CATEGORY_REVIEW_BANK.default;
-  const count = seededNumber(product.id, 22, 29);
+  const reviewMeta = getProductReviewMeta(product);
+  const count = reviewMeta.reviewCount;
 
   return Array.from({ length: count }).map((_, index) => {
     const author = seededPick(MOCK_AUTHORS, product.id + index);
@@ -485,6 +488,12 @@ export default function ProductDetailPage() {
 
 const reviews = useMemo(() => buildMockReviews(product), [product]);
 const inquiries = useMemo(() => buildMockInquiries(product), [product]);
+
+const reviewMeta = useMemo(() => getProductReviewMeta(product), [product]);
+const ratingText = useMemo(
+  () => formatRatingText(reviewMeta.rating),
+  [reviewMeta]
+);
 
 const reviewTabLabel = `상품평(${reviews.length})`;
 const inquiryTabLabel = `상품문의(${inquiries.length})`;
@@ -657,7 +666,7 @@ const tabs = useMemo(
 
             <S.RatingRow>
               <S.Stars>★★★★★</S.Stars>
-              <S.RatingText>{STATIC_RATING}/5</S.RatingText>
+              <S.RatingText>{ratingText}</S.RatingText>
             </S.RatingRow>
 
             <S.PriceRow>
@@ -889,33 +898,6 @@ const tabs = useMemo(
                 </S.ReviewCard>
               ))}
             </S.ReviewGrid>
-
-            <S.Pagination>
-              <S.PageNavButton type="button">
-                <ChevronsLeft size={12} />
-              </S.PageNavButton>
-              <S.PageNavButton type="button">
-                <ChevronLeft size={12} />
-              </S.PageNavButton>
-
-              {pages.map((page) => (
-                <S.PageNumberButton
-                  key={page}
-                  type="button"
-                  $active={currentPage === page}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </S.PageNumberButton>
-              ))}
-
-              <S.PageNavButton type="button">
-                <ChevronRight size={12} />
-              </S.PageNavButton>
-              <S.PageNavButton type="button">
-                <ChevronsRight size={12} />
-              </S.PageNavButton>
-            </S.Pagination>
           </>
         )}
 
@@ -967,32 +949,6 @@ const tabs = useMemo(
               ))}
             </S.InquiryList>
 
-            <S.Pagination>
-              <S.PageNavButton type="button">
-                <ChevronsLeft size={12} />
-              </S.PageNavButton>
-              <S.PageNavButton type="button">
-                <ChevronLeft size={12} />
-              </S.PageNavButton>
-
-              {pages.map((page) => (
-                <S.PageNumberButton
-                  key={page}
-                  type="button"
-                  $active={currentPage === page}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </S.PageNumberButton>
-              ))}
-
-              <S.PageNavButton type="button">
-                <ChevronRight size={12} />
-              </S.PageNavButton>
-              <S.PageNavButton type="button">
-                <ChevronsRight size={12} />
-              </S.PageNavButton>
-            </S.Pagination>
           </>
         )}
 

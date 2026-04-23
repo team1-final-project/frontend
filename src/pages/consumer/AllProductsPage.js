@@ -3,18 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import * as S from "./AllProductsPage.styles";
 import { getProductList } from "../../api/product";
-
-const REVIEW_MOCKS = [
-  { rating: 4.8, reviewCount: 128 },
-  { rating: 4.6, reviewCount: 83 },
-  { rating: 4.5, reviewCount: 57 },
-  { rating: 4.7, reviewCount: 96 },
-  { rating: 5.0, reviewCount: 211 },
-  { rating: 4.4, reviewCount: 73 },
-  { rating: 4.3, reviewCount: 64 },
-  { rating: 4.9, reviewCount: 141 },
-  { rating: 4.2, reviewCount: 39 },
-];
+import { getProductReviewMeta } from "../../mocks/productReviewMeta";
 
 
 const FALLBACK_IMAGE =
@@ -71,11 +60,6 @@ function renderStars(rating) {
   );
 }
 
-function getMockReviewMeta(productId) {
-  const index = Math.abs(Number(productId || 0)) % REVIEW_MOCKS.length;
-  return REVIEW_MOCKS[index];
-}
-
 export default function AllProductsPage() {
   const [productCategories, setProductCategories] = useState([
     { id: "all", name: "전체" },
@@ -116,7 +100,7 @@ export default function AllProductsPage() {
         ];
 
         const mappedItems = (data.items || []).map((item) => {
-          const mockReview = getMockReviewMeta(item.id);
+          const mockReview = getProductReviewMeta(item);
 
           return {
             id: item.id,

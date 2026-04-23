@@ -9,6 +9,7 @@ import salesShinramyunImg from "../../assets/sinramyeon img.jpg";
 import salesCokezeroImg from "../../assets/cocacola img.png";
 import salesCurryImg from "../../assets/curry img.jpg";
 import salesHetbanImg from "../../assets/hatban img.jpg";
+import { getProductReviewMeta, formatRatingText } from "../../mocks/productReviewMeta";
 
 function StarRating({ rating }) {
   const numericRating = Number.parseFloat(rating) || 0;
@@ -369,7 +370,7 @@ function ProductCard({ item }) {
       <S.ProductName to={`/products/${item.id}`}>{item.name}</S.ProductName>
 
       <S.RatingRow>
-        <StarRating rating={item.rating} />
+        <StarRating rating={item.ratingValue} />
         <S.RatingText>{item.rating}</S.RatingText>
       </S.RatingRow>
 
@@ -427,19 +428,25 @@ export default function Home() {
 
   useEffect(() => {
     const formatCardItems = (items = []) =>
-      items.map((item) => ({
-        id: item.id,
-        name: item.name,
-        rating: "4.5/5",
-        price: `${Number(item.price || 0).toLocaleString()}원`,
-        originalPrice: item.original_price
-          ? `${Number(item.original_price).toLocaleString()}원`
-          : "",
-        discount:
-          item.discount_rate > 0 ? `-${item.discount_rate}%` : "0%",
-        image: item.thumbnail_image_url,
-        imageScale: 0.82,
-      }));
+      items.map((item) => {
+        const reviewMeta = getProductReviewMeta(item);
+
+        return {
+          id: item.id,
+          name: item.name,
+          ratingValue: reviewMeta.rating,
+          rating: formatRatingText(reviewMeta.rating),
+          reviewCount: reviewMeta.reviewCount,
+          price: `${Number(item.price || 0).toLocaleString()}원`,
+          originalPrice: item.original_price
+            ? `${Number(item.original_price).toLocaleString()}원`
+            : "",
+          discount:
+            item.discount_rate > 0 ? `-${item.discount_rate}%` : "0%",
+          image: item.thumbnail_image_url,
+          imageScale: 0.82,
+        };
+      });
 
     const fetchHomeMain = async () => {
       try {
