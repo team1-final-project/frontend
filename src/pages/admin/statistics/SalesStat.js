@@ -406,26 +406,6 @@ export default function SalesStat() {
         ))}
       </ModeTabs>
 
-      <GlobalFilterRow>
-        <SearchDate
-          startDate={startDate}
-          onStartDateChange={setStartDate}
-          endDate={endDate}
-          onEndDateChange={setEndDate}
-        />
-
-        <SelectBar
-          value={period}
-          onChange={setPeriod}
-          options={PERIOD_OPTIONS}
-          width="120px"
-        />
-      </GlobalFilterRow>
-
-      {isLoading ? (
-        <LoadingText>데이터를 불러오는 중입니다.</LoadingText>
-      ) : null}
-
       <SummaryGrid>
         {summary.cards.map((card) => {
           const numericChange = Number(card.change || 0);
@@ -446,6 +426,25 @@ export default function SalesStat() {
           );
         })}
       </SummaryGrid>
+
+      <GlobalFilterRow>
+        <SearchDate
+          startDate={startDate}
+          onStartDateChange={setStartDate}
+          endDate={endDate}
+          onEndDateChange={setEndDate}
+        />
+
+        <SelectBar
+          value={period}
+          onChange={setPeriod}
+          options={PERIOD_OPTIONS}
+          width="120px"
+        />
+      </GlobalFilterRow>
+      {isLoading ? (
+        <LoadingText>데이터를 불러오는 중입니다.</LoadingText>
+      ) : null}
 
       <ChartTwoCol>
         <Panel>
@@ -882,7 +881,6 @@ const ModeTabs = styled.div`
   justify-content: space-between;
   align-items: center;
   gap: 6px;
-  margin-bottom: 18px;
   border-bottom: 1px solid var(--border);
 `;
 
@@ -914,7 +912,6 @@ const GlobalFilterRow = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 18px;
   flex-wrap: wrap;
 `;
 
@@ -1014,7 +1011,6 @@ const SummaryGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
-  margin-bottom: 18px;
 
   @media (max-width: 1200px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1100,7 +1096,7 @@ const WidePanel = styled.section`
 const PanelTitle = styled.h3`
   margin: 0px;
   color: var(--font);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
 `;
 

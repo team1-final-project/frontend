@@ -219,26 +219,6 @@ export default function AIPriceStat() {
     <PageWrap>
       <Title>AI 가격변경 분석</Title>
 
-      <TopFilterRow>
-        <SearchDate
-          startDate={startDate}
-          onStartDateChange={setStartDate}
-          endDate={endDate}
-          onEndDateChange={setEndDate}
-        />
-
-        <SelectBar
-          value={period}
-          onChange={setPeriod}
-          options={PERIOD_OPTIONS}
-          width="120px"
-        />
-      </TopFilterRow>
-
-      {isLoading ? (
-        <LoadingText>데이터를 불러오는 중입니다.</LoadingText>
-      ) : null}
-
       <SummaryGrid>
         {summaryCards.map((card) => {
           const numericChange = Number(card.change || 0);
@@ -270,6 +250,26 @@ export default function AIPriceStat() {
           );
         })}
       </SummaryGrid>
+
+      <TopFilterRow>
+        <SearchDate
+          startDate={startDate}
+          onStartDateChange={setStartDate}
+          endDate={endDate}
+          onEndDateChange={setEndDate}
+        />
+
+        <SelectBar
+          value={period}
+          onChange={setPeriod}
+          options={PERIOD_OPTIONS}
+          width="120px"
+        />
+      </TopFilterRow>
+
+      {isLoading ? (
+        <LoadingText>데이터를 불러오는 중입니다.</LoadingText>
+      ) : null}
 
       <LargePanel>
         <PanelHeaderRow>
@@ -686,7 +686,6 @@ const TopFilterRow = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 22px;
   flex-wrap: wrap;
 `;
 
