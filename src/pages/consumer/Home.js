@@ -5,10 +5,10 @@ import * as S from "./HomeStyles";
 import { brandLogos } from "./HomeData";
 import { getHomeMain } from "../../api/home";
 
-import salesShinramyunImg from "../../assets/sales-shinramyun.png";
-import salesCokezeroImg from "../../assets/sales-cokezero.png";
-import salesCurryImg from "../../assets/sales-curry.png";
-import salesHetbanImg from "../../assets/sales-hetban.png";
+import salesShinramyunImg from "../../assets/sinramyeon img.jpg";
+import salesCokezeroImg from "../../assets/cocacola img.png";
+import salesCurryImg from "../../assets/curry img.jpg";
+import salesHetbanImg from "../../assets/hatban img.jpg";
 
 function StarRating({ rating }) {
   const numericRating = Number.parseFloat(rating) || 0;
