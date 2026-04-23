@@ -38,6 +38,8 @@ import SalesStat from "./pages/admin/statistics/SalesStat";
 import AIPriceStat from "./pages/admin/statistics/AIPriceStat";
 import AdminLogin from "./pages/admin/AdminLogin";
 
+import NotLoginRoute from "./routes/NotLoginRoute";
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -62,8 +64,10 @@ function App() {
             <Route path="/orders" element={<Orders />} />
           </Route>
 
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route element={<NotLoginRoute />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Route>
 
           <Route path="/payment/success" element={<PaymentSuccessPage />} />
           <Route path="/payment/fail" element={<PaymentFailPage />} />
