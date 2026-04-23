@@ -203,15 +203,6 @@ const MOCK_AUTHORS = [
   "임수*",
 ];
 
-const REVIEW_IMAGES = [
-  "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=300&q=80",
-  "https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=300&q=80",
-  "https://images.unsplash.com/photo-1617093727343-374698b1b08d?auto=format&fit=crop&w=300&q=80",
-  "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=300&q=80",
-  "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=300&q=80",
-];
-
-
 
 const RETURN_INFO_ROWS = [
   {
@@ -1148,113 +1139,6 @@ const TrendLabelMarker = styled.div`
   white-space: nowrap;
 `;
 
-const UnifiedDetailSection = styled.section`
-  margin-top: 34px;
-  padding: 28px;
-  border-radius: 24px;
-  background: #ffffff;
-  border: 1px solid #ebe5dc;
-
-  @media (max-width: 720px) {
-    padding: 22px 18px;
-  }
-`;
-
-const UnifiedDetailHeader = styled.div`
-  margin-bottom: 24px;
-`;
-
-const UnifiedDetailEyebrow = styled.p`
-  margin: 0;
-  font-size: 13px;
-  font-weight: 800;
-  color: #77726b;
-`;
-
-const UnifiedDetailTitle = styled.h2`
-  margin: 10px 0 0;
-  font-size: 40px;
-  line-height: 1.08;
-  font-weight: 900;
-  color: #111111;
-  letter-spacing: -0.05em;
-
-  @media (max-width: 720px) {
-    font-size: 32px;
-  }
-`;
-
-const UnifiedDetailDesc = styled.p`
-  margin: 12px 0 0;
-  color: #666666;
-  font-size: 14px;
-  line-height: 1.7;
-`;
-
-const UnifiedDetailBody = styled.div`
-  display: grid;
-  grid-template-columns: 420px minmax(0, 1fr);
-  gap: 28px;
-  align-items: start;
-
-  @media (max-width: 980px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const UnifiedImageArea = styled.div`
-  border-radius: 22px;
-  overflow: hidden;
-  border: 1px solid #ebe5dc;
-  background: #f7f7f7;
-`;
-
-const UnifiedImage = styled.img`
-  display: block;
-  width: 100%;
-  height: auto;
-`;
-
-const UnifiedTextArea = styled.div`
-  min-width: 0;
-`;
-
-const UnifiedDivider = styled.div`
-  margin: 26px 0 22px;
-  border-bottom: 1px solid #e8e1d8;
-`;
-
-const UnifiedPointWrap = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-const UnifiedPointTitle = styled.h4`
-  margin: 0;
-  font-size: 18px;
-  font-weight: 900;
-  color: #111111;
-`;
-
-const UnifiedPointList = styled.ul`
-  margin: 0;
-  padding-left: 18px;
-  color: #666666;
-  font-size: 14px;
-  line-height: 1.8;
-
-  li {
-    margin-bottom: 4px;
-  }
-`;
-
-const DetailImageGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-`;
-
 const DetailContentSection = styled.section`
   margin-top: 34px;
   padding: 28px;
@@ -1451,9 +1335,10 @@ const BreadcrumbButton = styled.button`
 `;
 
 const HeroThumbFrame = styled.div`
+  position: relative;
   width: 100%;
-  height: 100%;
-  min-height: 520px;
+  min-height: clamp(400px, 44vw, 400px);
+  border-radius: 24px;
   overflow: hidden;
   background: #f6f6f6;
 
@@ -1463,8 +1348,13 @@ const HeroThumbFrame = styled.div`
 `;
 
 const HeroThumbImage = styled.img`
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
+  transform: scale(1.06);
+  transform-origin: center;
 `;
