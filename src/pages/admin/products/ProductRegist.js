@@ -693,13 +693,13 @@ export default function ProductRegist() {
             </FormRow>
 
             <FormRow>
-              <FormLabel>최소가 제한</FormLabel>
+              <FormLabel>최저가 제한</FormLabel>
               <FormField>
                 <UnitInputWrap>
                   <Input
                     value={form.minPrice}
                     onChange={(e) => handleChange("minPrice", e.target.value)}
-                    placeholder="최소가 제한"
+                    placeholder="최저가 제한"
                     disabled={!form.useAiPrice}
                   />
                   <UnitText>원</UnitText>
@@ -708,13 +708,13 @@ export default function ProductRegist() {
             </FormRow>
 
             <FormRow>
-              <FormLabel>최대가 제한</FormLabel>
+              <FormLabel>최고가 제한</FormLabel>
               <FormField>
                 <UnitInputWrap>
                   <Input
                     value={form.maxPrice}
                     onChange={(e) => handleChange("maxPrice", e.target.value)}
-                    placeholder="최대가 제한"
+                    placeholder="최고가 제한"
                     disabled={!form.useAiPrice}
                   />
                   <UnitText>원</UnitText>

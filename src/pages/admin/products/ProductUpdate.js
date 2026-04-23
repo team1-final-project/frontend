@@ -778,7 +778,7 @@ export default function ProductUpdate() {
             </FormRow>
 
             <FormRow>
-              <FormLabel>최소가 제한</FormLabel>
+              <FormLabel>최저가 제한</FormLabel>
               <FormField>
                 <UnitInputWrap>
                   <Input
@@ -792,7 +792,7 @@ export default function ProductUpdate() {
             </FormRow>
 
             <FormRow>
-              <FormLabel>최대가 제한</FormLabel>
+              <FormLabel>최고가 제한</FormLabel>
               <FormField>
                 <UnitInputWrap>
                   <Input
