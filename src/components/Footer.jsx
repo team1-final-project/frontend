@@ -1,25 +1,51 @@
 import React from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/stocker-logo.svg";
 import logo2 from "../assets/stocker-logo-2.svg";
 import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
 import * as S from "./Footer.styles.jsx";
 
 export default function Footer() {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  const handleBannerButtonClick = () => {
+    if (isAuthenticated) {
+      navigate("/products");
+      return;
+    }
+
+    navigate("/signup");
+  };
+
   return (
     <S.FooterWrap>
       <S.Inner>
         <S.SignupBanner>
           <S.BannerText>
-            <S.BannerTopLine>
-              <S.BrandLogoImage2 src={logo2} alt="STOCK+er" />
-              <span>회원가입 하고</span>
-            </S.BannerTopLine>
-            <span>실시간 최저가를 합리적인 쇼핑하기 !</span>
+            {isAuthenticated ? (
+              <>
+                <S.BannerTopLine>
+                  <S.BrandLogoImage2 src={logo2} alt="STOCK+er" />
+                </S.BannerTopLine>
+                <span>실시간 최저가로 합리적인 쇼핑하기 !</span>
+              </>
+            ) : (
+              <>
+                <S.BannerTopLine>
+                  <S.BrandLogoImage2 src={logo2} alt="STOCK+er" />
+                  <span>회원가입 하고</span>
+                </S.BannerTopLine>
+                <span>실시간 최저가를 합리적인 쇼핑하기 !</span>
+              </>
+            )}
           </S.BannerText>
 
-          <S.SignupButton type="button">Sign Up</S.SignupButton>
+          <S.SignupButton type="button" onClick={handleBannerButtonClick}>
+            {isAuthenticated ? "상품 확인" : "회원가입"}
+          </S.SignupButton>
         </S.SignupBanner>
 
         <S.TopSection>
