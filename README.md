@@ -38,5 +38,7 @@ src
 ## 실행 방법
 
 ### Frontend
+```bash
 yarn install
 yarn start
+```
