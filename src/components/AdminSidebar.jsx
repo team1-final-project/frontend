@@ -13,15 +13,11 @@ import {
   ShoppingCart,
   ClipboardList,
   BarChart3,
-  Map,
-  Users,
-  Settings,
   PanelLeftClose,
-  CirclePlus,
   SquarePlus,
 } from "lucide-react";
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ onClose }) {
   const menuSections = useMemo(
     () => [
       {
@@ -107,7 +103,11 @@ export default function AdminSidebar() {
           <BrandText>STOCK+er</BrandText>
         </BrandWrap>
 
-        <TopIconButton type="button">
+        <TopIconButton
+          type="button"
+          onClick={onClose}
+          aria-label="사이드바 닫기"
+        >
           <PanelLeftClose size={18} />
         </TopIconButton>
       </TopArea>
@@ -248,8 +248,6 @@ const DashboardButton = styled(NavLink)`
   color: var(--placeholder);
   text-decoration: none;
   font-size: 13px;
-  font-weight: 500;
-  text-decoration: none;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -270,7 +268,6 @@ const DashboardButton = styled(NavLink)`
   &.active {
     background: var(--hover-gray);
     color: black;
-    font-weight: 700;
   }
 
   &.active svg {
