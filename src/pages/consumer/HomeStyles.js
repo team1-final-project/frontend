@@ -468,7 +468,7 @@ export const SalesImage = styled.img`
       case "hetban":
         return "50% 0%";
       case "curry":
-        return "50% -28%";
+        return "50% 75%";
       case "cokezero":
         return "50% 0%";
       default:
