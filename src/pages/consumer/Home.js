@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import herosectionImg from "../../assets/sinramyeon banner.png";
 import * as S from "./HomeStyles";
-import { getHomeAiRanking } from "../../api/stats";
-
-import { bestItems, hotDealItems, brandLogos } from "./HomeData";
+import { brandLogos } from "./HomeData";
+import { getHomeMain } from "../../api/home";
 
 import salesShinramyunImg from "../../assets/sales-shinramyun.png";
 import salesCokezeroImg from "../../assets/sales-cokezero.png";
@@ -38,15 +37,32 @@ function AIRankingSection({ data, onViewMore }) {
 
   const [selectedPeriod, setSelectedPeriod] = useState("weekly");
 
+  const truncateText = (text = "", max = 10) => {
+    if (!text) return "";
+    return text.length > max ? `${text.slice(0, max)}...` : text;
+  };
+
   const selectedDropCategory =
     data.priceDropTop5ByCategory?.find(
       (category) => category.categoryId === selectedDropCategoryId,
     ) || data.priceDropTop5ByCategory?.[0];
 
   const maxDropAmount = Math.max(
-    ...(selectedDropCategory?.items?.map((item) => item.dropAmount) || []),
+    ...(selectedDropCategory?.items?.map((item) => Number(item.dropAmount) || 0) || []),
     1,
   );
+
+  useEffect(() => {
+    if (!data.priceDropTop5ByCategory?.length) return;
+
+    const exists = data.priceDropTop5ByCategory.some(
+      (category) => category.categoryId === selectedDropCategoryId,
+    );
+
+    if (!exists) {
+      setSelectedDropCategoryId(data.priceDropTop5ByCategory[0].categoryId);
+    }
+  }, [data, selectedDropCategoryId]);
 
   useEffect(() => {
     if (!data.categories?.length) return;
@@ -84,6 +100,15 @@ function AIRankingSection({ data, onViewMore }) {
       ? selectedProduct?.weekly
       : selectedProduct?.monthly;
 
+  const chartSeries = graphData?.series || [];
+  const allValues = chartSeries.flatMap((series) => series.values || []);
+  const rawMax = Math.max(...allValues, 0);
+  const chartMax = rawMax <= 10 ? 10 : Math.ceil(rawMax / 10) * 10;
+
+  const yAxisTicks = Array.from({ length: 6 }, (_, index) =>
+    Math.round(chartMax - (chartMax / 5) * index),
+  );
+
   return (
     <S.AIRankingSection>
       <S.AIRankingTitle>AI Ranking</S.AIRankingTitle>
@@ -110,36 +135,38 @@ function AIRankingSection({ data, onViewMore }) {
 
           <S.BarList>
             {selectedDropCategory?.items?.map((item, index) => (
-              <S.BarItem key={item.name}>
+              <S.BarItem key={`${item.name}-${index}`}>
                 <S.BarItemTop>
                   <S.RankBadge>{index + 1}</S.RankBadge>
 
                   <S.BarMain>
                     <S.BarHeader>
-                      <S.BarLabel>{item.name}</S.BarLabel>
+                      <S.BarLabel title={item.name}>{item.name}</S.BarLabel>
 
                       <S.BarValueWrap>
                         <S.BarValue>
-                          -{item.dropAmount.toLocaleString()}원
+                          -{(Number(item.dropAmount) || 0).toLocaleString()}원
                         </S.BarValue>
-                        <S.BarSubValue>-{item.dropRate}%</S.BarSubValue>
+                        <S.BarSubValue>
+                          -{Number(item.dropRate || 0)}%
+                        </S.BarSubValue>
                       </S.BarValueWrap>
                     </S.BarHeader>
 
                     <S.BarTrack>
                       <S.BarFill
                         style={{
-                          width: `${(item.dropAmount / maxDropAmount) * 100}%`,
+                          width: `${((Number(item.dropAmount) || 0) / maxDropAmount) * 100}%`,
                           background:
                             index === 0
                               ? "#f06464"
                               : index === 1
-                                ? "#f27474"
+                                ? "#f27a7a"
                                 : index === 2
-                                  ? "#f48787"
+                                  ? "#f38e8e"
                                   : index === 3
-                                    ? "#f4a0a0"
-                                    : "#f6b3b3",
+                                    ? "#f5a4a4"
+                                    : "#f6b8b8",
                         }}
                       />
                     </S.BarTrack>
@@ -182,8 +209,8 @@ function AIRankingSection({ data, onViewMore }) {
           <S.MiniTable>
             <thead>
               <tr>
-                <th>SN</th>
-                <th>
+                <th style={{ width: "14%" }}>SN</th>
+                <th style={{ width: "34%" }}>
                   <S.InnerSelectWrap>
                     <S.InnerSelect
                       value={selectedProductId}
@@ -191,35 +218,50 @@ function AIRankingSection({ data, onViewMore }) {
                     >
                       {selectedCategory?.products?.map((product) => (
                         <option key={product.id} value={product.id}>
-                          {product.name}
+                          {truncateText(product.name, 10)}
                         </option>
                       ))}
                     </S.InnerSelect>
                     <S.InnerSelectArrow />
                   </S.InnerSelectWrap>
                 </th>
-                <th>금주</th>
-                <th>7일전 대비</th>
-                <th>2주전 대비</th>
+                <th style={{ width: "17%" }}>금주</th>
+                <th style={{ width: "17%" }}>7일전 대비</th>
+                <th style={{ width: "18%" }}>2주전 대비</th>
               </tr>
             </thead>
+
             <tbody>
               {selectedProduct && (
                 <tr>
                   <td>5</td>
-                  <td>{selectedProduct.name}</td>
+                  <td title={selectedProduct.name}>
+                    <S.TruncateCellText>
+                      {truncateText(selectedProduct.name, 10)}
+                    </S.TruncateCellText>
+                  </td>
                   <td>{selectedProduct.currentPrice.toLocaleString()}</td>
                   <td>
-                    <S.NegativeValue>
-                      {selectedProduct.weekCompare > 0 ? "+" : ""}
-                      {selectedProduct.weekCompare}
-                    </S.NegativeValue>
+                    {selectedProduct.weekCompare > 0 ? (
+                      <S.PositiveValue>
+                        +{selectedProduct.weekCompare}
+                      </S.PositiveValue>
+                    ) : (
+                      <S.NegativeValue>
+                        {selectedProduct.weekCompare}
+                      </S.NegativeValue>
+                    )}
                   </td>
                   <td>
-                    <S.PositiveValue>
-                      {selectedProduct.twoWeekCompare > 0 ? "+" : ""}
-                      {selectedProduct.twoWeekCompare}
-                    </S.PositiveValue>
+                    {selectedProduct.twoWeekCompare > 0 ? (
+                      <S.PositiveValue>
+                        +{selectedProduct.twoWeekCompare}
+                      </S.PositiveValue>
+                    ) : (
+                      <S.NegativeValue>
+                        {selectedProduct.twoWeekCompare}
+                      </S.NegativeValue>
+                    )}
                   </td>
                 </tr>
               )}
@@ -246,22 +288,22 @@ function AIRankingSection({ data, onViewMore }) {
           <S.TrendChartWrap>
             <S.CustomChartArea>
               <S.YAxisColumn>
-                {[60, 50, 40, 30, 20, 10].map((value) => (
+                {yAxisTicks.map((value) => (
                   <S.YAxisLabel key={value}>{value}</S.YAxisLabel>
                 ))}
               </S.YAxisColumn>
 
               <S.ChartMain>
-                <S.ChartGridLines>
-                  {[...Array(6)].map((_, index) => (
-                    <S.GridLine key={index} />
-                  ))}
-                </S.ChartGridLines>
-
                 <S.PlotArea>
-                  {graphData?.series?.map((series, index) => (
+                  <S.ChartGridLines>
+                    {yAxisTicks.map((_, index) => (
+                      <S.GridLine key={index} />
+                    ))}
+                  </S.ChartGridLines>
+
+                  {chartSeries.map((series, index) => (
                     <S.LineSvg
-                      key={index}
+                      key={`${series.name}-${index}`}
                       viewBox="0 0 100 100"
                       preserveAspectRatio="none"
                     >
@@ -269,14 +311,13 @@ function AIRankingSection({ data, onViewMore }) {
                         fill="none"
                         stroke={series.color}
                         strokeWidth="1.8"
-                        points={series.values
+                        points={(series.values || [])
                           .map((value, valueIndex) => {
-                            const total = series.values.length;
+                            const total = (series.values || []).length;
                             const x =
-                              total === 1
-                                ? 0
-                                : (valueIndex / (total - 1)) * 100;
-                            const y = 100 - (value / 60) * 100;
+                              total <= 1 ? 0 : (valueIndex / (total - 1)) * 100;
+                            const y =
+                              100 - ((Number(value) || 0) / chartMax) * 100;
                             return `${x},${y}`;
                           })
                           .join(" ")}
@@ -293,10 +334,10 @@ function AIRankingSection({ data, onViewMore }) {
               </S.ChartMain>
 
               <S.ChartLegendSide>
-                {graphData?.series?.map((series, index) => (
-                  <S.SideLegendItem key={index}>
+                {chartSeries.map((series, index) => (
+                  <S.SideLegendItem key={`${series.name}-${index}`}>
                     <S.SideLegendLine style={{ background: series.color }} />
-                    <S.SideLegendText>Value</S.SideLegendText>
+                    <S.SideLegendText>{series.name}</S.SideLegendText>
                   </S.SideLegendItem>
                 ))}
               </S.ChartLegendSide>
@@ -334,7 +375,9 @@ function ProductCard({ item }) {
 
       <S.PriceRow>
         <S.CurrentPrice>{item.price}</S.CurrentPrice>
-        <S.OriginalPrice>{item.originalPrice}</S.OriginalPrice>
+        {item.originalPrice ? (
+          <S.OriginalPrice>{item.originalPrice}</S.OriginalPrice>
+        ) : null}
         <S.DiscountBadge $positive={isPositive}>
           {item.discount}
         </S.DiscountBadge>
@@ -346,9 +389,13 @@ function ProductCard({ item }) {
 export default function Home() {
   const navigate = useNavigate();
 
-  const [aiRanking, setAiRanking] = useState({
-    priceDropTop5ByCategory: [],
-    categories: [],
+  const [homeData, setHomeData] = useState({
+    bestItems: [],
+    hotDealItems: [],
+    aiRanking: {
+      priceDropTop5ByCategory: [],
+      categories: [],
+    },
   });
 
   const salesItems = {
@@ -379,16 +426,67 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const fetchAiRanking = async () => {
+    const formatCardItems = (items = []) =>
+      items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        rating: "4.5/5",
+        price: `${Number(item.price || 0).toLocaleString()}원`,
+        originalPrice: item.original_price
+          ? `${Number(item.original_price).toLocaleString()}원`
+          : "",
+        discount:
+          item.discount_rate > 0 ? `-${item.discount_rate}%` : "0%",
+        image: item.thumbnail_image_url,
+        imageScale: 0.82,
+      }));
+
+    const fetchHomeMain = async () => {
       try {
-        const data = await getHomeAiRanking();
-        setAiRanking(data);
+        const data = await getHomeMain();
+
+        setHomeData({
+          bestItems: formatCardItems(data.best_items),
+          hotDealItems: formatCardItems(data.hot_deal_items),
+          aiRanking: {
+            priceDropTop5ByCategory: (
+              data.ai_ranking?.price_drop_top5_by_category || []
+            ).map((category) => ({
+              categoryId: category.category_id,
+              categoryName: category.category_name,
+              items: (category.items || []).map((item) => ({
+                name: item.name,
+                dropAmount: item.drop_amount,
+                dropRate: item.drop_rate,
+              })),
+            })),
+            categories: (data.ai_ranking?.categories || []).map((category) => ({
+              id: category.id,
+              name: category.name,
+              products: (category.products || []).map((product) => ({
+                id: product.id,
+                name: product.name,
+                currentPrice: product.current_price,
+                weekCompare: product.week_compare,
+                twoWeekCompare: product.two_week_compare,
+                weekly: {
+                  labels: product.weekly?.labels || [],
+                  series: product.weekly?.series || [],
+                },
+                monthly: {
+                  labels: product.monthly?.labels || [],
+                  series: product.monthly?.series || [],
+                },
+              })),
+            })),
+          },
+        });
       } catch (error) {
-        console.error("AI Ranking 조회 실패:", error);
+        console.error("홈 메인 조회 실패:", error);
       }
     };
 
-    fetchAiRanking();
+    fetchHomeMain();
   }, []);
 
   return (
@@ -406,7 +504,7 @@ export default function Home() {
               최저가로 구매 !
             </S.HeroTitle>
 
-            <S.HeroButton type="button" onClick={() => navigate("/signup")}>
+            <S.HeroButton type="button" onClick={() => navigate("/products/1")}>
               Buy Now
             </S.HeroButton>
 
@@ -466,7 +564,7 @@ export default function Home() {
 
       <S.MainSection>
         <AIRankingSection
-          data={aiRanking}
+          data={homeData.aiRanking}
           onViewMore={() => navigate("/ai-lowest-price")}
         />
 
@@ -475,14 +573,12 @@ export default function Home() {
         <S.MainSectionTitle>Best</S.MainSectionTitle>
 
         <S.CardGrid>
-          {bestItems.map((item) => (
+          {homeData.bestItems.map((item) => (
             <ProductCard key={item.id} item={item} />
           ))}
         </S.CardGrid>
 
-        <S.ViewAllButton type="button" onClick={() => navigate("/products")}>
-          View All
-        </S.ViewAllButton>
+        <S.ViewAllSpacer aria-hidden="true" />
       </S.MainSection>
 
       <S.SectionDivider />
@@ -491,14 +587,12 @@ export default function Home() {
         <S.MainSectionTitle>Hot Deal</S.MainSectionTitle>
 
         <S.CardGrid>
-          {hotDealItems.map((item) => (
+          {homeData.hotDealItems.map((item) => (
             <ProductCard key={item.id} item={item} />
           ))}
         </S.CardGrid>
 
-        <S.ViewAllButton type="button" onClick={() => navigate("/products")}>
-          View All
-        </S.ViewAllButton>
+        <S.ViewAllSpacer aria-hidden="true" />
       </S.HotDealSection>
 
       <S.SalesSection>

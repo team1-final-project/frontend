@@ -370,6 +370,12 @@ export const ViewAllButton = styled.button`
   }
 `;
 
+export const ViewAllSpacer = styled.div`
+  width: 118px;
+  height: 40px;
+  margin: 24px auto 0;
+`;
+
 export const SectionDivider = styled.div`
   max-width: calc(1180px - 48px);
   height: 1px;
@@ -588,19 +594,18 @@ export const LiveBadge = styled.span`
   font-weight: 700;
 `;
 
-/* 왼쪽 가격 하락폭 TOP5 */
 export const BarList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0;
-  flex: 1;
-  justify-content: space-between;
+  flex: 0;
+  justify-content: flex-start;
 `;
 
 export const BarItem = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 10px 0;
+  padding: 14px 0 12px;
 `;
 
 export const BarItemTop = styled.div`
@@ -634,14 +639,19 @@ export const BarHeader = styled.div`
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 `;
 
 export const BarLabel = styled.span`
+  display: block;
+  flex: 1;
+  min-width: 0;
   font-size: 16px;
   color: #5f5a54;
   font-weight: 800;
-  line-height: 1.3;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
 `;
 
 export const BarValueWrap = styled.div`
@@ -649,7 +659,7 @@ export const BarValueWrap = styled.div`
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
   flex-shrink: 0;
 `;
 
@@ -749,20 +759,22 @@ export const MoreLink = styled.button`
 
 export const MiniTable = styled.table`
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   background: #fbf9f6;
   border: 1px solid #eee7dd;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
   margin-top: 6px;
   table-layout: fixed;
 
   th,
   td {
-    padding: 8px 6px;
-    font-size: 10px;
+    padding: 10px 8px;
+    font-size: 11px;
     text-align: center;
     white-space: nowrap;
+    vertical-align: middle;
   }
 
   thead th {
@@ -781,9 +793,11 @@ export const InnerSelectWrap = styled.div`
   position: relative;
   display: inline-flex;
   align-items: center;
+  max-width: 100%;
 `;
 
 export const InnerSelect = styled.select`
+  max-width: 120px;
   border: none;
   background: transparent;
   color: #222;
@@ -803,6 +817,14 @@ export const InnerSelectArrow = styled(ChevronDown)`
   height: 14px;
   color: #8f8a82;
   pointer-events: none;
+`;
+
+export const TruncateCellText = styled.span`
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 export const PositiveValue = styled.span`
@@ -840,50 +862,50 @@ export const TrendChartWrap = styled.div`
   background: #fbf9f6;
   border: 1px solid #eee7dd;
   border-radius: 14px;
-  padding: 12px;
+  padding: 14px 12px 12px;
 `;
 
 export const CustomChartArea = styled.div`
   display: grid;
-  grid-template-columns: 32px 1fr 64px;
+  grid-template-columns: 34px minmax(0, 1fr) 72px;
   gap: 10px;
   align-items: stretch;
 `;
 
 export const YAxisColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 14px 0 26px;
+  height: 216px;
+  display: grid;
+  grid-template-rows: repeat(6, 1fr) 28px;
+  align-items: start;
 `;
 
 export const YAxisLabel = styled.span`
   font-size: 11px;
   color: #9a958d;
+  line-height: 1;
+  transform: translateY(-6px);
 `;
 
 export const ChartMain = styled.div`
-  position: relative;
-`;
-
-export const ChartGridLines = styled.div`
-  position: absolute;
-  inset: 0 0 24px 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  pointer-events: none;
-`;
-
-export const GridLine = styled.div`
-  width: 100%;
-  height: 1px;
-  background: #ece7df;
+  min-width: 0;
 `;
 
 export const PlotArea = styled.div`
   position: relative;
   height: 188px;
+`;
+
+export const ChartGridLines = styled.div`
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: repeat(6, 1fr);
+  pointer-events: none;
+`;
+
+export const GridLine = styled.div`
+  width: 100%;
+  border-top: 1px solid #ece7df;
 `;
 
 export const LineSvg = styled.svg`
@@ -895,17 +917,18 @@ export const LineSvg = styled.svg`
 `;
 
 export const XAxisRow = styled.div`
-  margin-top: 10px;
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  height: 28px;
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: start;
 `;
 
 export const XAxisLabel = styled.span`
-  flex: 1;
   text-align: center;
   font-size: 11px;
   color: #9a958d;
+  line-height: 1;
 `;
 
 export const ChartLegendSide = styled.div`
@@ -913,6 +936,7 @@ export const ChartLegendSide = styled.div`
   flex-direction: column;
   justify-content: center;
   gap: 10px;
+  padding-top: 8px;
 `;
 
 export const SideLegendItem = styled.div`
@@ -932,4 +956,5 @@ export const SideLegendLine = styled.span`
 export const SideLegendText = styled.span`
   font-size: 10px;
   color: #8f8a82;
+  line-height: 1;
 `;
