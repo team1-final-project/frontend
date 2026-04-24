@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import styled, { css, createGlobalStyle } from "styled-components";
-import { Search, Plus, Calendar } from "lucide-react";
+import styled, { createGlobalStyle } from "styled-components";
+import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ReactQuill, { Quill } from "react-quill";
 import BlotFormatter from "quill-blot-formatter";
@@ -8,7 +8,6 @@ import "react-quill/dist/quill.snow.css";
 import SearchBar from "../../../components/SearchBar";
 import SearchDate from "../../../components/SearchDate";
 import SelectBar from "../../../components/SelectBar";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 import { getCategories } from "../../../api/category";
@@ -43,6 +42,7 @@ const DatePickerStyle = createGlobalStyle`
 `;
 
 Quill.register("modules/blotFormatter", BlotFormatter);
+
 const saleStatusOptions = [
   { value: "ON_SALE", label: "판매중" },
   { value: "READY", label: "판매예정" },
@@ -55,7 +55,6 @@ const FIXED_SHIPPING_FROM =
   "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
 const FIXED_RETURN_ADDRESS =
   "충청남도 천안시 동남구 대흥로 215 7층 (우 : 31144)";
-
 
 function insertImageWithLineBreak(editor, imageUrl) {
   if (!editor) return;
@@ -90,6 +89,7 @@ export default function ProductRegist() {
 
   const [isCatalogLoading, setIsCatalogLoading] = useState(false);
   const [catalogError, setCatalogError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const [form, setForm] = useState({
     productCode: "",
@@ -200,6 +200,111 @@ export default function ProductRegist() {
     }));
   };
 
+  const sanitizeIntegerInput = (value) => {
+    const raw = String(value ?? "");
+    const cleaned = raw.replace(/[^\d-]/g, "");
+
+    if (cleaned.startsWith("-")) {
+      return `-${cleaned.slice(1).replace(/-/g, "")}`;
+    }
+
+    return cleaned.replace(/-/g, "");
+  };
+
+  const validatePositiveNumber = (label, value, { required = false } = {}) => {
+    const raw = String(value ?? "").trim();
+
+    if (!raw) {
+      return required ? `${label}를 입력해주세요.` : "";
+    }
+
+    if (!/^-?\d+$/.test(raw)) {
+      return `${label}는 숫자만 입력할 수 있습니다.`;
+    }
+
+    if (Number(raw) <= 0) {
+      return `${label}는 0보다 큰 값만 입력할 수 있습니다.`;
+    }
+
+    return "";
+  };
+
+  const validateExpiryDate = (value) => {
+    if (!value) return "";
+
+    const expiry = new Date(value);
+    if (Number.isNaN(expiry.getTime())) {
+      return "유통기한이 올바르지 않습니다.";
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    expiry.setHours(0, 0, 0, 0);
+
+    if (expiry <= today) {
+      return "유통기한은 오늘 이후 날짜만 선택할 수 있습니다.";
+    }
+
+    return "";
+  };
+
+  const handlePositiveNumberChange = (key, label) => (e) => {
+    const nextValue = sanitizeIntegerInput(e.target.value);
+
+    handleChange(key, nextValue);
+    setFieldErrors((prev) => ({
+      ...prev,
+      [key]: validatePositiveNumber(label, nextValue),
+    }));
+  };
+
+  const handleExpiryDateChange = (date) => {
+    handleChange("expiryDate", date);
+    setFieldErrors((prev) => ({
+      ...prev,
+      expiryDate: validateExpiryDate(date),
+    }));
+  };
+
+  const validateRegistForm = () => {
+    const nextErrors = {
+      salePrice: validatePositiveNumber("판매가", form.salePrice, {
+        required: true,
+      }),
+      costPrice: validatePositiveNumber("원가", form.costPrice),
+      minPrice: form.useAiPrice
+        ? validatePositiveNumber("최저가 제한", form.minPrice)
+        : "",
+      maxPrice: form.useAiPrice
+        ? validatePositiveNumber("최고가 제한", form.maxPrice)
+        : "",
+      pricePerTime: form.useAiPrice
+        ? validatePositiveNumber("회당 조정가", form.pricePerTime)
+        : "",
+      stockQty: validatePositiveNumber("재고수량", form.stockQty, {
+        required: true,
+      }),
+      safetyStock: validatePositiveNumber("안전재고", form.safetyStock),
+      expiryDate: validateExpiryDate(form.expiryDate),
+    };
+
+    if (
+      form.useAiPrice &&
+      form.minPrice &&
+      form.maxPrice &&
+      !nextErrors.minPrice &&
+      !nextErrors.maxPrice &&
+      Number(form.minPrice) > Number(form.maxPrice)
+    ) {
+      nextErrors.maxPrice =
+        "최고가 제한은 최저가 제한보다 크거나 같아야 합니다.";
+    }
+
+    setFieldErrors(nextErrors);
+
+    return Object.values(nextErrors).find(Boolean) || "";
+  };
+
   const handleResolveCatalogName = async () => {
     const catalogId = form.catalogExternalId.trim();
 
@@ -233,6 +338,13 @@ export default function ProductRegist() {
             ? nextLowestPrice
             : prev.salePrice,
       }));
+
+      if (!String(form.salePrice ?? "").trim() && nextLowestPrice) {
+        setFieldErrors((prev) => ({
+          ...prev,
+          salePrice: "",
+        }));
+      }
     } catch (error) {
       console.error(error);
       setCatalogError(
@@ -304,55 +416,55 @@ export default function ProductRegist() {
   };
 
   const quillModules = useMemo(
-      () => ({
-        toolbar: {
-          container: [
-            [{ header: [1, 2, 3, false] }],
-            [{ size: ["small", false, "large", "huge"] }],
-            ["bold", "italic", "underline", "strike"],
-            [{ color: [] }, { background: [] }],
-            ["blockquote", "code-block"],
-            [{ list: "ordered" }, { list: "bullet" }],
-            [{ indent: "-1" }, { indent: "+1" }],
-            [{ align: [] }],
-            ["link", "image"],
-            ["clean"],
-          ],
-          handlers: {
-            image: handleEditorImageUpload,
-          },
+    () => ({
+      toolbar: {
+        container: [
+          [{ header: [1, 2, 3, false] }],
+          [{ size: ["small", false, "large", "huge"] }],
+          ["bold", "italic", "underline", "strike"],
+          [{ color: [] }, { background: [] }],
+          ["blockquote", "code-block"],
+          [{ list: "ordered" }, { list: "bullet" }],
+          [{ indent: "-1" }, { indent: "+1" }],
+          [{ align: [] }],
+          ["link", "image"],
+          ["clean"],
+        ],
+        handlers: {
+          image: handleEditorImageUpload,
         },
-        blotFormatter: {},
-        clipboard: {
-          matchVisual: false,
-        },
-        history: {
-          delay: 500,
-          maxStack: 100,
-          userOnly: true,
-        },
-      }),
-      [],
-    );
-  
-    const quillFormats = [
-      "header",
-      "size",
-      "bold",
-      "italic",
-      "underline",
-      "strike",
-      "color",
-      "background",
-      "blockquote",
-      "code-block",
-      "list",
-      "bullet",
-      "indent",
-      "align",
-      "link",
-      "image",
-    ];
+      },
+      blotFormatter: {},
+      clipboard: {
+        matchVisual: false,
+      },
+      history: {
+        delay: 500,
+        maxStack: 100,
+        userOnly: true,
+      },
+    }),
+    [],
+  );
+
+  const quillFormats = [
+    "header",
+    "size",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "color",
+    "background",
+    "blockquote",
+    "code-block",
+    "list",
+    "bullet",
+    "indent",
+    "align",
+    "link",
+    "image",
+  ];
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -372,18 +484,14 @@ export default function ProductRegist() {
       return;
     }
 
-    if (!form.salePrice) {
-      alert("판매가를 입력해주세요.");
-      return;
-    }
-
-    if (!form.stockQty) {
-      alert("재고수량을 입력해주세요.");
-      return;
-    }
-
     if (!thumbnailUrl) {
       alert("대표이미지를 업로드해주세요.");
+      return;
+    }
+
+    const validationMessage = validateRegistForm();
+    if (validationMessage) {
+      alert(validationMessage);
       return;
     }
 
@@ -398,7 +506,7 @@ export default function ProductRegist() {
 
         catalog_external_id: form.catalogExternalId.trim() || null,
         catalog_name: form.catalogName.trim() || null,
-        
+
         current_lowest_price: form.currentLowestPrice
           ? Number(form.currentLowestPrice)
           : null,
@@ -448,6 +556,7 @@ export default function ProductRegist() {
 
   return (
     <PageWrap>
+      <DatePickerStyle />
       <Title>상품 등록</Title>
 
       <Form onSubmit={handleSubmit}>
@@ -658,11 +767,16 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.salePrice}
-                    onChange={(e) => handleChange("salePrice", e.target.value)}
+                    onChange={handlePositiveNumberChange("salePrice", "판매가")}
                     placeholder="판매가"
+                    inputMode="numeric"
+                    $error={Boolean(fieldErrors.salePrice)}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
+                {fieldErrors.salePrice ? (
+                  <ErrorHelperText>{fieldErrors.salePrice}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
 
@@ -672,11 +786,16 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.costPrice}
-                    onChange={(e) => handleChange("costPrice", e.target.value)}
+                    onChange={handlePositiveNumberChange("costPrice", "원가")}
                     placeholder="원가"
+                    inputMode="numeric"
+                    $error={Boolean(fieldErrors.costPrice)}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
+                {fieldErrors.costPrice ? (
+                  <ErrorHelperText>{fieldErrors.costPrice}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
 
@@ -685,9 +804,18 @@ export default function ProductRegist() {
               <FormField>
                 <ToggleSwitch
                   checked={form.useAiPrice}
-                  onChange={(nextChecked) =>
-                    handleChange("useAiPrice", nextChecked)
-                  }
+                  onChange={(nextChecked) => {
+                    handleChange("useAiPrice", nextChecked);
+
+                    if (!nextChecked) {
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        minPrice: "",
+                        maxPrice: "",
+                        pricePerTime: "",
+                      }));
+                    }
+                  }}
                 />
               </FormField>
             </FormRow>
@@ -698,12 +826,20 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.minPrice}
-                    onChange={(e) => handleChange("minPrice", e.target.value)}
+                    onChange={handlePositiveNumberChange(
+                      "minPrice",
+                      "최저가 제한",
+                    )}
                     placeholder="최저가 제한"
                     disabled={!form.useAiPrice}
+                    inputMode="numeric"
+                    $error={Boolean(fieldErrors.minPrice)}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
+                {fieldErrors.minPrice ? (
+                  <ErrorHelperText>{fieldErrors.minPrice}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
 
@@ -713,12 +849,20 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.maxPrice}
-                    onChange={(e) => handleChange("maxPrice", e.target.value)}
+                    onChange={handlePositiveNumberChange(
+                      "maxPrice",
+                      "최고가 제한",
+                    )}
                     placeholder="최고가 제한"
                     disabled={!form.useAiPrice}
+                    inputMode="numeric"
+                    $error={Boolean(fieldErrors.maxPrice)}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
+                {fieldErrors.maxPrice ? (
+                  <ErrorHelperText>{fieldErrors.maxPrice}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
 
@@ -728,14 +872,20 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.pricePerTime}
-                    onChange={(e) =>
-                      handleChange("pricePerTime", e.target.value)
-                    }
+                    onChange={handlePositiveNumberChange(
+                      "pricePerTime",
+                      "회당 조정가",
+                    )}
                     placeholder="회당 조정가"
                     disabled={!form.useAiPrice}
+                    inputMode="numeric"
+                    $error={Boolean(fieldErrors.pricePerTime)}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
+                {fieldErrors.pricePerTime ? (
+                  <ErrorHelperText>{fieldErrors.pricePerTime}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
           </FormGrid>
@@ -751,11 +901,19 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.stockQty}
-                    onChange={(e) => handleChange("stockQty", e.target.value)}
+                    onChange={handlePositiveNumberChange(
+                      "stockQty",
+                      "재고수량",
+                    )}
                     placeholder="재고수량"
+                    inputMode="numeric"
+                    $error={Boolean(fieldErrors.stockQty)}
                   />
                   <UnitText>개</UnitText>
                 </UnitInputWrap>
+                {fieldErrors.stockQty ? (
+                  <ErrorHelperText>{fieldErrors.stockQty}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
 
@@ -765,13 +923,19 @@ export default function ProductRegist() {
                 <UnitInputWrap>
                   <Input
                     value={form.safetyStock}
-                    onChange={(e) =>
-                      handleChange("safetyStock", e.target.value)
-                    }
+                    onChange={handlePositiveNumberChange(
+                      "safetyStock",
+                      "안전재고",
+                    )}
                     placeholder="안전재고"
+                    inputMode="numeric"
+                    $error={Boolean(fieldErrors.safetyStock)}
                   />
                   <UnitText>개</UnitText>
                 </UnitInputWrap>
+                {fieldErrors.safetyStock ? (
+                  <ErrorHelperText>{fieldErrors.safetyStock}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
 
@@ -781,12 +945,15 @@ export default function ProductRegist() {
                 <SearchDate
                   type="single"
                   selected={form.expiryDate}
-                  onChange={(date) => handleChange("expiryDate", date)}
+                  onChange={handleExpiryDateChange}
                   placeholderText="날짜 선택"
                   width="220px"
                   border={true}
                   shadow={false}
                 />
+                {fieldErrors.expiryDate ? (
+                  <ErrorHelperText>{fieldErrors.expiryDate}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
           </FormGrid>
@@ -1004,6 +1171,7 @@ const CategoryTabs = styled.div`
   background: var(--choice);
   padding: 3px;
 `;
+
 const CategoryTabButton = styled.button`
   flex: 1;
   border-radius: 8px;
@@ -1062,33 +1230,6 @@ const CategorySearchWrap = styled.div`
   margin-bottom: 12px;
 `;
 
-const SearchIconWrap = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 12px;
-  transform: translateY(-50%);
-  color: var(--placeholder);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const CategorySearchInput = styled.input`
-  width: 100%;
-  height: 40px;
-  padding: 0 14px 0 36px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #ffffff;
-  color: var(--font);
-  font-size: 13px;
-  outline: none;
-
-  &:focus {
-    border-color: var(--border);
-  }
-`;
-
 const SearchResultList = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -1135,7 +1276,7 @@ const SelectedCategoryValue = styled.div`
 const FormGrid = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 `;
 
 const FormRow = styled.div`
@@ -1158,13 +1299,15 @@ const FormLabel = styled.label`
 
 const FormField = styled.div`
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 `;
 
 const Input = styled.input`
   width: 100%;
   height: 40px;
   padding: 0 12px;
-  border: 1px solid var(--border);
+  border: 1px solid ${({ $error }) => ($error ? "#ef4444" : "var(--border)")};
   border-radius: 10px;
   background: ${({ readOnly, disabled }) =>
     disabled || readOnly ? "var(--read-only)" : "white"};
@@ -1174,7 +1317,8 @@ const Input = styled.input`
   box-sizing: border-box;
 
   &:focus {
-    border-color: var(--focus-border);
+    border-color: ${({ $error }) =>
+      $error ? "#ef4444" : "var(--focus-border)"};
   }
 
   &::placeholder {
@@ -1202,23 +1346,20 @@ const InnerHelperText = styled.div`
   user-select: none;
 `;
 
-const Select = styled.select`
-  width: 180px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: white;
-  color: var(--font);
-  font-size: 13px;
-  outline: none;
-`;
-
 const HelperText = styled.div`
   margin-top: 6px;
   color: var(--placeholder);
   font-size: 12px;
   text-align: right;
+`;
+
+const ErrorHelperText = styled.div`
+  margin-top: 2px;
+  color: #ef4444;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: left;
+  font-weight: 500;
 `;
 
 const UnitInputWrap = styled.div`
@@ -1234,46 +1375,6 @@ const UnitText = styled.span`
   color: var(--placeholder);
   font-size: 12px;
   font-weight: 500;
-`;
-
-const DateInputWrap = styled.div`
-  position: relative;
-  max-width: 220px;
-`;
-
-const SingleDateWrap = styled.div`
-  position: relative;
-  max-width: 220px;
-  box-shadow: var(--shadow);
-  border-radius: 10px;
-
-  .custom-datepicker {
-    width: 100%;
-    height: 40px;
-    padding: 0 34px 0 12px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: white;
-    font-size: var(--td);
-    cursor: pointer;
-    outline: none;
-
-    &:focus {
-      border-color: var(--blue);
-    }
-  }
-`;
-
-const DateIconWrap = styled.div`
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
-  color: var(--placeholder);
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `;
 
 const ImageUploadArea = styled.div`
