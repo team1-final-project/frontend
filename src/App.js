@@ -40,11 +40,14 @@ import AdminLogin from "./pages/admin/AdminLogin";
 
 import NotLoginRoute from "./routes/NotLoginRoute";
 
+import NetworkStatusBanner from "./components/NetworkStatusBanner";
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <AuthProvider>
         <GlobalStyle />
+        <NetworkStatusBanner />
         <ScrollToTop />
         <Routes>
           {/* Consumer */}
