@@ -180,13 +180,24 @@ export default function InventoryHistory() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [searchValue, setSearchValue] = useState("");
-  const [movementType, setMovementType] = useState("");
+  const [debounceSearchValue, setDebounceSearchValue] = useState("");
+  const [movementType, setMovementType] = useState("");  
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebounceSearchValue(searchValue);
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [searchValue])
 
   const fetchInventoryHistory = useCallback(async () => {
     setLoading(true);
@@ -197,7 +208,7 @@ export default function InventoryHistory() {
         await Promise.all([
           getAdminInventoryHistoryList(),
           getAdminInventoryHistoryList({
-            keyword: searchValue.trim() || undefined,
+            keyword: debounceSearchValue.trim() || undefined,
             change_type: movementType || undefined,
             start_date: startDate || undefined,
             end_date: endDate || undefined,
@@ -221,7 +232,7 @@ export default function InventoryHistory() {
     } finally {
       setLoading(false);
     }
-  }, [searchValue, movementType, startDate, endDate]);
+  }, [debounceSearchValue, movementType, startDate, endDate]);
 
   useEffect(() => {
     fetchInventoryHistory();
