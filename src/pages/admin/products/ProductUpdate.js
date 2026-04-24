@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import styled, { css, createGlobalStyle } from "styled-components";
-import { Search, Plus, Calendar } from "lucide-react";
+import styled, { createGlobalStyle } from "styled-components";
+import { Plus } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import ReactQuill, { Quill } from "react-quill";
 import BlotFormatter from "quill-blot-formatter";
 import SearchBar from "../../../components/SearchBar";
 import SearchDate from "../../../components/SearchDate";
 import SelectBar from "../../../components/SelectBar";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "react-quill/dist/quill.snow.css";
 
@@ -96,6 +95,7 @@ export default function ProductUpdate() {
 
   const [isCatalogLoading, setIsCatalogLoading] = useState(false);
   const [catalogError, setCatalogError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const [form, setForm] = useState({
     productCode: "",
@@ -285,6 +285,108 @@ export default function ProductUpdate() {
     }));
   };
 
+  const sanitizeIntegerInput = (value) => {
+    const raw = String(value ?? "");
+    const cleaned = raw.replace(/[^\d-]/g, "");
+
+    if (cleaned.startsWith("-")) {
+      return `-${cleaned.slice(1).replace(/-/g, "")}`;
+    }
+
+    return cleaned.replace(/-/g, "");
+  };
+
+  const validatePositiveNumber = (label, value, { required = false } = {}) => {
+    const raw = String(value ?? "").trim();
+
+    if (!raw) {
+      return required ? `${label}를 입력해주세요.` : "";
+    }
+
+    if (!/^-?\d+$/.test(raw)) {
+      return `${label}는 숫자만 입력할 수 있습니다.`;
+    }
+
+    if (Number(raw) <= 0) {
+      return `${label}는 0보다 큰 값만 입력할 수 있습니다.`;
+    }
+
+    return "";
+  };
+
+  const validateExpiryDate = (value) => {
+    if (!value) return "";
+
+    const expiry = new Date(value);
+    if (Number.isNaN(expiry.getTime())) {
+      return "유통기한이 올바르지 않습니다.";
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    expiry.setHours(0, 0, 0, 0);
+
+    if (expiry <= today) {
+      return "유통기한은 오늘 이후 날짜만 선택할 수 있습니다.";
+    }
+
+    return "";
+  };
+
+  const handlePositiveNumberChange = (key, label) => (e) => {
+    const nextValue = sanitizeIntegerInput(e.target.value);
+
+    handleChange(key, nextValue);
+    setFieldErrors((prev) => ({
+      ...prev,
+      [key]: validatePositiveNumber(label, nextValue),
+    }));
+  };
+
+  const handleExpiryDateChange = (date) => {
+    handleChange("expiryDate", date);
+    setFieldErrors((prev) => ({
+      ...prev,
+      expiryDate: validateExpiryDate(date),
+    }));
+  };
+
+  const validateUpdateForm = () => {
+    const nextErrors = {
+      salePrice: validatePositiveNumber("판매가", form.salePrice, {
+        required: true,
+      }),
+      costPrice: validatePositiveNumber("원가", form.costPrice),
+      minPrice: form.useAiPrice
+        ? validatePositiveNumber("최저가 제한", form.minPrice)
+        : "",
+      maxPrice: form.useAiPrice
+        ? validatePositiveNumber("최고가 제한", form.maxPrice)
+        : "",
+      pricePerTime: form.useAiPrice
+        ? validatePositiveNumber("회당 조정가", form.pricePerTime)
+        : "",
+      safetyStock: validatePositiveNumber("안전재고", form.safetyStock),
+      expiryDate: validateExpiryDate(form.expiryDate),
+    };
+
+    if (
+      form.useAiPrice &&
+      form.minPrice &&
+      form.maxPrice &&
+      !nextErrors.minPrice &&
+      !nextErrors.maxPrice &&
+      Number(form.minPrice) > Number(form.maxPrice)
+    ) {
+      nextErrors.maxPrice =
+        "최고가 제한은 최저가 제한보다 크거나 같아야 합니다.";
+    }
+
+    setFieldErrors(nextErrors);
+
+    return Object.values(nextErrors).find(Boolean) || "";
+  };
+
   const handleResolveCatalogName = async () => {
     const catalogId = form.catalogExternalId.trim();
 
@@ -318,6 +420,13 @@ export default function ProductUpdate() {
             ? nextLowestPrice
             : prev.salePrice,
       }));
+
+      if (!String(form.salePrice ?? "").trim() && nextLowestPrice) {
+        setFieldErrors((prev) => ({
+          ...prev,
+          salePrice: "",
+        }));
+      }
     } catch (error) {
       console.error(error);
 
@@ -459,18 +568,14 @@ export default function ProductUpdate() {
       return;
     }
 
-    if (!form.salePrice) {
-      alert("판매가를 입력해주세요.");
-      return;
-    }
-
-    if (!form.stockQty) {
-      alert("재고수량을 입력해주세요.");
-      return;
-    }
-
     if (!thumbnailUrl) {
       alert("대표이미지를 업로드해주세요.");
+      return;
+    }
+
+    const validationMessage = validateUpdateForm();
+    if (validationMessage) {
+      alert(validationMessage);
       return;
     }
 
@@ -492,9 +597,14 @@ export default function ProductUpdate() {
         cost_price: Number(form.costPrice || 0),
 
         ai_pricing_enabled: form.useAiPrice,
-        min_price_limit: form.minPrice ? Number(form.minPrice) : null,
-        max_price_limit: form.maxPrice ? Number(form.maxPrice) : null,
-        price_per_time: form.pricePerTime ? Number(form.pricePerTime) : null,
+        min_price_limit:
+          form.useAiPrice && form.minPrice ? Number(form.minPrice) : null,
+        max_price_limit:
+          form.useAiPrice && form.maxPrice ? Number(form.maxPrice) : null,
+        price_per_time:
+          form.useAiPrice && form.pricePerTime
+            ? Number(form.pricePerTime)
+            : null,
 
         stock_qty: Number(form.stockQty || 0),
         safety_stock_qty: Number(form.safetyStock || 0),
@@ -535,6 +645,7 @@ export default function ProductUpdate() {
 
   return (
     <PageWrap>
+      <DatePickerStyle />
       <PageTitle>상품 수정</PageTitle>
 
       <Form onSubmit={handleSubmit}>
@@ -740,10 +851,15 @@ export default function ProductUpdate() {
                 <UnitInputWrap>
                   <Input
                     value={form.salePrice}
-                    onChange={(e) => handleChange("salePrice", e.target.value)}
+                    onChange={handlePositiveNumberChange("salePrice", "판매가")}
+                    inputMode="numeric"
+                    $error={Boolean(fieldErrors.salePrice)}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
+                {fieldErrors.salePrice ? (
+                  <ErrorHelperText>{fieldErrors.salePrice}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
 
@@ -753,10 +869,15 @@ export default function ProductUpdate() {
                 <UnitInputWrap>
                   <Input
                     value={form.costPrice}
-                    onChange={(e) => handleChange("costPrice", e.target.value)}
+                    onChange={handlePositiveNumberChange("costPrice", "원가")}
+                    inputMode="numeric"
+                    $error={Boolean(fieldErrors.costPrice)}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
+                {fieldErrors.costPrice ? (
+                  <ErrorHelperText>{fieldErrors.costPrice}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
 
@@ -765,9 +886,18 @@ export default function ProductUpdate() {
               <FormField>
                 <ToggleSwitch
                   checked={form.useAiPrice}
-                  onChange={(nextChecked) =>
-                    handleChange("useAiPrice", nextChecked)
-                  }
+                  onChange={(nextChecked) => {
+                    handleChange("useAiPrice", nextChecked);
+
+                    if (!nextChecked) {
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        minPrice: "",
+                        maxPrice: "",
+                        pricePerTime: "",
+                      }));
+                    }
+                  }}
                 />
               </FormField>
             </FormRow>
@@ -778,11 +908,19 @@ export default function ProductUpdate() {
                 <UnitInputWrap>
                   <Input
                     value={form.minPrice}
-                    onChange={(e) => handleChange("minPrice", e.target.value)}
-                    readOnly={!form.useAiPrice}
+                    onChange={handlePositiveNumberChange(
+                      "minPrice",
+                      "최저가 제한",
+                    )}
+                    disabled={!form.useAiPrice}
+                    inputMode="numeric"
+                    $error={Boolean(fieldErrors.minPrice)}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
+                {fieldErrors.minPrice ? (
+                  <ErrorHelperText>{fieldErrors.minPrice}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
 
@@ -792,11 +930,19 @@ export default function ProductUpdate() {
                 <UnitInputWrap>
                   <Input
                     value={form.maxPrice}
-                    onChange={(e) => handleChange("maxPrice", e.target.value)}
-                    readOnly={!form.useAiPrice}
+                    onChange={handlePositiveNumberChange(
+                      "maxPrice",
+                      "최고가 제한",
+                    )}
+                    disabled={!form.useAiPrice}
+                    inputMode="numeric"
+                    $error={Boolean(fieldErrors.maxPrice)}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
+                {fieldErrors.maxPrice ? (
+                  <ErrorHelperText>{fieldErrors.maxPrice}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
 
@@ -806,14 +952,20 @@ export default function ProductUpdate() {
                 <UnitInputWrap>
                   <Input
                     value={form.pricePerTime}
-                    onChange={(e) =>
-                      handleChange("pricePerTime", e.target.value)
-                    }
+                    onChange={handlePositiveNumberChange(
+                      "pricePerTime",
+                      "회당 조정가",
+                    )}
                     placeholder="회당 조정가"
-                    readOnly={!form.useAiPrice}
+                    disabled={!form.useAiPrice}
+                    inputMode="numeric"
+                    $error={Boolean(fieldErrors.pricePerTime)}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
+                {fieldErrors.pricePerTime ? (
+                  <ErrorHelperText>{fieldErrors.pricePerTime}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
           </FormGrid>
@@ -843,12 +995,18 @@ export default function ProductUpdate() {
                 <UnitInputWrap>
                   <Input
                     value={form.safetyStock}
-                    onChange={(e) =>
-                      handleChange("safetyStock", e.target.value)
-                    }
+                    onChange={handlePositiveNumberChange(
+                      "safetyStock",
+                      "안전재고",
+                    )}
+                    inputMode="numeric"
+                    $error={Boolean(fieldErrors.safetyStock)}
                   />
                   <UnitText>개</UnitText>
                 </UnitInputWrap>
+                {fieldErrors.safetyStock ? (
+                  <ErrorHelperText>{fieldErrors.safetyStock}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
 
@@ -858,12 +1016,15 @@ export default function ProductUpdate() {
                 <SearchDate
                   type="single"
                   selected={form.expiryDate}
-                  onChange={(date) => handleChange("expiryDate", date)}
+                  onChange={handleExpiryDateChange}
                   placeholderText="날짜 선택"
                   width="220px"
                   border={true}
                   shadow={false}
                 />
+                {fieldErrors.expiryDate ? (
+                  <ErrorHelperText>{fieldErrors.expiryDate}</ErrorHelperText>
+                ) : null}
               </FormField>
             </FormRow>
           </FormGrid>
@@ -1040,12 +1201,14 @@ const PageWrap = styled.div`
   flex-direction: column;
   gap: 25px;
 `;
+
 const PageTitle = styled.h2`
   margin: 0;
   font-size: var(--title);
   font-weight: 700;
   color: var(--font);
 `;
+
 const LoadingBox = styled.div`
   padding: 24px;
   border: 1px solid var(--border);
@@ -1053,11 +1216,13 @@ const LoadingBox = styled.div`
   background: white;
   color: var(--font2);
 `;
+
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 15px;
 `;
+
 const Section = styled.section`
   padding: 18px 20px;
   box-shadow: var(--shadow);
@@ -1067,11 +1232,13 @@ const Section = styled.section`
   flex-direction: column;
   gap: 15px;
 `;
+
 const SectionTitle = styled.h3`
   color: var(--font);
   font-size: 17px;
   font-weight: 600;
 `;
+
 const CategoryTabs = styled.div`
   display: inline-flex;
   width: 240px;
@@ -1080,6 +1247,7 @@ const CategoryTabs = styled.div`
   background: var(--choice);
   padding: 3px;
 `;
+
 const CategoryTabButton = styled.button`
   flex: 1;
   border-radius: 8px;
@@ -1089,6 +1257,7 @@ const CategoryTabButton = styled.button`
   font-weight: 700;
   box-shadow: ${({ $active }) => ($active ? "var(--shadow)" : "none")};
 `;
+
 const CategoryPanel = styled.div`
   display: grid;
   grid-template-columns: 220px 220px;
@@ -1126,19 +1295,23 @@ const CategoryItemButton = styled.button`
     border-bottom: none;
   }
 `;
+
 const SearchCategoryPanel = styled.div`
   margin-bottom: 12px;
 `;
+
 const CategorySearchWrap = styled.div`
   position: relative;
   max-width: 360px;
 `;
+
 const SearchResultList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
 `;
+
 const SearchResultButton = styled.button`
   height: 34px;
   padding: 0 14px;
@@ -1150,6 +1323,7 @@ const SearchResultButton = styled.button`
   font-size: 12px;
   font-weight: 600;
 `;
+
 const SelectedCategoryRow = styled.div`
   display: flex;
   align-items: center;
@@ -1173,41 +1347,51 @@ const SelectedCategoryValue = styled.div`
   display: inline-flex;
   align-items: center;
 `;
+
 const FormGrid = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 `;
+
 const FormRow = styled.div`
   display: grid;
   grid-template-columns: 120px minmax(0, 1fr);
   gap: 14px;
   align-items: center;
+
   @media (max-width: 700px) {
     grid-template-columns: 1fr;
     gap: 8px;
   }
 `;
+
 const FormLabel = styled.label`
   color: var(--font);
   font-size: 13px;
   font-weight: 500;
 `;
+
 const FormField = styled.div`
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 `;
+
 const Input = styled.input`
   width: 100%;
   height: 40px;
   padding: 0 12px;
-  border: 1px solid var(--border);
+  border: 1px solid ${({ $error }) => ($error ? "#ef4444" : "var(--border)")};
   border-radius: 10px;
   background: ${({ readOnly, disabled }) =>
     disabled || readOnly ? "var(--read-only)" : "white"};
   color: var(--font);
   font-size: 13px;
+
   &:focus {
-    border-color: var(--focus-border);
+    border-color: ${({ $error }) =>
+      $error ? "#ef4444" : "var(--focus-border)"};
   }
 `;
 
@@ -1237,10 +1421,21 @@ const HelperText = styled.div`
   font-size: 12px;
   text-align: right;
 `;
+
+const ErrorHelperText = styled.div`
+  margin-top: 2px;
+  color: #ef4444;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: left;
+  font-weight: 500;
+`;
+
 const UnitInputWrap = styled.div`
   position: relative;
   max-width: 220px;
 `;
+
 const UnitText = styled.span`
   position: absolute;
   top: 50%;
@@ -1250,14 +1445,17 @@ const UnitText = styled.span`
   font-size: 12px;
   font-weight: 600;
 `;
+
 const ImageUploadArea = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
 `;
+
 const HiddenFileInput = styled.input`
   display: none;
 `;
+
 const ImagePreviewButton = styled.button`
   width: 160px;
   height: 160px;
@@ -1267,6 +1465,7 @@ const ImagePreviewButton = styled.button`
   overflow: hidden;
   padding: 0;
 `;
+
 const UploadPlaceholder = styled.div`
   width: 100%;
   height: 100%;
@@ -1275,16 +1474,19 @@ const UploadPlaceholder = styled.div`
   align-items: center;
   justify-content: center;
 `;
+
 const PreviewImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
 `;
+
 const ImageGuide = styled.div`
   color: var(--placeholder);
   font-size: 12px;
   line-height: 1.6;
 `;
+
 const EditorWrap = styled.div`
   .ql-toolbar.ql-snow {
     border: 1px solid var(--border);
@@ -1348,11 +1550,13 @@ const EditorWrap = styled.div`
     overflow-x: auto;
   }
 `;
+
 const EditorNotice = styled.div`
   margin-top: 10px;
   color: var(--placeholder);
   font-size: 12px;
 `;
+
 const BottomButtonRow = styled.div`
   padding: 20px 0;
   display: flex;
@@ -1360,6 +1564,7 @@ const BottomButtonRow = styled.div`
   justify-content: center;
   gap: 12px;
 `;
+
 const CancelButton = styled.button`
   min-width: 96px;
   height: 40px;
@@ -1370,6 +1575,7 @@ const CancelButton = styled.button`
   font-size: 13px;
   font-weight: 700;
 `;
+
 const SubmitButton = styled.button`
   min-width: 96px;
   height: 40px;
@@ -1378,6 +1584,7 @@ const SubmitButton = styled.button`
   border-radius: 10px;
   font-size: 13px;
   font-weight: 700;
+
   &:disabled {
     opacity: 0.6;
   }
