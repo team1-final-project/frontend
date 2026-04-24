@@ -138,12 +138,9 @@ export default function AllProductsPage() {
 
   useEffect(() => {
     const keywordParam = searchParams.get("keyword") || "";
-
-    if (keywordParam !== keyword) {
-      setKeyword(keywordParam);
-      setCurrentPage(1);
-    }
-  }, [searchParams, keyword]);
+    setKeyword(keywordParam);
+    setCurrentPage(1);
+  }, [searchParams]);
 
   const selectedCategoryName =
     productCategories.find((category) => category.id === selectedCategory)
@@ -186,20 +183,8 @@ export default function AllProductsPage() {
   };
 
   const handleChangeKeyword = (event) => {
-    const nextKeyword = event.target.value;
-
-    setKeyword(nextKeyword);
+    setKeyword(event.target.value);
     setCurrentPage(1);
-
-    const nextParams = new URLSearchParams(searchParams);
-
-    if (nextKeyword.trim()) {
-      nextParams.set("keyword", nextKeyword);
-    } else {
-      nextParams.delete("keyword");
-    }
-
-    setSearchParams(nextParams);
   };
 
   const handleChangeSort = (event) => {
