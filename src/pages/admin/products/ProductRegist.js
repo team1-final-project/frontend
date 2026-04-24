@@ -304,55 +304,55 @@ export default function ProductRegist() {
   };
 
   const quillModules = useMemo(
-      () => ({
-        toolbar: {
-          container: [
-            [{ header: [1, 2, 3, false] }],
-            [{ size: ["small", false, "large", "huge"] }],
-            ["bold", "italic", "underline", "strike"],
-            [{ color: [] }, { background: [] }],
-            ["blockquote", "code-block"],
-            [{ list: "ordered" }, { list: "bullet" }],
-            [{ indent: "-1" }, { indent: "+1" }],
-            [{ align: [] }],
-            ["link", "image"],
-            ["clean"],
-          ],
-          handlers: {
-            image: handleEditorImageUpload,
-          },
+    () => ({
+      toolbar: {
+        container: [
+          [{ header: [1, 2, 3, false] }],
+          [{ size: ["small", false, "large", "huge"] }],
+          ["bold", "italic", "underline", "strike"],
+          [{ color: [] }, { background: [] }],
+          ["blockquote", "code-block"],
+          [{ list: "ordered" }, { list: "bullet" }],
+          [{ indent: "-1" }, { indent: "+1" }],
+          [{ align: [] }],
+          ["link", "image"],
+          ["clean"],
+        ],
+        handlers: {
+          image: handleEditorImageUpload,
         },
-        blotFormatter: {},
-        clipboard: {
-          matchVisual: false,
-        },
-        history: {
-          delay: 500,
-          maxStack: 100,
-          userOnly: true,
-        },
-      }),
-      [],
-    );
-  
-    const quillFormats = [
-      "header",
-      "size",
-      "bold",
-      "italic",
-      "underline",
-      "strike",
-      "color",
-      "background",
-      "blockquote",
-      "code-block",
-      "list",
-      "bullet",
-      "indent",
-      "align",
-      "link",
-      "image",
-    ];
+      },
+      blotFormatter: {},
+      clipboard: {
+        matchVisual: false,
+      },
+      history: {
+        delay: 500,
+        maxStack: 100,
+        userOnly: true,
+      },
+    }),
+    [],
+  );
+
+  const quillFormats = [
+    "header",
+    "size",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "color",
+    "background",
+    "blockquote",
+    "code-block",
+    "list",
+    "bullet",
+    "indent",
+    "align",
+    "link",
+    "image",
+  ];
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -398,7 +398,7 @@ export default function ProductRegist() {
 
         catalog_external_id: form.catalogExternalId.trim() || null,
         catalog_name: form.catalogName.trim() || null,
-        
+
         current_lowest_price: form.currentLowestPrice
           ? Number(form.currentLowestPrice)
           : null,
@@ -407,15 +407,9 @@ export default function ProductRegist() {
         cost_price: Number(form.costPrice || 0),
 
         ai_pricing_enabled: form.useAiPrice,
-        min_price_limit:
-          form.useAiPrice && form.minPrice ? Number(form.minPrice) : null,
-        max_price_limit:
-          form.useAiPrice && form.maxPrice ? Number(form.maxPrice) : null,
-        price_per_time:
-          form.useAiPrice && form.pricePerTime
-            ? Number(form.pricePerTime)
-            : null,
-
+        min_price_limit: form.minPrice ? Number(form.minPrice) : null,
+        max_price_limit: form.maxPrice ? Number(form.maxPrice) : null,
+        price_per_time: form.pricePerTime ? Number(form.pricePerTime) : null,
         stock_qty: Number(form.stockQty || 0),
         safety_stock_qty: Number(form.safetyStock || 0),
         expiration_date: form.expiryDate || null,
@@ -700,7 +694,7 @@ export default function ProductRegist() {
                     value={form.minPrice}
                     onChange={(e) => handleChange("minPrice", e.target.value)}
                     placeholder="최저가 제한"
-                    disabled={!form.useAiPrice}
+                    readOnly={!form.useAiPrice}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
@@ -715,7 +709,7 @@ export default function ProductRegist() {
                     value={form.maxPrice}
                     onChange={(e) => handleChange("maxPrice", e.target.value)}
                     placeholder="최고가 제한"
-                    disabled={!form.useAiPrice}
+                    readOnly={!form.useAiPrice}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
@@ -732,7 +726,7 @@ export default function ProductRegist() {
                       handleChange("pricePerTime", e.target.value)
                     }
                     placeholder="회당 조정가"
-                    disabled={!form.useAiPrice}
+                    readOnly={!form.useAiPrice}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>

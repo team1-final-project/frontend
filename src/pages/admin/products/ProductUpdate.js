@@ -492,14 +492,9 @@ export default function ProductUpdate() {
         cost_price: Number(form.costPrice || 0),
 
         ai_pricing_enabled: form.useAiPrice,
-        min_price_limit:
-          form.useAiPrice && form.minPrice ? Number(form.minPrice) : null,
-        max_price_limit:
-          form.useAiPrice && form.maxPrice ? Number(form.maxPrice) : null,
-        price_per_time:
-          form.useAiPrice && form.pricePerTime
-            ? Number(form.pricePerTime)
-            : null,
+        min_price_limit: form.minPrice ? Number(form.minPrice) : null,
+        max_price_limit: form.maxPrice ? Number(form.maxPrice) : null,
+        price_per_time: form.pricePerTime ? Number(form.pricePerTime) : null,
 
         stock_qty: Number(form.stockQty || 0),
         safety_stock_qty: Number(form.safetyStock || 0),
@@ -784,7 +779,7 @@ export default function ProductUpdate() {
                   <Input
                     value={form.minPrice}
                     onChange={(e) => handleChange("minPrice", e.target.value)}
-                    disabled={!form.useAiPrice}
+                    readOnly={!form.useAiPrice}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
@@ -798,7 +793,7 @@ export default function ProductUpdate() {
                   <Input
                     value={form.maxPrice}
                     onChange={(e) => handleChange("maxPrice", e.target.value)}
-                    disabled={!form.useAiPrice}
+                    readOnly={!form.useAiPrice}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
@@ -815,7 +810,7 @@ export default function ProductUpdate() {
                       handleChange("pricePerTime", e.target.value)
                     }
                     placeholder="회당 조정가"
-                    disabled={!form.useAiPrice}
+                    readOnly={!form.useAiPrice}
                   />
                   <UnitText>원</UnitText>
                 </UnitInputWrap>
