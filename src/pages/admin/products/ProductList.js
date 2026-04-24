@@ -29,6 +29,8 @@ const salesStatusLabelMap = {
   ENDED: "판매종료",
 };
 
+const SERVER_FETCH_SIZE = 100;
+
 function mapSaleStatusLabel(value) {
   return salesStatusLabelMap[value] || value || "-";
 }
@@ -42,11 +44,38 @@ function formatNumber(value) {
   return `${Number(value).toLocaleString()}원`;
 }
 
+async function fetchAllAdminProducts(params = {}) {
+  let currentPage = 1;
+  let totalPages = 1;
+  let summary = null;
+  const allItems = [];
+
+  while (currentPage <= totalPages) {
+    const response = await getAdminProductList({
+      ...params,
+      page: currentPage,
+      size: SERVER_FETCH_SIZE,
+    });
+
+    if (!summary) {
+      summary = response.summary || null;
+    }
+
+    allItems.push(...(response.items || []));
+    totalPages = Math.max(1, Number(response.total_pages || 1));
+    currentPage += 1;
+  }
+
+  return {
+    items: allItems,
+    summary,
+    total: allItems.length,
+  };
+}
+
 export default function ProductList() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
   const [searchValue, setSearchValue] = useState("");
@@ -99,13 +128,11 @@ export default function ProductList() {
       try {
         setIsLoading(true);
 
-        const data = await getAdminProductList({
+        const data = await fetchAllAdminProducts({
           keyword: searchValue.trim() || undefined,
           category_id: categoryValue ? Number(categoryValue) : undefined,
           start_date: startDate || undefined,
           end_date: endDate || undefined,
-          page,
-          size: pageSize,
         });
 
         const mappedItems = (data.items || []).map((item) => ({
@@ -133,11 +160,9 @@ export default function ProductList() {
           soldOutDiff: data.summary?.sold_out_diff || 0,
           aiEnabledDiff: data.summary?.ai_enabled_diff || 0,
         });
-
-        setTotal(data.total || 0);
-        setTotalPages(data.total_pages || 1);
       } catch (error) {
         console.error(error);
+        setProducts([]);
         alert(
           error?.response?.data?.detail || "상품 목록 조회에 실패했습니다.",
         );
@@ -147,15 +172,14 @@ export default function ProductList() {
     };
 
     fetchProducts();
-  }, [
-    searchValue,
-    categoryValue,
-    startDate,
-    endDate,
-    page,
-    pageSize,
-    reloadTick,
-  ]);
+  }, [searchValue, categoryValue, startDate, endDate, reloadTick]);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(products.length / pageSize));
+    if (page > maxPage) {
+      setPage(maxPage);
+    }
+  }, [products.length, pageSize, page]);
 
   const handleToggleAiPricing = async (id, nextChecked) => {
     const previousProducts = products;
