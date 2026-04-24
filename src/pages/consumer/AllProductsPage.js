@@ -136,6 +136,15 @@ export default function AllProductsPage() {
     fetchProducts();
   }, [selectedCategory, keyword, sortType, currentPage]);
 
+  useEffect(() => {
+    const keywordParam = searchParams.get("keyword") || "";
+
+    if (keywordParam !== keyword) {
+      setKeyword(keywordParam);
+      setCurrentPage(1);
+    }
+  }, [searchParams, keyword]);
+
   const selectedCategoryName =
     productCategories.find((category) => category.id === selectedCategory)
       ?.name || "전체";
@@ -160,6 +169,7 @@ export default function AllProductsPage() {
     setCurrentPage(1);
 
     const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("keyword");
 
     if (categoryId === "all") {
       nextParams.delete("categoryName");
@@ -176,8 +186,20 @@ export default function AllProductsPage() {
   };
 
   const handleChangeKeyword = (event) => {
-    setKeyword(event.target.value);
+    const nextKeyword = event.target.value;
+
+    setKeyword(nextKeyword);
     setCurrentPage(1);
+
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (nextKeyword.trim()) {
+      nextParams.set("keyword", nextKeyword);
+    } else {
+      nextParams.delete("keyword");
+    }
+
+    setSearchParams(nextParams);
   };
 
   const handleChangeSort = (event) => {
