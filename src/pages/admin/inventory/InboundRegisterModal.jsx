@@ -398,7 +398,7 @@ const Input = styled.input`
   }
 
   &:read-only {
-    color: var(--read-only);
+    color: var(--font);
   }
 
   &::placeholder {
