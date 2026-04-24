@@ -657,7 +657,7 @@ const Title = styled.h2`
 const SummaryGrid = styled.div`
   margin-bottom: 18px;
   display: grid;
-  grid-template-columns: 1fr 1fr 2fr;
+  grid-template-columns: 1fr 1fr 1.5fr;
   gap: 16px;
 
   @media (max-width: 1100px) {
