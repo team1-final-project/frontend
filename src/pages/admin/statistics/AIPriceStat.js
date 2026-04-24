@@ -959,7 +959,7 @@ const CodeButton = styled.button`
 `;
 
 const ReasonText = styled.span`
-  color: ${({ $type }) => ($type === "up" ? "var(--red)" : "var(--green)")};
+  color: ${({ $type }) => ($type === "up" ? "var(--green)" : "var(--red)")};
   font-size: 12px;
   font-weight: 700;
 `;
@@ -1019,7 +1019,7 @@ const PerformanceDiff = styled.div`
   align-items: center;
   justify-content: center;
   gap: 4px;
-  color: ${({ $positive }) => ($positive ? "var(--red)" : "var(--green)")};
+  color: ${({ $positive }) => ($positive ? "var(--green)" : "var(--red)")};
   font-size: 14px;
   font-weight: 700;
 `;

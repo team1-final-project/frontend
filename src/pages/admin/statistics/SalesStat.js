@@ -602,9 +602,10 @@ export default function SalesStat() {
                   boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
                 }}
                 formatter={(value, name) => {
-                  if (name === "최저가" || name === "나의 판매가") {
-                    return [formatCurrency(value), name];
+                  if (name === "판매량") {
+                    return [formatCount(value), name];
                   }
+
                   return [formatCurrency(value), name];
                 }}
               />
@@ -728,7 +729,13 @@ export default function SalesStat() {
                     border: "1px solid #e5e7eb",
                     boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
                   }}
-                  formatter={(value, name) => [formatCurrency(value), name]}
+                  formatter={(value, name) => {
+                    if (name === "판매량") {
+                      return [formatCount(value), name];
+                    }
+
+                    return [formatCurrency(value), name];
+                  }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Bar
