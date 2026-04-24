@@ -196,13 +196,13 @@ const Pagination = styled.div`
   flex-shrink: 0;
 `;
 
-const Number = styled.div`
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
+// const Number = styled.div`
+//   width: 30px;
+//   height: 30px;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// `;
 
 const ArrowButton = styled.button`
   width: 30px;
