@@ -409,19 +409,19 @@ export default function Home() {
     hetban: {
       name: "햇반",
       image: salesHetbanImg,
-      to: "/products/2",
+      to: "/products/9",
       variant: "hetban",
     },
     curry: {
       name: "3분카레",
       image: salesCurryImg,
-      to: "/products/3",
+      to: "/products/31",
       variant: "curry",
     },
     cokezero: {
       name: "코카콜라제로",
       image: salesCokezeroImg,
-      to: "/products/4",
+      to: "/products/12",
       variant: "cokezero",
     },
   };
