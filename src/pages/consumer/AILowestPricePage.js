@@ -17,19 +17,10 @@ const FALLBACK_IMAGE =
 
 const CHART_WIDTH = 640;
 const CHART_HEIGHT = 220;
+const PAGE_SIZE = 6;
 
 function formatPrice(value) {
   return `${Number(value).toLocaleString()}원`;
-}
-
-function truncateText(text, maxLength = 22) {
-  const value = String(text || "").trim();
-
-  if (value.length <= maxLength) {
-    return value;
-  }
-
-  return `${value.slice(0, maxLength)}...`;
 }
 
 function getChartPoints(data, width = CHART_WIDTH, height = CHART_HEIGHT) {
@@ -112,6 +103,7 @@ function AILowestTrendChart({ trendPoints, trendLabels, currentPrice }) {
         >
           {[0, 1, 2].map((idx) => {
             const y = 52 + idx * 40;
+
             return (
               <line
                 key={idx}
@@ -188,6 +180,23 @@ export default function AILowestPricePage() {
   const [sortType, setSortType] = useState("drop");
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.ceil(products.length / PAGE_SIZE);
+
+  const pagedProducts = useMemo(() => {
+    const startIndex = (page - 1) * PAGE_SIZE;
+    return products.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [products, page]);
+
+  const pageNumbers = useMemo(
+    () => Array.from({ length: totalPages }, (_, index) => index + 1),
+    [totalPages],
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [selectedCategory, keyword, sortType]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -209,28 +218,27 @@ export default function AILowestPricePage() {
           })) || []),
         ]);
 
-        setProducts(
-          (data.items || []).map((item) => ({
-            id: item.id,
-            categoryId: String(item.category_id),
-            name: item.name,
-            brand: item.brand || "",
-            image: item.thumbnail_image_url || FALLBACK_IMAGE,
-            currentPrice: Number(item.current_price || 0),
-            lowestPrice: Number(item.lowest_price || 0),
-            dropAmount: Number(item.drop_amount || 0),
-            dropRate: Number(item.drop_rate || 0),
-            aiRecommendation: item.ai_recommendation || "",
-            aiDescription: item.ai_description || "",
-            badgeType: item.badge_tone || "default",
-            trendPoints: (item.trend_points || []).map((point) =>
-              Number(point.value || 0),
-            ),
-            trendLabels: (item.trend_points || []).map((point) => point.label),
-          })),
-        );
+        const mappedProducts = (data.items || []).map((item) => ({
+          id: item.id,
+          categoryId: String(item.category_id),
+          name: item.name,
+          brand: item.brand || "",
+          image: item.thumbnail_image_url || FALLBACK_IMAGE,
+          currentPrice: Number(item.current_price || 0),
+          lowestPrice: Number(item.lowest_price || 0),
+          dropAmount: Number(item.drop_amount || 0),
+          dropRate: Number(item.drop_rate || 0),
+          aiRecommendation: item.ai_recommendation || "",
+          aiDescription: item.ai_description || "",
+          badgeType: item.badge_tone || "default",
+          trendPoints: (item.trend_points || []).map((point) =>
+            Number(point.value || 0),
+          ),
+          trendLabels: (item.trend_points || []).map((point) => point.label),
+        }));
 
-        setTotalCount(Number(data.total || 0));
+        setProducts(mappedProducts);
+        setTotalCount(mappedProducts.length);
       } catch (error) {
         console.error(error);
         setProducts([]);
@@ -250,6 +258,13 @@ export default function AILowestPricePage() {
   const handleChangeCategory = (categoryId) => {
     setSelectedCategory(categoryId);
     setKeyword("");
+  };
+
+  const handleChangePage = (nextPage) => {
+    if (nextPage < 1 || nextPage > totalPages || nextPage === page) return;
+
+    setPage(nextPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -313,78 +328,114 @@ export default function AILowestPricePage() {
           {isLoading ? (
             <S.EmptyBox>상품을 불러오는 중이에요.</S.EmptyBox>
           ) : products.length > 0 ? (
-            <S.ProductGrid>
-              {products.map((product) => (
-                <S.ProductCard key={product.id}>
-                  <S.ProductTop>
-                    <S.ProductThumb>
-                      <S.ProductImage src={product.image} alt={product.name} />
-                    </S.ProductThumb>
+            <>
+              <S.ProductGrid>
+                {pagedProducts.map((product) => (
+                  <S.ProductCard key={product.id}>
+                    <S.ProductTop>
+                      <S.ProductThumb>
+                        <S.ProductImage
+                          src={product.image}
+                          alt={product.name}
+                        />
+                      </S.ProductThumb>
 
-                    <S.ProductMain>
-                      <S.BrandText>{product.brand}</S.BrandText>
-                      <S.ProductName title={product.name}>
-                        {product.name}
-                      </S.ProductName>
+                      <S.ProductMain>
+                        <S.BrandText>{product.brand}</S.BrandText>
+                        <S.ProductName title={product.name}>
+                          {product.name}
+                        </S.ProductName>
 
-                      <S.AITag $tone={product.badgeType}>
-                        {product.aiRecommendation}
-                      </S.AITag>
+                        <S.AITag $tone={product.badgeType}>
+                          {product.aiRecommendation}
+                        </S.AITag>
 
-                      <S.PriceSummary>
-                        <S.InfoCard>
-                          <S.InfoLabel>현재가</S.InfoLabel>
-                          <S.InfoValue>
-                            {formatPrice(product.currentPrice)}
-                          </S.InfoValue>
-                        </S.InfoCard>
+                        <S.PriceSummary>
+                          <S.InfoCard>
+                            <S.InfoLabel>현재가</S.InfoLabel>
+                            <S.InfoValue>
+                              {formatPrice(product.currentPrice)}
+                            </S.InfoValue>
+                          </S.InfoCard>
 
-                        <S.InfoCard>
-                          <S.InfoLabel>최근 최저가</S.InfoLabel>
-                          <S.InfoValue>
-                            {formatPrice(product.lowestPrice)}
-                          </S.InfoValue>
-                        </S.InfoCard>
+                          <S.InfoCard>
+                            <S.InfoLabel>최근 최저가</S.InfoLabel>
+                            <S.InfoValue>
+                              {formatPrice(product.lowestPrice)}
+                            </S.InfoValue>
+                          </S.InfoCard>
 
-                        <S.InfoCard>
-                          <S.InfoLabel>하락폭</S.InfoLabel>
-                          <S.DropValue>
-                            -{formatPrice(product.dropAmount)}
-                          </S.DropValue>
-                        </S.InfoCard>
-                      </S.PriceSummary>
-                    </S.ProductMain>
-                  </S.ProductTop>
+                          <S.InfoCard>
+                            <S.InfoLabel>하락폭</S.InfoLabel>
+                            <S.DropValue>
+                              -{formatPrice(product.dropAmount)}
+                            </S.DropValue>
+                          </S.InfoCard>
+                        </S.PriceSummary>
+                      </S.ProductMain>
+                    </S.ProductTop>
 
-                  <S.ProductBottom>
-                    <S.AIBox>
-                      <S.AIBoxTitle>AI 추천 코멘트</S.AIBoxTitle>
-                      <S.AIBoxDescription>
-                        {product.aiDescription}
-                      </S.AIBoxDescription>
-                    </S.AIBox>
+                    <S.ProductBottom>
+                      <S.AIBox>
+                        <S.AIBoxTitle>AI 추천 코멘트</S.AIBoxTitle>
+                        <S.AIBoxDescription>
+                          {product.aiDescription}
+                        </S.AIBoxDescription>
+                      </S.AIBox>
 
-                    <S.TrendSection>
-                      <S.TrendHeaderRow>
-                        <S.TrendLabel>최근 가격 추이</S.TrendLabel>
-                      </S.TrendHeaderRow>
+                      <S.TrendSection>
+                        <S.TrendHeaderRow>
+                          <S.TrendLabel>최근 가격 추이</S.TrendLabel>
+                        </S.TrendHeaderRow>
 
-                      <AILowestTrendChart
-                        trendPoints={product.trendPoints}
-                        trendLabels={product.trendLabels}
-                        currentPrice={product.currentPrice}
-                      />
-                    </S.TrendSection>
+                        <AILowestTrendChart
+                          trendPoints={product.trendPoints}
+                          trendLabels={product.trendLabels}
+                          currentPrice={product.currentPrice}
+                        />
+                      </S.TrendSection>
 
-                    <S.ButtonRow>
-                      <S.DetailButton to={`/products/${product.id}`}>
-                        상세 보기
-                      </S.DetailButton>
-                    </S.ButtonRow>
-                  </S.ProductBottom>
-                </S.ProductCard>
-              ))}
-            </S.ProductGrid>
+                      <S.ButtonRow>
+                        <S.DetailButton to={`/products/${product.id}`}>
+                          상세 보기
+                        </S.DetailButton>
+                      </S.ButtonRow>
+                    </S.ProductBottom>
+                  </S.ProductCard>
+                ))}
+              </S.ProductGrid>
+
+              {totalPages > 1 ? (
+                <S.PaginationArea>
+                  <S.PageButton
+                    type="button"
+                    disabled={page === 1}
+                    onClick={() => handleChangePage(page - 1)}
+                  >
+                    이전
+                  </S.PageButton>
+
+                  {pageNumbers.map((pageNumber) => (
+                    <S.PageButton
+                      key={pageNumber}
+                      type="button"
+                      $active={pageNumber === page}
+                      onClick={() => handleChangePage(pageNumber)}
+                    >
+                      {pageNumber}
+                    </S.PageButton>
+                  ))}
+
+                  <S.PageButton
+                    type="button"
+                    disabled={page === totalPages}
+                    onClick={() => handleChangePage(page + 1)}
+                  >
+                    다음
+                  </S.PageButton>
+                </S.PaginationArea>
+              ) : null}
+            </>
           ) : (
             <S.EmptyBox>조건에 맞는 상품이 없어요.</S.EmptyBox>
           )}
