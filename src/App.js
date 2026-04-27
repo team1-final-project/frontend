@@ -7,7 +7,7 @@ import { AuthProvider } from "./context/AuthContext";
 
 import MainLayout from "./layout/MainLayout";
 import AdminLayout from "./layout/AdminLayout";
-// import AdminRoute from "./routes/AdminRoute";
+import AdminRoute from "./routes/AdminRoute";
 
 import Home from "./pages/consumer/Home";
 import Login from "./pages/consumer/Login";
@@ -78,7 +78,7 @@ function App() {
           <Route path="/admin/login" element={<AdminLogin />} />
 
           {/* 나중에 권한 분기 필요할 때 주석 풀기 ㄱㄱ혓 */}
-          {/* <Route element={<AdminRoute />}> */}
+          <Route element={<AdminRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
 
@@ -99,7 +99,7 @@ function App() {
             <Route path="sales-stat" element={<SalesStat />} />
             <Route path="ai-price-stat" element={<AIPriceStat />} />
           </Route>
-          {/* </Route> */}
+          </Route>
 
           <Route
             path="/auth/google/callback"
