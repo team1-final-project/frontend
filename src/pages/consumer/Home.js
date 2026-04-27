@@ -356,10 +356,22 @@ function AIRankingSection({ data, onViewMore }) {
 
 function ProductCard({ item }) {
   const isPositive = item.discount.trim().startsWith("+");
+  const navigate = useNavigate();
 
   return (
     <S.ProductCardWrap>
-      <S.ProductThumb>
+      <S.ProductThumb
+        role="button"
+        tabIndex={0}
+        onClick={() => navigate(`/products/${item.id}`)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            navigate(`/products/${item.id}`);
+          }
+        }}
+        style={{ cursor: "pointer" }}
+      >
         <S.ProductImage
           src={item.image}
           alt={item.name}
