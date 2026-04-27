@@ -46,7 +46,7 @@ const SubText = styled.div`
 const Value = styled.div`
   margin-top: 10px;
   color: var(--font);
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 800;
 
   span {

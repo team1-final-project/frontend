@@ -530,3 +530,30 @@ export const TrendTooltip = styled.div`
     font-weight: 800;
   }
 `;
+
+export const PaginationArea = styled.div`
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
+export const PageButton = styled.button`
+  min-width: ${({ $active }) => ($active ? "40px" : "38px")};
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid ${({ $active }) => ($active ? "#111111" : "#e3dbcf")};
+  background: ${({ $active }) => ($active ? "#111111" : "#ffffff")};
+  color: ${({ $active }) => ($active ? "#ffffff" : "#111111")};
+  font-size: 12px;
+  font-weight: 800;
+
+  &:disabled {
+    cursor: not-allowed;
+    color: #b8b0a6;
+    background: #f5f1eb;
+  }
+`;

@@ -16,6 +16,7 @@ const inventoryStatusOptions = [
   { label: "안전재고", value: "안전재고" },
   { label: "발주권고", value: "발주권고" },
   { label: "일시품절", value: "일시품절" },
+  { label: "악성재고", value: "악성재고" },
 ];
 
 const salesStatusOptions = [
@@ -98,7 +99,7 @@ export default function LiveInventory() {
       setSummaryData(defaultSummaryData);
       setErrorMessage(
         error?.response?.data?.detail ||
-          "실시간 재고 목록을 불러오지 못했습니다.",
+        "실시간 재고 목록을 불러오지 못했습니다.",
       );
     } finally {
       setIsLoading(false);
@@ -129,11 +130,11 @@ export default function LiveInventory() {
         prev.map((item) =>
           item.productCode === productCode
             ? {
-                ...item,
-                salesStatusCode: nextStatusCode,
-                salesStatus:
-                  saleStatusLabelMap[nextStatusCode] ?? nextStatusCode,
-              }
+              ...item,
+              salesStatusCode: nextStatusCode,
+              salesStatus:
+                saleStatusLabelMap[nextStatusCode] ?? nextStatusCode,
+            }
             : item,
         ),
       );
@@ -793,7 +794,7 @@ const InventoryStatusBadge = styled.span`
     if ($type === "안전재고") {
       return `
         background: #dcfce7;
-        color: var(--grren);
+        color: var(--green);
       `;
     }
 
@@ -809,6 +810,13 @@ const InventoryStatusBadge = styled.span`
         background: #f3e8ff;
         color: var(--purple);
       `;
+    }
+
+    if ($type === "악성재고") {
+      return `
+    background: #fee2e2;
+    color: var(--red);
+  `;
     }
 
     return `
