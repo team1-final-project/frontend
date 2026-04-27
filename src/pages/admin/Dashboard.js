@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
-import { Info, Section } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getAdminDashboard } from "../../api/adminDashboard";
 import InfoTooltip from "../../components/InfoTooltip";
@@ -23,19 +22,100 @@ const numberFormat = (value) => `${Number(value || 0).toLocaleString()}원`;
 const qtyFormat = (value) => `${Number(value || 0).toLocaleString()}개`;
 const percentText = (value) => `${Number(value || 0).toFixed(1)}%`;
 
-function buildLinePoints(values, width, height, padding = 18) {
+function toNumber(value) {
+  return Number(value || 0);
+}
+
+function getNiceMax(values, fallback = 1) {
+  const safeValues = (Array.isArray(values) ? values : [])
+    .map((value) => Math.max(0, toNumber(value)))
+    .filter((value) => Number.isFinite(value));
+
+  const rawMax = Math.max(...safeValues, fallback);
+
+  if (rawMax <= 10) return 10;
+
+  const exponent = Math.floor(Math.log10(rawMax));
+  const base = 10 ** exponent;
+  const ratio = rawMax / base;
+
+  let niceRatio = 10;
+  if (ratio <= 1) niceRatio = 1;
+  else if (ratio <= 2) niceRatio = 2;
+  else if (ratio <= 3) niceRatio = 3;
+  else if (ratio <= 4) niceRatio = 4;
+  else if (ratio <= 5) niceRatio = 5;
+
+  return niceRatio * base;
+}
+
+function buildAxisTicks(maxValue, count = 6) {
+  const max = Math.max(toNumber(maxValue), 1);
+
+  return Array.from({ length: count }, (_, index) => {
+    const value = max - (max / (count - 1)) * index;
+    return Math.round(value);
+  });
+}
+
+function formatMoneyAxis(value) {
+  const number = toNumber(value);
+
+  if (number >= 10000) {
+    return `${(number / 10000).toFixed(1).replace(".0", "")}만원`;
+  }
+
+  if (number >= 1000) {
+    return `${(number / 1000).toFixed(1).replace(".0", "")}천원`;
+  }
+
+  return `${number.toLocaleString()}원`;
+}
+
+function formatQtyAxis(value) {
+  const number = toNumber(value);
+
+  if (number >= 10000) {
+    return `${(number / 10000).toFixed(1).replace(".0", "")}만개`;
+  }
+
+  if (number >= 1000) {
+    return `${(number / 1000).toFixed(1).replace(".0", "")}천개`;
+  }
+
+  return `${number.toLocaleString()}개`;
+}
+
+function buildLinePoints(values, width, height, padding = 18, maxValue = null) {
   const safeValues = Array.isArray(values) && values.length ? values : [0];
-  const max = Math.max(...safeValues, 1);
-  const min = Math.min(...safeValues, 0);
-  const range = max - min || 1;
+
+  if (maxValue == null) {
+    const max = Math.max(...safeValues, 1);
+    const min = Math.min(...safeValues, 0);
+    const range = max - min || 1;
+
+    return safeValues
+      .map((value, index) => {
+        const x =
+          padding +
+          (index * (width - padding * 2)) / Math.max(safeValues.length - 1, 1);
+        const y =
+          height - padding - ((value - min) * (height - padding * 2)) / range;
+        return `${x},${y}`;
+      })
+      .join(" ");
+  }
+
+  const max = Math.max(toNumber(maxValue), 1);
 
   return safeValues
     .map((value, index) => {
+      const safeValue = Math.max(0, toNumber(value));
       const x =
         padding +
         (index * (width - padding * 2)) / Math.max(safeValues.length - 1, 1);
       const y =
-        height - padding - ((value - min) * (height - padding * 2)) / range;
+        height - padding - (safeValue / max) * (height - padding * 2);
       return `${x},${y}`;
     })
     .join(" ");
@@ -48,13 +128,17 @@ function buildBars(
   padding = 28,
   offset = 0,
   barWidth = 10,
+  maxValue = null,
 ) {
   const safeValues = Array.isArray(values) && values.length ? values : [0];
-  const max = Math.max(...safeValues, 1);
+  const max =
+    maxValue == null ? Math.max(...safeValues, 1) : Math.max(maxValue, 1);
   const groupWidth = (width - padding * 2) / safeValues.length;
 
   return safeValues.map((value, index) => {
-    const barHeight = (value / max) * (height - padding * 2);
+    const safeValue = Math.max(0, toNumber(value));
+    const barHeight = (safeValue / max) * (height - padding * 2);
+
     return {
       x: padding + index * groupWidth + offset,
       y: height - padding - barHeight,
@@ -146,6 +230,8 @@ export default function Dashboard() {
   const [activeAiTab, setActiveAiTab] = useState("");
   const [activeShareTab, setActiveShareTab] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [appliedContributionKeyword, setAppliedContributionKeyword] =
+    useState("");
   const [liveTime, setLiveTime] = useState(formatDateTime(new Date()));
 
   const fetchDashboard = async (options = {}) => {
@@ -187,33 +273,69 @@ export default function Dashboard() {
   }, []);
 
   const handleSearch = () => {
+    const trimmedKeyword = searchKeyword.trim();
+    setAppliedContributionKeyword(trimmedKeyword);
+
     fetchDashboard({
       category: activeAiTab || undefined,
       share_category: activeShareTab || undefined,
-      contribution_keyword: searchKeyword || undefined,
+      contribution_keyword: trimmedKeyword || undefined,
     });
   };
 
   const handleAiTabClick = (tab) => {
     setActiveAiTab(tab);
+
     fetchDashboard({
       category: tab,
       share_category: activeShareTab || tab,
-      contribution_keyword: searchKeyword || undefined,
+      contribution_keyword: appliedContributionKeyword || undefined,
     });
   };
 
   const handleShareTabClick = (tab) => {
     setActiveShareTab(tab);
+
     fetchDashboard({
       category: activeAiTab || tab,
       share_category: tab,
-      contribution_keyword: searchKeyword || undefined,
+      contribution_keyword: appliedContributionKeyword || undefined,
     });
   };
 
   const aiTrend = dashboard?.ai_strategy_trend || [];
   const contributionTrend = dashboard?.contribution_trend || [];
+  const hasContributionKeyword = appliedContributionKeyword.trim().length > 0;
+
+  const contributionSalesMax = useMemo(
+    () =>
+      getNiceMax(
+        contributionTrend.map((item) => Number(item.sales_qty || 0)),
+      ),
+    [contributionTrend],
+  );
+
+  const contributionMoneyMax = useMemo(
+    () =>
+      getNiceMax([
+        ...contributionTrend.map((item) => Number(item.lowest_price || 0)),
+        ...contributionTrend.map((item) => Number(item.my_price || 0)),
+        ...contributionTrend.map((item) =>
+          Number(item.contribution_profit || 0),
+        ),
+      ]),
+    [contributionTrend],
+  );
+
+  const contributionSalesTicks = useMemo(
+    () => buildAxisTicks(contributionSalesMax),
+    [contributionSalesMax],
+  );
+
+  const contributionMoneyTicks = useMemo(
+    () => buildAxisTicks(contributionMoneyMax),
+    [contributionMoneyMax],
+  );
 
   const shareBars = useMemo(
     () => buildStackedBars(dashboard?.share_points || [], 520, 250, 28),
@@ -229,8 +351,9 @@ export default function Dashboard() {
         28,
         10,
         10,
+        contributionSalesMax,
       ),
-    [contributionTrend],
+    [contributionTrend, contributionSalesMax],
   );
 
   const profitBars = useMemo(
@@ -242,8 +365,9 @@ export default function Dashboard() {
         28,
         24,
         10,
+        contributionMoneyMax,
       ),
-    [contributionTrend],
+    [contributionTrend, contributionMoneyMax],
   );
 
   if (loading && !dashboard) {
@@ -525,6 +649,7 @@ export default function Dashboard() {
           </Card>
         </ContentGrid>
       </Sec>
+
       <Sec>
         <SectionLabel>
           <Dot $color="#eab308" />
@@ -551,8 +676,14 @@ export default function Dashboard() {
             </CardTopRow>
 
             <InfoText>
-              상품코드 : {dashboard?.contribution_product_code || "-"}{" "}
-              {dashboard?.contribution_product_name || ""}
+              {hasContributionKeyword ? (
+                <>
+                  상품코드 : {dashboard?.contribution_product_code || "-"}{" "}
+                  {dashboard?.contribution_product_name || ""}
+                </>
+              ) : (
+                "상품을 검색하면 가격 변화와 공헌이익 그래프가 표시됩니다."
+              )}
             </InfoText>
 
             <LegendRow>
@@ -570,94 +701,100 @@ export default function Dashboard() {
               </LegendItem>
             </LegendRow>
 
-            <BarChartWrap>
-              <BarAxisLeft>
-                <span>1.5천개</span>
-                <span>1.3천개</span>
-                <span>1천개</span>
-                <span>0.5천개</span>
-                <span>0.3천개</span>
-                <span>0</span>
-              </BarAxisLeft>
+            {hasContributionKeyword ? (
+              <BarChartWrap>
+                <BarAxisLeft>
+                  {contributionSalesTicks.map((tick) => (
+                    <span key={`sales-axis-${tick}`}>
+                      {formatQtyAxis(tick)}
+                    </span>
+                  ))}
+                </BarAxisLeft>
 
-              <ChartCanvas>
-                <BarSvg viewBox="0 0 760 260" preserveAspectRatio="none">
-                  {salesBars.map((bar, index) => (
-                    <rect
-                      key={`sales-${index}`}
-                      x={bar.x}
-                      y={bar.y}
-                      width={bar.width}
-                      height={bar.height}
-                      rx="2"
-                      fill="#2563eb"
+                <ChartCanvas>
+                  <BarSvg viewBox="0 0 760 260" preserveAspectRatio="none">
+                    {salesBars.map((bar, index) => (
+                      <rect
+                        key={`sales-${index}`}
+                        x={bar.x}
+                        y={bar.y}
+                        width={bar.width}
+                        height={bar.height}
+                        rx="2"
+                        fill="#2563eb"
+                      />
+                    ))}
+
+                    {profitBars.map((bar, index) => (
+                      <rect
+                        key={`profit-${index}`}
+                        x={bar.x}
+                        y={bar.y}
+                        width={bar.width}
+                        height={bar.height}
+                        rx="2"
+                        fill="#eab308"
+                      />
+                    ))}
+
+                    <polyline
+                      fill="none"
+                      stroke="#ef4444"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      points={buildLinePoints(
+                        contributionTrend.map((item) =>
+                          Number(item.lowest_price || 0),
+                        ),
+                        760,
+                        260,
+                        28,
+                        contributionMoneyMax,
+                      )}
                     />
-                  ))}
 
-                  {profitBars.map((bar, index) => (
-                    <rect
-                      key={`profit-${index}`}
-                      x={bar.x}
-                      y={bar.y}
-                      width={bar.width}
-                      height={bar.height}
-                      rx="2"
-                      fill="#eab308"
+                    <polyline
+                      fill="none"
+                      stroke="#22c55e"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      points={buildLinePoints(
+                        contributionTrend.map((item) =>
+                          Number(item.my_price || 0),
+                        ),
+                        760,
+                        260,
+                        28,
+                        contributionMoneyMax,
+                      )}
                     />
+                  </BarSvg>
+
+                  <XAxisNine>
+                    {(contributionTrend.length
+                      ? contributionTrend
+                      : hourLabels.map((label) => ({ label }))
+                    ).map((item, index) => (
+                      <span key={`${item.label}-${index}`}>{item.label}</span>
+                    ))}
+                  </XAxisNine>
+                </ChartCanvas>
+
+                <BarAxisRight>
+                  {contributionMoneyTicks.map((tick) => (
+                    <span key={`money-axis-${tick}`}>
+                      {formatMoneyAxis(tick)}
+                    </span>
                   ))}
-
-                  <polyline
-                    fill="none"
-                    stroke="#ef4444"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    points={buildLinePoints(
-                      contributionTrend.map((item) =>
-                        Number(item.lowest_price || 0),
-                      ),
-                      760,
-                      260,
-                      28,
-                    )}
-                  />
-
-                  <polyline
-                    fill="none"
-                    stroke="#22c55e"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    points={buildLinePoints(
-                      contributionTrend.map((item) =>
-                        Number(item.my_price || 0),
-                      ),
-                      760,
-                      260,
-                      28,
-                    )}
-                  />
-                </BarSvg>
-
-                <XAxisNine>
-                  {(contributionTrend.length
-                    ? contributionTrend
-                    : hourLabels.map((label) => ({ label }))
-                  ).map((item, index) => (
-                    <span key={`${item.label}-${index}`}>{item.label}</span>
-                  ))}
-                </XAxisNine>
-              </ChartCanvas>
-
-              <BarAxisRight>
-                <span>8천원</span>
-                <span>6천원</span>
-                <span>4천원</span>
-                <span>2천원</span>
-                <span>1천원</span>
-                <span>0</span>
-              </BarAxisRight>
-            </BarChartWrap>
+                </BarAxisRight>
+              </BarChartWrap>
+            ) : (
+              <ContributionEmptyArea>
+                우측 상단에서 상품을 검색하세요
+              </ContributionEmptyArea>
+            )}
           </Card>
 
           <Card>
@@ -989,6 +1126,7 @@ const CardTopRow = styled.div`
 `;
 
 const CardHeader = styled(CardTopRow)``;
+
 const SmallHeader = styled(CardTopRow)`
   margin-bottom: 10px;
 `;
@@ -1024,7 +1162,7 @@ const AxisLeft = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-end;
-  padding: 10px 0 28px;
+  padding: 10px 0 20px;
   color: var(--placeholder);
   font-size: 11px;
 `;
@@ -1132,15 +1270,24 @@ const InfoText = styled.div`
 const BarChartWrap = styled.div`
   display: grid;
   grid-template-columns: 52px 1fr 52px;
+  align-items: start;
   gap: 8px;
 `;
 
-const BarAxisLeft = styled(AxisLeft)`
-  padding-bottom: 28px;
+const BarAxisLeft = styled.div`
+  height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 10px 0 20px;
+  box-sizing: border-box;
+  color: var(--placeholder);
+  font-size: 11px;
 `;
 
-const BarAxisRight = styled(AxisRight)`
-  padding-bottom: 28px;
+const BarAxisRight = styled(BarAxisLeft)`
+  align-items: flex-start;
 `;
 
 const BarSvg = styled.svg`
@@ -1156,6 +1303,18 @@ const XAxisNine = styled.div`
   color: var(--placeholder);
   font-size: 11px;
   text-align: center;
+`;
+
+const ContributionEmptyArea = styled.div`
+  height: 294px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--placeholder);
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 14px;
+  background: #ffffff;
 `;
 
 const NegativeText = styled.span`
